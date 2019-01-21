@@ -1,0 +1,10 @@
+#data
+*.png
+*.jpg
+*.zip
+*.avi
+*.mp4
+*.json
+test/
+render_temp/
+
