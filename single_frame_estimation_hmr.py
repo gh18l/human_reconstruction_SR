@@ -250,30 +250,61 @@ def main(flength=2500.):
     last pose : no sense
     smooth : j3ds
     '''
+
     model = _load_model(util.SMPL_PATH)
     dd = pickle.load(open(util.NORMAL_SMPL_PATH))
     weights = dd['weights']
     vert_sym_idxs = dd['vert_sym_idxs']
     v_template = dd['v_template']
-    index = [1, 4, 7, 10]
-    idx = np.zeros(6890)
-    for _, iii in enumerate(index):
+    leg_index = [1, 4, 7, 10, 2, 5, 8, 11]
+    arm_index = [17, 19, 21, 23, 16, 18, 20, 22, 14, 13]
+    body_index = [0, 3, 6, 9]
+    head_index = [12, 15]
+    leg_idx = np.zeros(6890)
+    arm_idx = np.zeros(6890)
+    body_idx = np.zeros(6890)
+    head_idx = np.zeros(6890)
+    test_idx = np.zeros(6890)
+    for _, iii in enumerate(leg_index):
         length = len(weights[:, iii])
         for ii in range(length):
-            if weights[ii, iii] > 0.1:
-                idx[ii] = 1
-    import matplotlib.pyplot as plt
-    from mpl_toolkits.mplot3d import Axes3D
-    fig = plt.figure(1)
-    #ax = plt.subplot(111)
-    ax = fig.add_subplot(111, projection='3d')
-    ax.scatter(v_template[idx== 1, 0], v_template[idx==1, 1], v_template[idx==1, 2], c='b', s=30)
-    ax.scatter(v_template[:, 0], v_template[:, 1], v_template[:, 2], c='r', s=1)
+            if weights[ii, iii] > 0.3:
+                leg_idx[ii] = 1
+                test_idx[ii] = 1
+    for _, iii in enumerate(arm_index):
+        length = len(weights[:, iii])
+        for ii in range(length):
+            if weights[ii, iii] > 0.3:
+                arm_idx[ii] = 1
+                test_idx[ii] = 1
+    for _, iii in enumerate(body_index):
+        length = len(weights[:, iii])
+        for ii in range(length):
+            if weights[ii, iii] > 0.3:
+                body_idx[ii] = 1
+                test_idx[ii] = 1
+    for _, iii in enumerate(head_index):
+        length = len(weights[:, iii])
+        for ii in range(length):
+            if weights[ii, iii] > 0.3:
+                head_idx[ii] = 1
+                test_idx[ii] = 1
+    ##test
+    # import matplotlib.pyplot as plt
+    # from mpl_toolkits.mplot3d import Axes3D
+    # fig = plt.figure(1)
+    # #ax = plt.subplot(111)
+    # ax = fig.add_subplot(111, projection='3d')
+    # ax.scatter(v_template[leg_idx== 1, 0], v_template[leg_idx==1, 1], v_template[leg_idx==1, 2], c='b')
+    # ax.scatter(v_template[arm_idx == 1, 0], v_template[arm_idx == 1, 1], v_template[arm_idx == 1, 2], c='g')
+    # ax.scatter(v_template[body_idx == 1, 0], v_template[body_idx == 1, 1], v_template[body_idx == 1, 2], c='y')
+    # ax.scatter(v_template[head_idx == 1, 0], v_template[head_idx == 1, 1], v_template[head_idx == 1, 2], c='c')
+    #ax.scatter(v_template[:, 0], v_template[:, 1], v_template[:, 2], c='r', s=1)
     #ax.scatter(j2ds_est_fixed1[12, 0], j2ds_est_fixed1[12, 1], c='r')
     #ax.scatter(HR_j2ds_head[ind][iii, 0], HR_j2ds_head[ind][iii, 1], c='b')
     #hmr_joint3d = hmr_joint3ds[ind,:,:]
     #ax.scatter(hmr_joint3d[iii, 0], hmr_joint3d[iii, 1], hmr_joint3d[iii, 2], c='r', s=50)
-    plt.show()
+    #plt.show()
 
 
     hmr_dict, data_dict = util.load_hmr_data(util.hmr_path)
@@ -409,15 +440,15 @@ def main(flength=2500.):
         # import matplotlib.pyplot as plt
         # from mpl_toolkits.mplot3d import Axes3D
         # fig = plt.figure(1)
-        # #ax = plt.subplot(111)
-        # ax = fig.add_subplot(111, projection='3d')
-        # ax.scatter(v1[:, 0], v1[:, 1], v1[:, 2], c='b', s=1)
-        # #ax.scatter(j2ds_est1[12:14, 0], j2ds_est1[12:14, 1], c='r')
+        # ax = plt.subplot(111)
+        # #ax = fig.add_subplot(111, projection='3d')
+        # #ax.scatter(v1[:, 0], v1[:, 1], v1[:, 2], c='b', s=1)
+        # ax.scatter(j2ds_est1[14, 0], j2ds_est1[14, 1], c='r')
         # #ax.scatter(HR_j2ds_foot[ind][0, 0], HR_j2ds_foot[ind][0, 1], c='b')
         # #hmr_joint3d = hmr_joint3ds[ind,:,:]
-        # ax.scatter(j3ds1[13, 0], j3ds1[13, 1], j3ds1[13, 2], c='r',s=40)
+        # #ax.scatter(j3ds1[14, 0], j3ds1[14, 1], j3ds1[14, 2], c='r',s=40)
         # #ax.scatter(j3ds1[13, 0], j3ds1[13, 1], j3ds1[13, 2], c='r',s=40)
-        # #plt.imshow(HR_imgs[ind])
+        # plt.imshow(HR_imgs[ind])
         # plt.show()
         # #plt.imshow(HR_imgs[ind])
         # #ax.scatter(verts_est1[:, 0], verts_est1[:, 1], c='r')
@@ -460,13 +491,13 @@ def main(flength=2500.):
 
         objs = {}
         base_weights = np.array(
-            [1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0])  #######
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0])  #######
         weights = HR_confs[ind] * base_weights
         weights = tf.constant(weights, dtype=tf.float32)
-        objs['J2D_Loss'] = 0.1 * tf.reduce_sum(weights * tf.reduce_sum(tf.square(j2ds_est[2:, :] - HR_j2d), 1))
+        objs['J2D_Loss'] = 1.0 * tf.reduce_sum(weights * tf.reduce_sum(tf.square(j2ds_est[2:, :] - HR_j2d), 1))
 
-        base_weights_face = np.array(
-            [0.1, 0.1, 0.1, 0.1, 0.1])
+        base_weights_face = 2.5 * np.array(
+            [1.0, 1.0, 1.0, 1.0, 1.0])
         weights_face = HR_confs_face[ind] * base_weights_face
         weights_face = tf.constant(weights_face, dtype=tf.float32)
         objs['J2D_face_Loss'] = tf.reduce_sum(
@@ -474,14 +505,14 @@ def main(flength=2500.):
         #objs['J2D_face_Loss'] = 10000000.0 * tf.reduce_sum(
               #tf.square(j2dsplus_est[14, :] - HR_j2ds_face[ind][0, :]))
 
-        base_weights_head = np.array(
+        base_weights_head = 1.0 * np.array(
             [1.0, 1.0])
         weights_head = HR_confs_head[ind] * base_weights_head
         weights_head = tf.constant(weights_head, dtype=tf.float32)
         objs['J2D_head_Loss'] = tf.reduce_sum(
             weights_head * tf.reduce_sum(tf.square(HR_j2ds_head[ind] - j2ds_est[14:16, :]), 1))
 
-        base_weights_foot = np.array(
+        base_weights_foot = 1.0 * np.array(
             [1.0, 1.0])
         _HR_confs_foot = np.zeros(2)
         _HR_confs_foot[0] = (HR_confs_foot[ind][0] + HR_confs_foot[ind][1]) / 2.0
@@ -497,7 +528,7 @@ def main(flength=2500.):
             weights_foot * tf.reduce_sum(tf.square(_HR_j2ds_foot - j2ds_est[0:2, :]), 1))
 
         pose_diff = tf.reshape(param_pose - pose_mean, [1, -1])
-        objs['Prior_Loss'] = 2.5 * tf.squeeze(tf.matmul(tf.matmul(pose_diff, pose_covariance), tf.transpose(pose_diff)))
+        objs['Prior_Loss'] = 1.0 * tf.squeeze(tf.matmul(tf.matmul(pose_diff, pose_covariance), tf.transpose(pose_diff)))
         objs['Prior_Shape'] = 5.0 * tf.reduce_sum(tf.square(param_shape))
         ##############################################################
         ##########control the angle of the elbow and knee#############
@@ -505,7 +536,7 @@ def main(flength=2500.):
         #w1 = np.array([4.04 * 1e2, 4.04 * 1e2, 57.4 * 10, 57.4 * 10])
         w1 = np.array([1.04 * 2.0, 1.04 * 2.0, 57.4 * 50, 57.4 * 50])
         w1 = tf.constant(w1, dtype=tf.float32)
-        objs["angle_elbow_knee"] = 0.1 * tf.reduce_sum(w1 * [
+        objs["angle_elbow_knee"] = 0.03 * tf.reduce_sum(w1 * [
             tf.exp(param_pose[0, 52]), tf.exp(-param_pose[0, 55]),
                 tf.exp(-param_pose[0, 9]),tf.exp(-param_pose[0, 12])])
 
@@ -513,7 +544,7 @@ def main(flength=2500.):
         ##############################################################
         ###################mask obj###################################
         ##############################################################
-        objs['mask'] = 0.001 * tf.reduce_sum(verts2dsilhouette / 255.0 * (255.0 - HR_mask) / 255.0
+        objs['mask'] = 0.05 * tf.reduce_sum(verts2dsilhouette / 255.0 * (255.0 - HR_mask) / 255.0
                                             + (255.0 - verts2dsilhouette) / 255.0 * HR_mask / 255.0)
 
         objs['face'] = 0.0 * tf.reduce_sum(tf.square(hmr_joint3d[14:19] - jointsplus[14:19]))
@@ -523,9 +554,9 @@ def main(flength=2500.):
 
         w_temporal = [0.5, 0.5, 1.0, 1.5, 2.5, 2.5, 1.5, 1.0, 1.0, 1.5, 2.0, 2.0, 1.5, 1.0, 6.0, 6.0]
         if ind != 0:
-            objs['temporal'] = 300.0 * tf.reduce_sum(
+            objs['temporal'] = 200.0 * tf.reduce_sum(
                 w_temporal * tf.reduce_sum(tf.square(j3ds - j3ds_old), 1))
-            objs['temporal_pose'] = 200.0 * tf.reduce_sum(
+            objs['temporal_pose'] = 0.0 * tf.reduce_sum(
                 tf.square(pose_final_old[0, 3:72] - param_pose[0, :]))
 
         loss = tf.reduce_mean(objs.values())

@@ -53,9 +53,9 @@ HR_pkl_base_path = base_path + "/HR/output"
 LR_j2d_dctsmooth_base_path = base_path + "/LRdctsmooth"
 LR_img_dctsmooth_base_path = base_path + "/LRdctsmooth"
 
-hmr_path = "/home/lgh/code/SMPLify_TF/test/test_hmr_init/HR_multi_crop_origin2/"
-texture_path = "/home/lgh/code/SMPLify_TF/test/test_hmr_init/HR_multi_crop_origin2/output/texture_file/"
-crop_texture = False  ###only use in small texture
+hmr_path = "/home/lgh/code/SMPLify_TF/test/test_hmr_init/HR_multi_crop_small3/"
+texture_path = "/home/lgh/code/SMPLify_TF/test/test_hmr_init/HR_multi_crop_small3/output/texture_file/"
+crop_texture = True  ###only use in small texture
 index_data = 0
 video = True
 
