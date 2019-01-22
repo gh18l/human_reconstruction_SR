@@ -30,12 +30,14 @@ class camera():
                                   [0.0, self.focal, self.cy],
                                   [0.0, 0.0, 1.0]])
         k = np.zeros(5)
+
         uv_real = cv2.projectPoints(verts, rt, t, camera_matrix, k)[0].squeeze()
         width = 600.0 if image is None else float(image.shape[1])
         height = 450.0 if image is None else float(image.shape[0])
         uv_u = (uv_real[:, 0] / width).reshape((len(uv_real), 1))
         uv_v = (uv_real[:, 1] / height).reshape((len(uv_real), 1))
         uv_norm = np.hstack((uv_u, uv_v))
+
         return uv_real, uv_norm
 
     def write_camera(self, path):
@@ -65,19 +67,21 @@ class camera():
     '''
     img is texture image, arbitrary size
     '''
-    def render_texture(self, verts, img, vt):
+    def render_texture(self, verts, img, vt, mask=None):
         self.write_camera("./render_temp/camera.txt")
         self.write_obj("./render_temp/model.obj", verts, vt)
+        if mask is not None:
+            img = cv2.add(img, np.zeros(np.shape(img), dtype=np.uint8),
+                mask=mask)
         cv2.imwrite("./render_temp/HR.png", img)
         cpp_render(img.shape[1])
         render_result = cv2.imread("./render_temp/result.png")
-        return render_result
+        return render_result, img
 
     '''
     img is texture image, arbitrary size
     '''
-    def write_texture_data(self, texture_path, verts, img):
-        _, vt = self.generate_uv(verts)
+    def write_texture_data(self, texture_path, img, vt):
         if not os.path.exists(texture_path):
             os.makedirs(texture_path)
         np.save(texture_path + "vt.npy", vt)

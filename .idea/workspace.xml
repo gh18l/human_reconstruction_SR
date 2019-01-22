@@ -2,13 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="f7d84f91-ca51-44e9-9207-a42c8622e72d" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/human_reconstruction_SR.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/human_reconstruction_SR.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/hmr.py" beforeDir="false" afterPath="$PROJECT_DIR$/hmr.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/opendr_render/render.py" beforeDir="false" afterPath="$PROJECT_DIR$/opendr_render/render.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/single_frame_estimation_hmr.py" beforeDir="false" afterPath="$PROJECT_DIR$/single_frame_estimation_hmr.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test_function.py" beforeDir="false" afterPath="$PROJECT_DIR$/test_function.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/util.py" beforeDir="false" afterPath="$PROJECT_DIR$/util.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -26,22 +21,22 @@
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
-          <entry key="py" value="31" />
+          <entry key="py" value="33" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
-          <entry key="Python" value="31" />
+          <entry key="Python" value="33" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="py" value="663" />
+          <entry key="py" value="1043" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="Python" value="663" />
+          <entry key="Python" value="1043" />
         </counts>
       </usages-collector>
     </session>
@@ -57,14 +52,34 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/single_frame_estimation_hmr.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="322">
-              <caret line="558" column="37" selection-start-line="558" selection-start-column="37" selection-end-line="558" selection-end-column="37" />
+            <state relative-caret-position="90">
+              <caret line="580" column="34" selection-start-line="580" selection-start-column="34" selection-end-line="580" selection-end-column="34" />
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/single_frame_estimation_hmr_LR.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-14078">
+              <folding>
+                <element signature="e#0#18#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/opendr_render/render.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="229">
+              <caret line="33" column="80" selection-start-line="33" selection-start-column="80" selection-end-line="33" selection-end-column="80" />
             </state>
           </provider>
         </entry>
@@ -87,15 +102,6 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file:///usr/lib/python2.7/pickle.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="24">
-              <caret line="1126" selection-start-line="1126" selection-end-line="1126" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/hmr.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="64">
@@ -103,15 +109,6 @@
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
               </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/../watch_study_fun/MuVS/venv/local/lib/python2.7/site-packages/numpy/lib/npyio.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1377">
-              <caret line="439" selection-start-line="439" selection-end-line="439" />
             </state>
           </provider>
         </entry>
@@ -155,6 +152,7 @@
         <option value="$PROJECT_DIR$/test_function.py" />
         <option value="$PROJECT_DIR$/util.py" />
         <option value="$PROJECT_DIR$/single_frame_estimation_hmr.py" />
+        <option value="$PROJECT_DIR$/opendr_render/render.py" />
       </list>
     </option>
   </component>
@@ -280,7 +278,7 @@
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
       <window_info anchor="bottom" id="Run" order="2" weight="0.12757732" />
-      <window_info anchor="bottom" id="Debug" order="3" visible="true" weight="0.12757732" />
+      <window_info anchor="bottom" id="Debug" order="3" visible="true" weight="0.27963918" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
@@ -474,13 +472,29 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/single_frame_estimation_hmr.py">
+    <entry file="file://$PROJECT_DIR$/single_frame_estimation_hmr_LR.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="322">
-          <caret line="558" column="37" selection-start-line="558" selection-start-column="37" selection-end-line="558" selection-end-column="37" />
+        <state relative-caret-position="-14078">
           <folding>
             <element signature="e#0#18#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/single_frame_estimation_hmr.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="90">
+          <caret line="580" column="34" selection-start-line="580" selection-start-column="34" selection-end-line="580" selection-end-column="34" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/opendr_render/render.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="229">
+          <caret line="33" column="80" selection-start-line="33" selection-start-column="80" selection-end-line="33" selection-end-column="80" />
         </state>
       </provider>
     </entry>

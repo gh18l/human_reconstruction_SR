@@ -491,7 +491,7 @@ def main(flength=2500.):
 
         objs = {}
         base_weights = np.array(
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0])  #######
+            [1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0])  #######
         weights = HR_confs[ind] * base_weights
         weights = tf.constant(weights, dtype=tf.float32)
         objs['J2D_Loss'] = 1.0 * tf.reduce_sum(weights * tf.reduce_sum(tf.square(j2ds_est[2:, :] - HR_j2d), 1))
@@ -554,9 +554,9 @@ def main(flength=2500.):
 
         w_temporal = [0.5, 0.5, 1.0, 1.5, 2.5, 2.5, 1.5, 1.0, 1.0, 1.5, 2.0, 2.0, 1.5, 1.0, 6.0, 6.0]
         if ind != 0:
-            objs['temporal'] = 200.0 * tf.reduce_sum(
+            objs['temporal'] = 50.0 * tf.reduce_sum(
                 w_temporal * tf.reduce_sum(tf.square(j3ds - j3ds_old), 1))
-            objs['temporal_pose'] = 0.0 * tf.reduce_sum(
+            objs['temporal_pose'] = 200.0 * tf.reduce_sum(
                 tf.square(pose_final_old[0, 3:72] - param_pose[0, :]))
 
         loss = tf.reduce_mean(objs.values())
@@ -579,29 +579,28 @@ def main(flength=2500.):
             print("v_final is %f" % duration)
             camera = render.camera(cam_HR1[0], cam_HR1[1], cam_HR1[2], cam_HR1[3])
             _, vt = camera.generate_uv(v_final[0], HR_imgs[ind])
-
             if not os.path.exists(util.hmr_path + "output"):
                 os.makedirs(util.hmr_path + "output")
-            img_result_texture = camera.render_texture(v_final[0], HR_imgs[ind], vt)
             if util.crop_texture is True:
-                img_result_texture = cv2.add(img_result_texture,
-                                        np.zeros(np.shape(img_result_texture), dtype=np.uint8),
-                                            mask=HR_masks[ind])
-
+                img_result_texture, HR_mask_img = camera.render_texture(v_final[0], HR_imgs[ind], vt, HR_masks[ind])
+                if ind == 4:
+                    if not os.path.exists(util.texture_path):
+                        os.makedirs(util.texture_path)
+                    camera.write_texture_data(util.texture_path, HR_mask_img, vt)
+            else:
+                img_result_texture, _ = camera.render_texture(v_final[0], HR_imgs[ind], vt)
+                if ind == 4:
+                    if not os.path.exists(util.texture_path):
+                        os.makedirs(util.texture_path)
+                    camera.write_texture_data(util.texture_path, HR_imgs[ind], vt)
             cv2.imwrite(util.hmr_path + "output/hmr_optimization_texture_%04d.png" % ind, img_result_texture)
             if util.video is True:
-                video_img = cv2.resize(img_result_texture, (1000, 750))
-                videowriter.write(video_img)
+                videowriter.write(img_result_texture)
             img_result_naked = camera.render_naked(v_final[0], HR_imgs[ind])
             cv2.imwrite(util.hmr_path + "output/hmr_optimization_%04d.png" % ind, img_result_naked)
             img_result_naked_rotation = camera.render_naked_rotation(v_final[0], 90, HR_imgs[ind])
             cv2.imwrite(util.hmr_path + "output/hmr_optimization_rotation_%04d.png" % ind, img_result_naked_rotation)
 
-            if ind == 4:
-                if not os.path.exists(util.texture_path):
-                    os.makedirs(util.texture_path)
-                camera.write_texture_data(util.texture_path,
-                            v_final[0], HR_imgs[ind])
             #model_f = sess.run(smpl_model.f)
             start_time = time.time()
             _objs = sess.run(objs)
