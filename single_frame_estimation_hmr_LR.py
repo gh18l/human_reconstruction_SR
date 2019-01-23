@@ -8,8 +8,7 @@ import os
 import cv2
 import pickle as pkl
 import hmr
-import json
-from obj_view import write_obj_and_translation
+
 try:
     from smpl.serialization import load_model as _load_model
 except:
@@ -532,7 +531,7 @@ def main(flength=2500.):
         objs['face_pose'] = 0.0 * tf.reduce_sum(tf.square(param_pose[0, 33:36] - hmr_theta[36:39])
                                           + tf.square(param_pose[0, 42:45] - hmr_theta[45:48]))
 
-        w_temporal = [0.5, 0.5, 1.0, 1.5, 2.5, 2.5, 1.5, 1.0, 0.1, 0.2, 2.0, 2.0, 0.2, 0.1, 7.0, 7.0]
+        w_temporal = [0.5, 0.5, 1.0, 1.5, 2.5, 2.5, 1.5, 1.0, 0.0, 0.0, 2.0, 2.0, 0.0, 0.0, 7.0, 7.0]
         if ind != 0:
             objs['temporal'] = 1000.0 * tf.reduce_sum(
                 w_temporal * tf.reduce_sum(tf.square(j3ds - j3ds_old), 1))
@@ -626,9 +625,7 @@ def main(flength=2500.):
     #write_obj_and_translation(util.HR_img_base_path + "/aa1small.jpg",
             #util.HR_img_base_path + "/output", util.LR_img_base_path + "/output")
     period.save_pkl_to_csv(util.hmr_path + "output")
-    lr_points = [0, 18, 36, 54, 72]    ###[0, 18, 36, 54, 72]
-    hr_points = [1, 19]
-    period.refine_LR_pose(util.HR_pose_path, hr_points, lr_points, LR_cameras, texture_img,
+    period.refine_LR_pose(util.HR_pose_path, util.hr_points, util.lr_points, LR_cameras, texture_img,
                    texture_vt, LR_imgs)
 
 

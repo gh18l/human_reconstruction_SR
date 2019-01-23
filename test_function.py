@@ -353,7 +353,22 @@ def mask_texture():
         #cv2.imwrite(
             #"/home/lgh/code/SMPLify_TF/test/test_hmr_init/HR_multi_crop_small3/optimization_data/mask_%04d.png" % i,
             #mask)
-mask_texture()
+
+def generate_video():
+    fps = 15
+    size = (600, 450)
+    path = "/home/lgh/code/SMPLify_TF/test/temp0/1/LR"
+    video_path = "/home/lgh/code/SMPLify_TF/test/temp0/1/LR/LR.avi"
+    videowriter = cv2.VideoWriter(video_path, cv2.VideoWriter_fourcc('D', 'I', 'V', 'X'), fps, size)
+    imgs_files = os.listdir(path)
+    imgs_files = sorted([filename for filename in imgs_files if filename.endswith(".jpg")],
+                        key=lambda d: int((d.split('_')[0])))
+    for ind, imgs_file in enumerate(imgs_files):
+        img_file_path = os.path.join(path, imgs_file)
+        HR_img = cv2.imread(img_file_path)
+        videowriter.write(HR_img)
+generate_video()
+#mask_texture()
 #HR_pose_prediction_full_replace_LR_pose()
 #preprocessHR()
 #HR_pose_prediction_full_replace_LR_pose()

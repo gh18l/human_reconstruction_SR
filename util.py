@@ -9,26 +9,16 @@ import tensorflow as tf
 import hmr
 import json
 
-# TODO: choose gender
 GENDER = 'm'
 HEVA_PATH = 'Data/HEVA_Validate'
 #SMPL_PATH = 'Data/Smpl_Model/basicModel_%s_lbs_10_207_0_v1.0.0.pkl' % GENDER
 SMPL_PATH = 'Data/Smpl_Model/neutral_smpl_with_cocoplus_reg.pkl'
 NORMAL_SMPL_PATH = '/home/lgh/code/SMPLify_TF/Data/Smpl_Model/basicModel_m_lbs_10_207_0_v1.0.0.pkl'
-# TODO: set beta dimension
 N_BETAS = 10
 SMPL_JOINT_IDS = [11, 10, 8, 5, 2, 1, 4, 7, 21, 19, 17, 16, 18, 20, 12]
 SMPL_JOINT_ALL = range(0, 24)
 TORSO_IDS = [3-1, 4-1, 9-1, 10-1]
 HEAD_VID = 411
-# TODO
-NUM_VIEW = 1
-# TODO
-VIS_OR_NOT = False
-# TODO
-LOG_OR_NOT = 1
-# TODO
-BATCH_FRAME_NUM = 30   ###################
 # TODO
 DCT_NUM = 10
 DCT_MAT_PATH = 'Data/DCT_Basis/%d.mat' % BATCH_FRAME_NUM
@@ -53,12 +43,16 @@ HR_pkl_base_path = base_path + "/HR/output"
 LR_j2d_dctsmooth_base_path = base_path + "/LRdctsmooth"
 LR_img_dctsmooth_base_path = base_path + "/LRdctsmooth"
 
-hmr_path = "/home/lgh/code/SMPLify_TF/test/test_hmr_init/dingjianLR100/"
+hmr_path = "/home/lgh/code/SMPLify_TF/test/test_hmr_init/HR_multi_crop_small/"
 texture_path = "/home/lgh/code/SMPLify_TF/test/test_hmr_init/HR_multi_crop_small/output/texture_file/"
 HR_pose_path = "/home/lgh/code/SMPLify_TF/test/test_hmr_init/HR_multi_crop_small/output/"
 crop_texture = True  ###only use in small texture
 index_data = 0
 video = True
+
+###dingjianLR100
+lr_points = [0, 16, 31, 47, 64, 80, 96]    ###[0, 18, 36, 54, 72]
+hr_points = [4, 20, 36]
 
 
 which_people = "tianyi_LR"

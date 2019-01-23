@@ -8,8 +8,7 @@ import os
 import cv2
 import pickle as pkl
 import hmr
-import json
-from obj_view import write_obj_and_translation
+
 try:
     from smpl.serialization import load_model as _load_model
 except:
