@@ -16,6 +16,7 @@ except:
     from smpl.smpl_webuser.serialization import load_model as _load_model
 from opendr_render import render
 import pickle
+import period
 def demo_point(x, y, img_path = None):
     import matplotlib.pyplot as plt
     if img_path != None:
@@ -318,6 +319,7 @@ def main(flength=2500.):
     j3ds_old = []
     pose_final_old = []
     pose_final = []
+    LR_cameras = []
     ###########################################################
     for ind, LR_j2d in enumerate(LR_j2ds):
         print("the LR %d iteration" % ind)
@@ -524,7 +526,7 @@ def main(flength=2500.):
         objs['face_pose'] = 0.0 * tf.reduce_sum(tf.square(param_pose[0, 33:36] - hmr_theta[36:39])
                                           + tf.square(param_pose[0, 42:45] - hmr_theta[45:48]))
 
-        w_temporal = [0.5, 0.5, 1.0, 1.5, 2.5, 2.5, 1.5, 1.0, 0.1, 0.2, 2.0, 2.0, 0.2, 0.1, 4.0, 4.0]
+        w_temporal = [0.5, 0.5, 1.0, 1.5, 2.5, 2.5, 1.5, 1.0, 0.1, 0.2, 2.0, 2.0, 0.2, 0.1, 7.0, 7.0]
         if ind != 0:
             objs['temporal'] = 1000.0 * tf.reduce_sum(
                 w_temporal * tf.reduce_sum(tf.square(j3ds - j3ds_old), 1))
@@ -544,6 +546,7 @@ def main(flength=2500.):
             optimizer.minimize(sess)
             v_final = sess.run([v, verts_est, j3ds])
             cam_LR1 = sess.run([cam_LR.fl_x, cam_LR.cx, cam_LR.cy, cam_LR.trans])
+            LR_cameras.append(cam_LR1)
             camera = render.camera(cam_LR1[0], cam_LR1[1], cam_LR1[2], cam_LR1[3])
             img_result_texture, _ = camera.render_texture(v_final[0], texture_img, texture_vt)
             if not os.path.exists(util.hmr_path + "output"):
@@ -586,12 +589,11 @@ def main(flength=2500.):
         # out_ply_path = os.path.join(out_ply_path, "%04d.ply" % ind)
         # m.write_ply(out_ply_path)
         #
-        # res = {'pose': pose_final, 'betas': betas_final, 'trans': trans_final,
-        #        'f': np.array([flength, flength]), 'rt': np.zeros([3]),
-        #        't': camera_t_final_HR}
+        res = {'pose': pose_final, 'betas': betas_final, 'trans': trans_final}
         # out_pkl_path = out_ply_path.replace('.ply', '.pkl')
-        # with open(out_pkl_path, 'wb') as fout:
-        #     pkl.dump(res, fout)
+        with open(util.hmr_path + "output/hmr_optimization_pose_%04d.pkl", 'wb') as fout:
+            pkl.dump(res, fout)
+
 
 
         verts2d = v_final[1]
@@ -617,7 +619,10 @@ def main(flength=2500.):
 
     #write_obj_and_translation(util.HR_img_base_path + "/aa1small.jpg",
             #util.HR_img_base_path + "/output", util.LR_img_base_path + "/output")
-
+    lr_points = [0, 18, 36, 54, 72]
+    hr_points = [1, 19, 37, 55]
+    period.refine_LR_pose(util.HR_pose_path, hr_points, lr_points, LR_cameras, texture_img,
+                   texture_vt, LR_imgs)
 
 
 if __name__ == '__main__':

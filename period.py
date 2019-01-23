@@ -1,6 +1,13 @@
 #coding=utf-8
 import numpy as np
 from matplotlib import pyplot as plt
+import os
+import pickle
+import util
+import smpl_np
+from opendr_render import render
+import cv2
+# import pandas as pd
 
 # 均值平滑
 def mean_smoothing(s,r):
@@ -36,20 +43,18 @@ def exponential_smoothing(s,alpha,r):
         s2[i]=alpha*s[i]+beta*tempSum
     return s2
 
-def periodicDecomp(lr, hr, lr_points, lr_num, lr_len, hr_points, hr_num, hr_len):
-    # 读取数据
-    # lr_file = open('D:/TBSI/Lab2F/ICCP2019/pose/tianyi_pose_Jan/tianyi_pose/LR/tianyi_LR_pose.csv', 'rb')
-    # hr_file = open('D:/TBSI/Lab2F/ICCP2019/pose/tianyi_pose_Jan/tianyi_pose/HR/tianyi_HR_pose.csv', 'rb')
-    # lr_file = open(LRfile, 'rb')
-    # hr_file = open(HRfile, 'rb')
-    # lr = np.loadtxt(lr_file, delimiter=',', dtype=float)
-    # hr = np.loadtxt(hr_file, delimiter=',', dtype=float)
-    # lr_file.close()
-    # hr_file.close()
-    # lr_mean = np.mean(lr[0:90], axis=0)
-    # hr_mean = np.mean(hr[6:82], axis=0)
+def periodicDecomp(lr, hr, lr_points, hr_points):
     lr = lr
     hr = hr
+    lr_num = len(lr_points)-1
+    hr_num = len(hr_points)-1
+    lr_len = hr_len = 9999
+    for i in range(lr_num):
+        if lr_points[i+1] - lr_points[i] < lr_len:
+            lr_len = lr_points[i+1] - lr_points[i]
+    for i in range(hr_num):
+        if hr_points[i+1] - hr_points[i] < hr_len:
+            hr_len = hr_points[i+1] - hr_points[i]
     lr_mean = np.mean(lr[lr_points[0]:lr_points[-1]], axis=0)
     hr_mean = np.mean(hr[hr_points[0]:hr_points[-1]], axis=0)
 
@@ -118,16 +123,69 @@ def periodicDecomp(lr, hr, lr_points, lr_num, lr_len, hr_points, hr_num, hr_len)
     # data.to_csv(output_file,header = False, index = False) # here
     return output
 
-if __name__ == '__main__':
-    # LRfile = 'D:/TBSI/Lab2F/ICCP2019/pose/tianyi_pose_Jan/tianyi_pose/LR/tianyi_LR_pose.csv' #LR文件输入
-    # HRfile = 'D:/TBSI/Lab2F/ICCP2019/pose/tianyi_pose_Jan/tianyi_pose/HR/tianyi_HR_pose.csv' #HR文件输入
-    lr = 
-    hr =
-    lr_points = [0,13,31,47,61,75,90] #LR周期点
-    lr_num = 6 #LR周期数量（输入数据有几个周期）
-    lr_len = 12 #LR最短周期长度（最短的周期有几帧）
-    hr_points = [6,21,36,51, 67,82]
-    hr_num = 5
-    hr_len = 12
+def refine_LR_pose(HR_pose_path, hr_points, lr_points, LR_cameras, texture_img,
+                   texture_vt, LR_imgs):
+    LR_path = util.hmr_path + "output"
+    LR_pkl_files = os.listdir(LR_path)
+    LR_pkl_files = sorted([filename for filename in LR_pkl_files if filename.endswith(".pkl")],
+                          key=lambda d: int((d.split('_')[3]).split('.')[0]))
+    LR_length = len(LR_pkl_files)
+    LR_array = np.zeros((LR_length, 24 * 3))
 
-    output = periodicDecomp(lr, hr, lr_points, lr_num, lr_len, hr_points, hr_num, hr_len)
+    HR_path = HR_pose_path
+    HR_pkl_files = os.listdir(HR_path)
+    HR_pkl_files = sorted([filename for filename in HR_pkl_files if filename.endswith(".pkl")],
+                          key=lambda d: int((d.split('_')[3]).split('.')[0]))
+    HR_length = len(HR_pkl_files)
+    HR_array = np.zeros((HR_length, 24 * 3))
+
+    LR_beta = []
+    LR_trans = []
+    LR_pose = []
+
+    for ind, LR_pkl_file in enumerate(LR_pkl_files):
+        LR_pkl_path = os.path.join(LR_path, LR_pkl_file)
+        with open(LR_pkl_path) as f:
+            param = pickle.load(f)
+        pose = param['pose']
+        for i in range(24 * 3):
+            LR_array[ind, i] = pose[0, i]
+    for ind, HR_pkl_file in enumerate(HR_pkl_files):
+        HR_pkl_path = os.path.join(HR_path, HR_pkl_file)
+        with open(HR_pkl_path) as f:
+            param = pickle.load(f)
+        pose = param['pose']
+        for i in range(24 * 3):
+            HR_array[ind, i] = pose[0, i]
+
+    output = periodicDecomp(LR_array, HR_array, lr_points, hr_points)
+
+    videowriter = []
+    if util.video == True:
+        fps = 15
+        size = (LR_imgs[0].shape[1], LR_imgs[0].shape[0])
+        video_path = util.hmr_path + "output_after_refine/texture.mp4"
+        videowriter = cv2.VideoWriter(video_path, cv2.VideoWriter_fourcc('D', 'I', 'V', 'X'), fps, size)
+
+    for ind, LR_pkl_file in enumerate(LR_pkl_files):
+        LR_pkl_path = os.path.join(LR_path, LR_pkl_file)
+        with open(LR_pkl_path) as f:
+            param = pickle.load(f)
+        beta = param['betas']
+        tran = param['trans']
+        pose = output[ind, :]
+
+        smpl = smpl_np.SMPLModel('./smpl/models/basicmodel_m_lbs_10_207_0_v1.0.0.pkl')
+        verts = smpl_np.get_verts(pose, beta, tran, smpl)
+
+        camera = render.camera(LR_cameras[ind][0], LR_cameras[ind][1], LR_cameras[ind][2], LR_cameras[ind][3])
+        img_result_texture, _ = camera.render_texture(verts, texture_img, texture_vt)
+        if not os.path.exists(util.hmr_path + "output_after_refine"):
+            os.makedirs(util.hmr_path + "output_after_refine")
+        cv2.imwrite(util.hmr_path + "output_after_refine/hmr_optimization_texture_%04d.png" % ind, img_result_texture)
+        if util.video is True:
+            videowriter.write(img_result_texture)
+        img_result_naked = camera.render_naked(verts, LR_imgs[ind])
+        cv2.imwrite(util.hmr_path + "output_after_refine/hmr_optimization_%04d.png" % ind, img_result_naked)
+        img_result_naked_rotation = camera.render_naked_rotation(verts, 90, LR_imgs[ind])
+        cv2.imwrite(util.hmr_path + "output_after_refine/hmr_optimization_rotation_%04d.png" % ind, img_result_naked_rotation)

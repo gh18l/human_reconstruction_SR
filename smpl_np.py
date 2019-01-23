@@ -204,8 +204,8 @@ class SMPLModel():
     return self.verts
 
 
-smpl = SMPLModel('./model.pkl')
-def get_verts(pose, beta, trans):
+
+def get_verts(pose, beta, trans, smpl):
   pose = pose.reshape((24, 3))
   beta = beta.reshape(10,)
   trans = trans.reshape(3,)
