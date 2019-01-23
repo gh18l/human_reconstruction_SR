@@ -1,7 +1,6 @@
-# -- coding: utf-8 --
+#coding=utf-8
 import numpy as np
 from matplotlib import pyplot as plt
-import pandas as pd
 
 # 均值平滑
 def mean_smoothing(s,r):
@@ -37,18 +36,20 @@ def exponential_smoothing(s,alpha,r):
         s2[i]=alpha*s[i]+beta*tempSum
     return s2
 
-def periodicDecomp(LRfile, HRfile, lr_points, lr_num, lr_len, hr_points, hr_num, hr_len, output_file):
+def periodicDecomp(lr, hr, lr_points, lr_num, lr_len, hr_points, hr_num, hr_len):
     # 读取数据
     # lr_file = open('D:/TBSI/Lab2F/ICCP2019/pose/tianyi_pose_Jan/tianyi_pose/LR/tianyi_LR_pose.csv', 'rb')
     # hr_file = open('D:/TBSI/Lab2F/ICCP2019/pose/tianyi_pose_Jan/tianyi_pose/HR/tianyi_HR_pose.csv', 'rb')
-    lr_file = open(LRfile, 'rb')
-    hr_file = open(HRfile, 'rb')
-    lr = np.loadtxt(lr_file, delimiter=',', dtype=float)
-    hr = np.loadtxt(hr_file, delimiter=',', dtype=float)
-    lr_file.close()
-    hr_file.close()
+    # lr_file = open(LRfile, 'rb')
+    # hr_file = open(HRfile, 'rb')
+    # lr = np.loadtxt(lr_file, delimiter=',', dtype=float)
+    # hr = np.loadtxt(hr_file, delimiter=',', dtype=float)
+    # lr_file.close()
+    # hr_file.close()
     # lr_mean = np.mean(lr[0:90], axis=0)
     # hr_mean = np.mean(hr[6:82], axis=0)
+    lr = lr
+    hr = hr
     lr_mean = np.mean(lr[lr_points[0]:lr_points[-1]], axis=0)
     hr_mean = np.mean(hr[hr_points[0]:hr_points[-1]], axis=0)
 
@@ -112,19 +113,21 @@ def periodicDecomp(LRfile, HRfile, lr_points, lr_num, lr_len, hr_points, hr_num,
                 result.append(j[0])
         results.append(np.array(result))
     output = np.array(results).T
-    data = pd.DataFrame(output)
+    # data = pd.DataFrame(output)
     # data.to_csv('tianyi_pose_0111.csv',header = False, index = False) # here
-    data.to_csv(output_file,header = False, index = False) # here
-
+    # data.to_csv(output_file,header = False, index = False) # here
+    return output
 
 if __name__ == '__main__':
-    LRfile = 'D:/TBSI/Lab2F/ICCP2019/pose/tianyi_pose_Jan/tianyi_pose/LR/tianyi_LR_pose.csv' #LR文件输入
-    HRfile = 'D:/TBSI/Lab2F/ICCP2019/pose/tianyi_pose_Jan/tianyi_pose/HR/tianyi_HR_pose.csv' #HR文件输入
+    # LRfile = 'D:/TBSI/Lab2F/ICCP2019/pose/tianyi_pose_Jan/tianyi_pose/LR/tianyi_LR_pose.csv' #LR文件输入
+    # HRfile = 'D:/TBSI/Lab2F/ICCP2019/pose/tianyi_pose_Jan/tianyi_pose/HR/tianyi_HR_pose.csv' #HR文件输入
+    lr = 
+    hr =
     lr_points = [0,13,31,47,61,75,90] #LR周期点
     lr_num = 6 #LR周期数量（输入数据有几个周期）
     lr_len = 12 #LR最短周期长度（最短的周期有几帧）
     hr_points = [6,21,36,51, 67,82]
-    hr_num =  5
+    hr_num = 5
     hr_len = 12
-    output_file = 'tianyi_pose_0121.csv'
-    periodicDecomp(LRfile, HRfile, lr_points, lr_num, lr_len, hr_points, hr_num, hr_len, output_file)
+
+    output = periodicDecomp(lr, hr, lr_points, lr_num, lr_len, hr_points, hr_num, hr_len)

@@ -420,12 +420,12 @@ def main(flength=2500.):
         jointsplus_fixed = tf.reshape(jointsplus_fixed, [-1, 3])
         j2ds_est_fixed = cam_HR_fixed.project(tf.squeeze(j3ds_fixed))
         j2dsplus_est_fixed = cam_HR_fixed.project(tf.squeeze(jointsplus_fixed))
-        # sess = tf.Session()
-        # sess.run(tf.global_variables_initializer())
-        # j3ds1 = sess.run(j3ds)
-        # cam_HR1 = sess.run([cam_HR.fl_x, cam_HR.cx, cam_HR.cy, cam_HR.trans])
-        # j2ds_est1 = sess.run(j2ds_est)
-        # v1 = sess.run(v)
+        sess = tf.Session()
+        sess.run(tf.global_variables_initializer())
+        j3ds1 = sess.run(j3ds)
+        cam_HR1 = sess.run([cam_HR.fl_x, cam_HR.cx, cam_HR.cy, cam_HR.trans])
+        j2ds_est1 = sess.run(j2ds_est)
+        v1 = sess.run(v)
         # j2dsplus_est_fixed1 = sess.run(j2dsplus_est_fixed)
         # j2ds_est_fixed1 = sess.run(j2ds_est_fixed)
         # camera = render.camera(cam_HR1[0], cam_HR1[1], cam_HR1[2], cam_HR1[3])
@@ -437,19 +437,19 @@ def main(flength=2500.):
         #HR_j2d[:, 1] = HR_imgs[ind].shape[0] - HR_j2d[:, 1]
         ########################################################################################
 
-        # import matplotlib.pyplot as plt
-        # from mpl_toolkits.mplot3d import Axes3D
-        # fig = plt.figure(1)
-        # ax = plt.subplot(111)
-        # #ax = fig.add_subplot(111, projection='3d')
-        # #ax.scatter(v1[:, 0], v1[:, 1], v1[:, 2], c='b', s=1)
-        # ax.scatter(j2ds_est1[14, 0], j2ds_est1[14, 1], c='r')
-        # #ax.scatter(HR_j2ds_foot[ind][0, 0], HR_j2ds_foot[ind][0, 1], c='b')
-        # #hmr_joint3d = hmr_joint3ds[ind,:,:]
-        # #ax.scatter(j3ds1[14, 0], j3ds1[14, 1], j3ds1[14, 2], c='r',s=40)
-        # #ax.scatter(j3ds1[13, 0], j3ds1[13, 1], j3ds1[13, 2], c='r',s=40)
-        # plt.imshow(HR_imgs[ind])
-        # plt.show()
+        import matplotlib.pyplot as plt
+        from mpl_toolkits.mplot3d import Axes3D
+        fig = plt.figure(1)
+        ax = plt.subplot(111)
+        #ax = fig.add_subplot(111, projection='3d')
+        #ax.scatter(v1[:, 0], v1[:, 1], v1[:, 2], c='b', s=1)
+        ax.scatter(j2ds_est1[14, 0], j2ds_est1[14, 1], c='r')
+        #ax.scatter(HR_j2ds_foot[ind][0, 0], HR_j2ds_foot[ind][0, 1], c='b')
+        #hmr_joint3d = hmr_joint3ds[ind,:,:]
+        #ax.scatter(j3ds1[14, 0], j3ds1[14, 1], j3ds1[14, 2], c='r',s=40)
+        #ax.scatter(j3ds1[13, 0], j3ds1[13, 1], j3ds1[13, 2], c='r',s=40)
+        plt.imshow(HR_imgs[ind])
+        plt.show()
         # #plt.imshow(HR_imgs[ind])
         # #ax.scatter(verts_est1[:, 0], verts_est1[:, 1], c='r')
         # #plt.savefig("/home/lgh/code/SMPLify_TF/test/temp0/1/LR/test_temp/dot.png")
@@ -617,8 +617,8 @@ def main(flength=2500.):
             print("the HR mask loss is %f" % _objs['mask'])
             print("the HR face loss is %f" % _objs['face'])
             if ind != 0:
-                print("the LR temporal loss is %f" % _objs['temporal'])
-                print("the LR temporal_pose loss is %f" % _objs['temporal_pose'])
+                print("the HR temporal loss is %f" % _objs['temporal'])
+                print("the HR temporal_pose loss is %f" % _objs['temporal_pose'])
             #print("the arm_leg_direction loss is %f" % sess.run(objs["arm_leg_direction"]))
             #model_f = model_f.astype(int).tolist()
             start_time = time.time()
