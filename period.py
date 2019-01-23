@@ -7,6 +7,7 @@ import util
 import smpl_np
 from opendr_render import render
 import cv2
+import csv
 # import pandas as pd
 
 # 均值平滑
@@ -122,6 +123,24 @@ def periodicDecomp(lr, hr, lr_points, hr_points):
     # data.to_csv('tianyi_pose_0111.csv',header = False, index = False) # here
     # data.to_csv(output_file,header = False, index = False) # here
     return output
+def save_pkl_to_csv(pose_path):
+    #####save csv before refine, extra output
+    pkl_files = os.listdir(pose_path)
+    pkl_files = sorted([filename for filename in pkl_files if filename.endswith(".pkl")],
+                          key=lambda d: int((d.split('_')[3]).split('.')[0]))
+    length = len(pkl_files)
+    array = np.zeros((length, 24 * 3))
+    for ind, pkl_file in enumerate(pkl_files):
+        pkl_path = os.path.join(pose_path, pkl_file)
+        with open(pkl_path) as f:
+            param = pickle.load(f)
+        pose = param['pose']
+        for i in range(24 * 3):
+            array[ind, i] = pose[0, i]
+    with open(os.path.join(pose_path, "optimization_pose.csv"), "w") as f:
+        writer = csv.writer(f)
+        for row in array:
+            writer.writerow(row)
 
 def refine_LR_pose(HR_pose_path, hr_points, lr_points, LR_cameras, texture_img,
                    texture_vt, LR_imgs):
@@ -139,9 +158,6 @@ def refine_LR_pose(HR_pose_path, hr_points, lr_points, LR_cameras, texture_img,
     HR_length = len(HR_pkl_files)
     HR_array = np.zeros((HR_length, 24 * 3))
 
-    LR_beta = []
-    LR_trans = []
-    LR_pose = []
 
     for ind, LR_pkl_file in enumerate(LR_pkl_files):
         LR_pkl_path = os.path.join(LR_path, LR_pkl_file)
@@ -167,8 +183,8 @@ def refine_LR_pose(HR_pose_path, hr_points, lr_points, LR_cameras, texture_img,
         video_path = util.hmr_path + "output_after_refine/texture.mp4"
         videowriter = cv2.VideoWriter(video_path, cv2.VideoWriter_fourcc('D', 'I', 'V', 'X'), fps, size)
 
-    for ind, LR_pkl_file in enumerate(LR_pkl_files):
-        LR_pkl_path = os.path.join(LR_path, LR_pkl_file)
+    for ind in range(lr_points[-1]):
+        LR_pkl_path = os.path.join(LR_path, LR_pkl_files[ind])
         with open(LR_pkl_path) as f:
             param = pickle.load(f)
         beta = param['betas']
@@ -188,4 +204,5 @@ def refine_LR_pose(HR_pose_path, hr_points, lr_points, LR_cameras, texture_img,
         img_result_naked = camera.render_naked(verts, LR_imgs[ind])
         cv2.imwrite(util.hmr_path + "output_after_refine/hmr_optimization_%04d.png" % ind, img_result_naked)
         img_result_naked_rotation = camera.render_naked_rotation(verts, 90, LR_imgs[ind])
-        cv2.imwrite(util.hmr_path + "output_after_refine/hmr_optimization_rotation_%04d.png" % ind, img_result_naked_rotation)
+        cv2.imwrite(util.hmr_path + "output_after_refine/hmr_optimization_rotation_%04d.png" % ind,
+                    img_result_naked_rotation)

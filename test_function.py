@@ -341,12 +341,15 @@ def preprocessHR():
     #     cv2.imwrite("/home/lgh/code/SMPLify_TF/test/temp0_tianyi/1/HR_resize/%04d.jpg" % i, img_output)
 
 def mask_texture():
-    for i in range(69):
-        img = cv2.imread("/home/lgh/code/SMPLify_TF/test/test_hmr_init/HR_multi_crop_small3/optimization_data/%04d.jpg" % i)
-        mask = cv2.imread("/home/lgh/code/SMPLify_TF/test/test_hmr_init/HR_multi_crop_small3/optimization_data/mask_%04d.png" % i)
+    for i in range(39):
+        img = cv2.imread("/home/lgh/code/SMPLify_TF/test/test_hmr_init/HR_multi_crop_small/optimization_data/%04d.jpg" % (i * 2))
+        mask = cv2.imread("/home/lgh/code/SMPLify_TF/test/test_hmr_init/HR_multi_crop_small/optimization_data/mask_%04d.png" % i)
         result = cv2.add(img, np.zeros(np.shape(img), dtype=np.uint8), mask=mask[:,:,0])
-        result = cv2.addWeighted(result,0.5,img,0.5,0)
-        cv2.imwrite("/home/lgh/code/SMPLify_TF/test/test_hmr_init/HR_multi_crop_small3/output_mask/compare_%04d.png" % i, result)
+        result_weights = cv2.addWeighted(result,0.5,img,0.5,0)
+        cv2.imwrite(
+            "/home/lgh/code/SMPLify_TF/test/test_hmr_init/HR_multi_crop_small/output_mask/mask_%04d.png" % i,
+            result)
+        cv2.imwrite("/home/lgh/code/SMPLify_TF/test/test_hmr_init/HR_multi_crop_small/output_mask/compare_%04d.png" % i, result_weights)
         #cv2.imwrite(
             #"/home/lgh/code/SMPLify_TF/test/test_hmr_init/HR_multi_crop_small3/optimization_data/mask_%04d.png" % i,
             #mask)

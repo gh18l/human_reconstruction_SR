@@ -2,7 +2,7 @@
 import cv2
 
 # 按照灰度图像的方式读入两幅图片
-img1 = cv2.imread("/home/lgh/code/SMPLify_TF/test/test_hmr_init/HR_multi_crop_small2/optimization_data/0004.jpg", cv2.IMREAD_GRAYSCALE)
+img1 = cv2.imread("/home/lgh/code/SMPLify_TF/test/test_hmr_init/xiongfei/optimization_data/0000.png", cv2.IMREAD_GRAYSCALE)
 for i in range(100):
     img2 = cv2.imread("/home/lgh/code/SMPLify_TF/test/test_hmr_init/xiongfei/optimization_data/%04d.png" % i, cv2.IMREAD_GRAYSCALE)
     # 创建ORB特征检测器和描述符

@@ -17,7 +17,7 @@ except:
 from opendr_render import render
 import time
 import pickle
-
+import period
 
 def demo_point(x, y, img_path = None):
     import matplotlib.pyplot as plt
@@ -289,6 +289,8 @@ def main(flength=2500.):
             if weights[ii, iii] > 0.3:
                 head_idx[ii] = 1
                 test_idx[ii] = 1
+
+
     ##test
     # import matplotlib.pyplot as plt
     # from mpl_toolkits.mplot3d import Axes3D
@@ -515,8 +517,14 @@ def main(flength=2500.):
         base_weights_foot = 1.0 * np.array(
             [1.0, 1.0])
         _HR_confs_foot = np.zeros(2)
-        _HR_confs_foot[0] = (HR_confs_foot[ind][0] + HR_confs_foot[ind][1]) / 2.0
-        _HR_confs_foot[1] = (HR_confs_foot[ind][3] + HR_confs_foot[ind][4]) / 2.0
+        if HR_confs_foot[ind][0] != 0 and HR_confs_foot[ind][1] != 0:
+            _HR_confs_foot[0] = (HR_confs_foot[ind][0] + HR_confs_foot[ind][1]) / 2.0
+        else:
+            _HR_confs_foot[0] = 0.0
+        if HR_confs_foot[ind][3] != 0 and HR_confs_foot[ind][4] != 0:
+            _HR_confs_foot[1] = (HR_confs_foot[ind][3] + HR_confs_foot[ind][4]) / 2.0
+        else:
+            _HR_confs_foot[1] = 0.0
         weights_foot = _HR_confs_foot * base_weights_foot
         weights_foot = tf.constant(weights_foot, dtype=tf.float32)
         _HR_j2ds_foot = np.zeros([2, 2])
@@ -666,7 +674,7 @@ def main(flength=2500.):
 
     #write_obj_and_translation(util.HR_img_base_path + "/aa1small.jpg",
             #util.HR_img_base_path + "/output", util.LR_img_base_path + "/output")
-
+    period.save_pkl_to_csv(util.hmr_path + "output")
 
 
 if __name__ == '__main__':

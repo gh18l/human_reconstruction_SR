@@ -460,11 +460,11 @@ def main(flength=2500.):
         j2ds_est = tf.convert_to_tensor(j2ds_est)
 
         objs = {}
-        base_weights = np.array(
+        base_weights = 1.0 * np.array(
             [1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0])
         weights = LR_confs[ind] * base_weights
         weights = tf.constant(weights, dtype=tf.float32)
-        objs['J2D_Loss'] = 1.0 * tf.reduce_sum(weights * tf.reduce_sum(tf.square(j2ds_est[2:, :] - LR_j2d), 1))
+        objs['J2D_Loss'] = tf.reduce_sum(weights * tf.reduce_sum(tf.square(j2ds_est[2:, :] - LR_j2d), 1))
 
         base_weights_face = 2.5 * np.array(
             [1.0, 1.0, 1.0, 1.0, 1.0])
@@ -473,18 +473,24 @@ def main(flength=2500.):
         objs['J2D_face_Loss'] = tf.reduce_sum(
             weights_face * tf.reduce_sum(tf.square(j2dsplus_est[14:19, :] - LR_j2ds_face[ind]), 1))
 
-        base_weights_head = 0.5 * np.array(
+        base_weights_head = 1.0 * np.array(
             [1.0, 1.0])
         weights_head = LR_confs_head[ind] * base_weights_head
         weights_head = tf.constant(weights_head, dtype=tf.float32)
         objs['J2D_head_Loss'] = tf.reduce_sum(
             weights_head * tf.reduce_sum(tf.square(LR_j2ds_head[ind] - j2ds_est[14:16, :]), 1))
 
-        base_weights_foot = 1.0 * np.array(
+        base_weights_foot = 2.5 * np.array(
             [1.0, 1.0])
         _LR_confs_foot = np.zeros(2)
-        _LR_confs_foot[0] = (LR_confs_foot[ind][0] + LR_confs_foot[ind][1]) / 2.0
-        _LR_confs_foot[1] = (LR_confs_foot[ind][3] + LR_confs_foot[ind][4]) / 2.0
+        if LR_confs_foot[ind][0] != 0 and LR_confs_foot[ind][1] != 0:
+            _LR_confs_foot[0] = (LR_confs_foot[ind][0] + LR_confs_foot[ind][1]) / 2.0
+        else:
+            _LR_confs_foot[0] = 0.0
+        if LR_confs_foot[ind][3] != 0 and LR_confs_foot[ind][4] != 0:
+            _LR_confs_foot[1] = (LR_confs_foot[ind][3] + LR_confs_foot[ind][4]) / 2.0
+        else:
+            _LR_confs_foot[1] = 0.0
         weights_foot = _LR_confs_foot * base_weights_foot
         weights_foot = tf.constant(weights_foot, dtype=tf.float32)
         _LR_j2ds_foot = np.zeros([2, 2])
@@ -492,7 +498,7 @@ def main(flength=2500.):
         _LR_j2ds_foot[0, 1] = (LR_j2ds_foot[ind][0, 1] + LR_j2ds_foot[ind][1, 1]) / 2.0
         _LR_j2ds_foot[1, 0] = (LR_j2ds_foot[ind][3, 0] + LR_j2ds_foot[ind][4, 0]) / 2.0
         _LR_j2ds_foot[1, 1] = (LR_j2ds_foot[ind][3, 1] + LR_j2ds_foot[ind][4, 1]) / 2.0
-        objs['J2D_foot_Loss'] = 2.5 * tf.reduce_sum(
+        objs['J2D_foot_Loss'] = tf.reduce_sum(
             weights_foot * tf.reduce_sum(tf.square(_LR_j2ds_foot - j2ds_est[0:2, :]), 1))
 
         pose_diff = tf.reshape(param_pose - pose_mean, [1, -1])
@@ -518,7 +524,7 @@ def main(flength=2500.):
         ##############################################################
         ###################mask obj###################################
         ##############################################################
-        objs['mask'] = 0.05 * tf.reduce_sum(verts2dsilhouette / 255.0 * (255.0 - LR_mask) / 255.0
+        objs['mask'] = 0.02 * tf.reduce_sum(verts2dsilhouette / 255.0 * (255.0 - LR_mask) / 255.0
                                             + (255.0 - verts2dsilhouette) / 255.0 * LR_mask / 255.0)
 
         objs['face'] = 0.0 * tf.reduce_sum(tf.square(hmr_joint3d[14:19] - jointsplus[14:19]))
@@ -591,7 +597,7 @@ def main(flength=2500.):
         #
         res = {'pose': pose_final, 'betas': betas_final, 'trans': trans_final}
         # out_pkl_path = out_ply_path.replace('.ply', '.pkl')
-        with open(util.hmr_path + "output/hmr_optimization_pose_%04d.pkl", 'wb') as fout:
+        with open(util.hmr_path + "output/hmr_optimization_pose_%04d.pkl" % ind, 'wb') as fout:
             pkl.dump(res, fout)
 
 
@@ -619,8 +625,9 @@ def main(flength=2500.):
 
     #write_obj_and_translation(util.HR_img_base_path + "/aa1small.jpg",
             #util.HR_img_base_path + "/output", util.LR_img_base_path + "/output")
-    lr_points = [0, 18, 36, 54, 72]
-    hr_points = [1, 19, 37, 55]
+    period.save_pkl_to_csv(util.hmr_path + "output")
+    lr_points = [0, 18, 36, 54, 72]    ###[0, 18, 36, 54, 72]
+    hr_points = [1, 19]
     period.refine_LR_pose(util.HR_pose_path, hr_points, lr_points, LR_cameras, texture_img,
                    texture_vt, LR_imgs)
 
