@@ -51,16 +51,19 @@ HR_pkl_base_path = base_path + "/HR/output"
 LR_j2d_dctsmooth_base_path = base_path + "/LRdctsmooth"
 LR_img_dctsmooth_base_path = base_path + "/LRdctsmooth"
 
-hmr_path = "/home/lgh/code/SMPLify_TF/test/test_hmr_init/dingjianLR100/"
-texture_path = "/home/lgh/code/SMPLify_TF/test/test_hmr_init/HR_multi_crop_small/output/texture_file/"
-HR_pose_path = "/home/lgh/code/SMPLify_TF/test/test_hmr_init/HR_multi_crop_small/output/"
+hmr_path = "/home/lgh/code/SMPLify_TF/test/test_hmr_init/xiongfei/"
+texture_path = "/home/lgh/code/SMPLify_TF/test/test_hmr_init/HR_multi_crop_small2/output/texture_file/"
+HR_pose_path = "/home/lgh/code/SMPLify_TF/test/test_hmr_init/HR_multi_crop_small2/output/"
 crop_texture = True  ###only use in small texture
 index_data = 0
 video = True
 
 ###dingjianLR100
-lr_points = [0, 16, 31, 47, 64, 80, 96]    ###[0, 18, 36, 54, 72]
-hr_points = [4, 20, 36]
+# lr_points = [0, 16, 31, 47, 64, 80, 96]    ###[0, 18, 36, 54, 72]
+# hr_points = [4, 20, 36]
+###xiongfei
+lr_points = [0, 18, 36, 54, 72]    ###[0, 18, 36, 54, 72]
+hr_points = [1, 19, 37]
 
 
 which_people = "tianyi_LR"
@@ -112,35 +115,6 @@ def load_deepcut(path):
     conf = est[2, :, 0]
     return (joints, conf)
 
-def load_HR_data():
-    HR_imgs = []
-    HR_j2ds = []
-    confs = []
-    masks = []
-    j2d_files = os.listdir(HR_j2d_base_path)
-    j2d_files = sorted([filename for filename in j2d_files if filename.endswith(".npz")],
-						key=lambda d: int((d.split('_')[2]).split('.')[0]))
-    img_files = os.listdir(HR_img_base_path)
-    img_files = sorted([filename for filename in img_files if filename.endswith(".png") and "img" in filename])
-    mask_files = os.listdir(HR_mask_base_path)
-    mask_files = sorted([filename for filename in mask_files if filename.endswith(".png") and "mask" in filename],
-                       key=lambda d: int((d.split('_')[1]).split('.')[0]))
-
-    for ind, j2d_file in enumerate(j2d_files):
-        j2d_file_path = os.path.join(HR_j2d_base_path, j2d_file)
-        HR_j2d, conf = load_deepcut(j2d_file_path)
-        HR_j2ds.append(HR_j2d)
-        confs.append(conf)
-        img_file_path = os.path.join(HR_img_base_path, img_files[ind])
-        HR_img = cv2.imread(img_file_path)
-        HR_imgs.append(HR_img)
-
-        mask_file_path = os.path.join(HR_mask_base_path, mask_files[ind])
-        mask1 = cv2.imread(mask_file_path)
-        mask = mask1[:, :, 0]
-        masks.append(mask)
-    return HR_j2ds, confs, HR_imgs, masks
-
 def load_openposeCOCO(file):
     #file = "/home/lgh/Documents/2d_3d_con/aa_000000000000_keypoints.json"
     openpose_index = np.array([11, 10, 9, 12, 13, 14, 4, 3, 2, 5, 6, 7, 1, 0, 0, 16, 15, 18, 17, 22, 23, 24, 20, 19, 21])
@@ -178,41 +152,6 @@ def load_openposeCOCO(file):
     deepcut_conf = deepcut_conf.reshape((len(deepcut_conf)))
     return deepcut_joints, deepcut_conf
 
-
-def load_LR_data():
-    LR_imgs = []
-    LR_j2ds = []
-    confs = []
-    masks = []
-    j2d_files = os.listdir(LR_j2d_base_path)
-    j2d_files = sorted([filename for filename in j2d_files if filename.endswith(".npz")],
-						key=lambda d: int((d.split('_')[2]).split('.')[0]))
-    img_files = os.listdir(LR_img_base_path)
-    img_files = sorted([filename for filename in img_files if filename.endswith(".jpg")])
-    mask_files = os.listdir(LR_mask_base_path)
-    mask_files = sorted([filename for filename in mask_files if filename.endswith(".png") and "mask" in filename],
-                       key=lambda d: int((d.split('_')[1]).split('.')[0]))
-
-    for ind, j2d_file in enumerate(j2d_files[first_index:last_index]):
-        j2d_file_path = os.path.join(LR_j2d_base_path, j2d_file)
-        LR_j2d, conf = load_deepcut(j2d_file_path)
-        LR_j2ds.append(LR_j2d)
-        confs.append(conf)
-
-        img_file_path = os.path.join(LR_img_base_path, img_files[ind + first_index])
-        LR_img = cv2.imread(img_file_path)
-        LR_imgs.append(LR_img)
-
-        mask_file_path = os.path.join(LR_mask_base_path, mask_files[ind + first_index])
-        mask1 = cv2.imread(mask_file_path)
-        ##################cautious change!!!!!!!!!!!################
-        if ind + first_index in bad_mask:
-            mask = np.zeros([100, 100, 3])
-        else:
-            mask = mask1[:, :, 0]
-        masks.append(mask)
-    return LR_j2ds, confs, LR_imgs, masks
-
 def load_hmr_data(path):
     hmr_theta, hmr_beta, hmr_tran, hmr_cam, hmr_joint3d = hmr.get_hmr(path)
     hmr_dict = {"hmr_thetas" : hmr_theta, "hmr_betas" : hmr_beta,
@@ -238,7 +177,7 @@ def load_hmr_data(path):
     MPI_j2d_files = sorted([filename for filename in MPI_j2d_files if filename.endswith(".json")],
                             key=lambda d: int((d.split('_')[0])))
     img_files = os.listdir(path)
-    img_files = sorted([filename for filename in img_files if filename.endswith(".jpg") and "mask" not in filename])
+    img_files = sorted([filename for filename in img_files if filename.endswith(".png") and "mask" not in filename])
     mask_files = os.listdir(path)
     mask_files = sorted([filename for filename in mask_files if filename.endswith(".png") and "mask" in filename],
                         key=lambda d: int((d.split('_')[1]).split('.')[0]))

@@ -9,7 +9,7 @@ from opendr_render import render
 import cv2
 import csv
 # import pandas as pd
-import single_frame_estimation_hmr_LR_periodrefine as refine_opt
+
 # 均值平滑
 def mean_smoothing(s,r):
     s2=np.zeros(s.shape)
@@ -143,15 +143,14 @@ def save_pkl_to_csv(pose_path):
             writer.writerow(row)
 
 def refine_LR_pose(HR_pose_path, hr_points, lr_points, LR_cameras, texture_img,
-                   texture_vt, data_dict):
+                   texture_vt, LR_imgs):
     LR_path = util.hmr_path + "output"
     LR_pkl_files = os.listdir(LR_path)
     LR_pkl_files = sorted([filename for filename in LR_pkl_files if filename.endswith(".pkl")],
                           key=lambda d: int((d.split('_')[3]).split('.')[0]))
     LR_length = len(LR_pkl_files)
     LR_array = np.zeros((LR_length, 24 * 3))
-    LR_betas = np.zeros([LR_length, 10])
-    LR_trans = np.zeros([LR_length, 3])
+
     HR_path = HR_pose_path
     HR_pkl_files = os.listdir(HR_path)
     HR_pkl_files = sorted([filename for filename in HR_pkl_files if filename.endswith(".pkl")],
@@ -165,14 +164,8 @@ def refine_LR_pose(HR_pose_path, hr_points, lr_points, LR_cameras, texture_img,
         with open(LR_pkl_path) as f:
             param = pickle.load(f)
         pose = param['pose']
-        beta = param['betas']
-        tran = param['trans']
         for i in range(24 * 3):
             LR_array[ind, i] = pose[0, i]
-        for i in range(10):
-            LR_betas[ind, i] = beta[0, i]
-        for i in range(3):
-            LR_trans[ind, i] = tran[0, i]
     for ind, HR_pkl_file in enumerate(HR_pkl_files):
         HR_pkl_path = os.path.join(HR_path, HR_pkl_file)
         with open(HR_pkl_path) as f:
@@ -182,6 +175,36 @@ def refine_LR_pose(HR_pose_path, hr_points, lr_points, LR_cameras, texture_img,
             HR_array[ind, i] = pose[0, i]
 
     output = periodicDecomp(LR_array, HR_array, lr_points, hr_points)
-    refine_opt.refine_optimization(output, LR_betas, LR_trans, data_dict,
-                                   LR_cameras, texture_img, texture_vt)
 
+    videowriter = []
+    if util.video == True:
+        fps = 15
+        size = (LR_imgs[0].shape[1], LR_imgs[0].shape[0])
+        video_path = util.hmr_path + "output_after_refine/texture.mp4"
+        videowriter = cv2.VideoWriter(video_path, cv2.VideoWriter_fourcc('D', 'I', 'V', 'X'), fps, size)
+
+    for ind in range(lr_points[-1]):
+        if ind == 17:
+            a = 1
+        LR_pkl_path = os.path.join(LR_path, LR_pkl_files[ind])
+        with open(LR_pkl_path) as f:
+            param = pickle.load(f)
+        beta = param['betas']
+        tran = param['trans']
+        pose = output[ind, :]
+
+        smpl = smpl_np.SMPLModel('./smpl/models/basicmodel_m_lbs_10_207_0_v1.0.0.pkl')
+        verts = smpl_np.get_verts(pose, beta, tran, smpl)
+
+        camera = render.camera(LR_cameras[ind][0], LR_cameras[ind][1], LR_cameras[ind][2], LR_cameras[ind][3])
+        img_result_texture, _ = camera.render_texture(verts, texture_img, texture_vt)
+        if not os.path.exists(util.hmr_path + "output_after_refine"):
+            os.makedirs(util.hmr_path + "output_after_refine")
+        cv2.imwrite(util.hmr_path + "output_after_refine/hmr_optimization_texture_%04d.png" % ind, img_result_texture)
+        if util.video is True:
+            videowriter.write(img_result_texture)
+        img_result_naked = camera.render_naked(verts, LR_imgs[ind])
+        cv2.imwrite(util.hmr_path + "output_after_refine/hmr_optimization_%04d.png" % ind, img_result_naked)
+        img_result_naked_rotation = camera.render_naked_rotation(verts, 90, LR_imgs[ind])
+        cv2.imwrite(util.hmr_path + "output_after_refine/hmr_optimization_rotation_%04d.png" % ind,
+                    img_result_naked_rotation)

@@ -626,7 +626,7 @@ def main(flength=2500.):
             #util.HR_img_base_path + "/output", util.LR_img_base_path + "/output")
     period.save_pkl_to_csv(util.hmr_path + "output")
     period.refine_LR_pose(util.HR_pose_path, util.hr_points, util.lr_points, LR_cameras, texture_img,
-                   texture_vt, LR_imgs)
+                   texture_vt, data_dict)
 
 
 if __name__ == '__main__':
