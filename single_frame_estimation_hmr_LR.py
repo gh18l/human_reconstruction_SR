@@ -479,7 +479,7 @@ def main(flength=2500.):
         objs['J2D_head_Loss'] = tf.reduce_sum(
             weights_head * tf.reduce_sum(tf.square(LR_j2ds_head[ind] - j2ds_est[14:16, :]), 1))
 
-        base_weights_foot = 2.5 * np.array(
+        base_weights_foot = 0.5 * np.array(
             [1.0, 1.0])
         _LR_confs_foot = np.zeros(2)
         if LR_confs_foot[ind][0] != 0 and LR_confs_foot[ind][1] != 0:
@@ -533,9 +533,9 @@ def main(flength=2500.):
 
         w_temporal = [0.5, 0.5, 1.0, 1.5, 2.5, 2.5, 1.5, 1.0, 0.0, 0.0, 2.0, 2.0, 0.0, 0.0, 7.0, 7.0]
         if ind != 0:
-            objs['temporal'] = 1000.0 * tf.reduce_sum(
+            objs['temporal'] = 200.0 * tf.reduce_sum(
                 w_temporal * tf.reduce_sum(tf.square(j3ds - j3ds_old), 1))
-            objs['temporal_pose'] = 50.0 * tf.reduce_sum(
+            objs['temporal_pose'] = 100.0 * tf.reduce_sum(
                 tf.square(pose_final_old[0, 3:72] - param_pose[0,:]))
         # pose1 = param_pose[0, 52]
         # pose2 = param_pose[0, 55]
