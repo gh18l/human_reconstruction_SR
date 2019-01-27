@@ -249,43 +249,7 @@ def main(flength=2500.):
     '''
     videowriter = []
     model = _load_model(util.SMPL_PATH)
-    dd = pickle.load(open(util.NORMAL_SMPL_PATH))
-    weights = dd['weights']
-    vert_sym_idxs = dd['vert_sym_idxs']
-    v_template = dd['v_template']
-    leg_index = [1, 4, 7, 10, 2, 5, 8, 11]
-    arm_index = [17, 19, 21, 23, 16, 18, 20, 22, 14, 13]
-    body_index = [0, 3, 6, 9]
-    head_index = [12, 15]
-    leg_idx = np.zeros(6890)
-    arm_idx = np.zeros(6890)
-    body_idx = np.zeros(6890)
-    head_idx = np.zeros(6890)
-    test_idx = np.zeros(6890)
-    for _, iii in enumerate(leg_index):
-        length = len(weights[:, iii])
-        for ii in range(length):
-            if weights[ii, iii] > 0.3:
-                leg_idx[ii] = 1
-                test_idx[ii] = 1
-    for _, iii in enumerate(arm_index):
-        length = len(weights[:, iii])
-        for ii in range(length):
-            if weights[ii, iii] > 0.3:
-                arm_idx[ii] = 1
-                test_idx[ii] = 1
-    for _, iii in enumerate(body_index):
-        length = len(weights[:, iii])
-        for ii in range(length):
-            if weights[ii, iii] > 0.3:
-                body_idx[ii] = 1
-                test_idx[ii] = 1
-    for _, iii in enumerate(head_index):
-        length = len(weights[:, iii])
-        for ii in range(length):
-            if weights[ii, iii] > 0.3:
-                head_idx[ii] = 1
-                test_idx[ii] = 1
+
 
     texture_vt, texture_img = render.read_texture_data(util.texture_path)
     hmr_dict, data_dict = util.load_hmr_data(util.hmr_path)
@@ -314,7 +278,7 @@ def main(flength=2500.):
     initial_param, pose_mean, pose_covariance = util.load_initial_param()
     pose_mean = tf.constant(pose_mean, dtype=tf.float32)
     pose_covariance = tf.constant(pose_covariance, dtype=tf.float32)
-    smpl_model = SMPL(util.SMPL_PATH)
+    smpl_model = SMPL(util.SMPL_PATH, util.NORMAL_SMPL_PATH)
     j3ds_old = []
     pose_final_old = []
     pose_final = []
@@ -582,7 +546,6 @@ def main(flength=2500.):
             #model_f = model_f.astype(int).tolist()
             pose_final, betas_final, trans_final = sess.run(
                 [tf.concat([param_rot, param_pose], axis=1), param_shape, param_trans])
-
         # from psbody.meshlite import Mesh
         # m = Mesh(v=np.squeeze(v_final[0]), f=model_f)
 
@@ -626,7 +589,7 @@ def main(flength=2500.):
             #util.HR_img_base_path + "/output", util.LR_img_base_path + "/output")
     period.save_pkl_to_csv(util.hmr_path + "output")
     period.refine_LR_pose(util.HR_pose_path, util.hr_points, util.lr_points, LR_cameras, texture_img,
-                   texture_vt, data_dict)
+                              texture_vt, data_dict)
 
 
 if __name__ == '__main__':

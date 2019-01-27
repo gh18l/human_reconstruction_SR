@@ -2,8 +2,15 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="f7d84f91-ca51-44e9-9207-a42c8622e72d" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/period.py" beforeDir="false" afterPath="$PROJECT_DIR$/period.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/period_old.py" beforeDir="false" afterPath="$PROJECT_DIR$/period_new.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/single_frame_estimation_hmr.py" beforeDir="false" afterPath="$PROJECT_DIR$/single_frame_estimation_hmr.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/single_frame_estimation_hmr_LR.py" beforeDir="false" afterPath="$PROJECT_DIR$/single_frame_estimation_hmr_LR.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/single_frame_estimation_hmr_LR_periodrefine.py" beforeDir="false" afterPath="$PROJECT_DIR$/single_frame_estimation_hmr_LR_periodrefine.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smpl_batch.py" beforeDir="false" afterPath="$PROJECT_DIR$/smpl_batch.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smpl_batch_new.py" beforeDir="false" afterPath="$PROJECT_DIR$/smpl_batch_body_parsing.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test_function.py" beforeDir="false" afterPath="$PROJECT_DIR$/test_function.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/util.py" beforeDir="false" afterPath="$PROJECT_DIR$/util.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -11,41 +18,6 @@
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
-  </component>
-  <component name="DockManager">
-    <window id="1">
-      <content type="file-editors">
-        <state>
-          <leaf>
-            <file pinned="false" current-in-tab="false">
-              <entry file="file://$PROJECT_DIR$/garbage_but_saved_file/render_into_pano.py">
-                <provider selected="true" editor-type-id="text-editor">
-                  <state relative-caret-position="771">
-                    <caret line="59" column="43" selection-start-line="59" selection-start-column="43" selection-end-line="59" selection-end-column="43" />
-                    <folding>
-                      <element signature="e#0#10#0" expanded="true" />
-                    </folding>
-                  </state>
-                </provider>
-              </entry>
-            </file>
-            <file pinned="false" current-in-tab="true">
-              <entry file="file://$PROJECT_DIR$/single_frame_estimation_hmr_LR_periodrefine.py">
-                <provider selected="true" editor-type-id="text-editor">
-                  <state relative-caret-position="-2760">
-                    <caret line="10" column="31" lean-forward="true" selection-start-line="10" selection-start-column="31" selection-end-line="10" selection-end-column="31" />
-                    <folding>
-                      <element signature="e#0#23#0" expanded="true" />
-                      <marker date="1548339309012" expanded="true" signature="339:340" ph="..." />
-                    </folding>
-                  </state>
-                </provider>
-              </entry>
-            </file>
-          </leaf>
-        </state>
-      </content>
-    </window>
   </component>
   <component name="FUSProjectUsageTrigger">
     <session id="-1755614933">
@@ -60,34 +32,36 @@
       <usages-collector id="statistics.file.extensions.open">
         <counts>
           <entry key="gitignore" value="1" />
-          <entry key="py" value="91" />
+          <entry key="py" value="107" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
           <entry key="PLAIN_TEXT" value="1" />
-          <entry key="Python" value="91" />
+          <entry key="Python" value="107" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="py" value="6500" />
+          <entry key="dummy" value="21" />
+          <entry key="py" value="8156" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="Python" value="6500" />
+          <entry key="PLAIN_TEXT" value="21" />
+          <entry key="Python" value="8156" />
         </counts>
       </usages-collector>
     </session>
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/period.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="149">
-              <caret line="181" column="20" selection-start-line="181" selection-start-column="12" selection-end-line="181" selection-end-column="20" />
+            <state relative-caret-position="252">
+              <caret line="179" selection-start-line="179" selection-end-line="180" />
               <folding>
                 <element signature="e#14#32#0" expanded="true" />
               </folding>
@@ -96,31 +70,70 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/period_old.py">
-          <provider selected="true" editor-type-id="text-editor" />
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/opendr_render/render.py">
+        <entry file="file://$PROJECT_DIR$/single_frame_estimation_shape.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="120">
-              <caret line="8" column="26" selection-start-line="8" selection-start-column="18" selection-end-line="8" selection-end-column="26" />
+            <state relative-caret-position="293">
+              <caret line="120" column="46" lean-forward="true" selection-start-line="120" selection-start-column="46" selection-end-line="120" selection-end-column="46" />
+              <folding>
+                <element signature="e#0#13#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/smpl_batch.py">
-          <provider selected="true" editor-type-id="text-editor" />
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-630">
+              <caret line="12" column="12" selection-start-line="12" selection-start-column="8" selection-end-line="12" selection-end-column="12" />
+              <folding>
+                <element signature="e#15#38#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/render_into_panorama.py">
+        <entry file="file://$PROJECT_DIR$/smpl_batch_body_parsing.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="314">
-              <caret line="51" column="42" selection-start-line="51" selection-start-column="32" selection-end-line="51" selection-end-column="42" />
+            <state relative-caret-position="212">
+              <caret line="132" column="51" lean-forward="true" selection-start-line="132" selection-start-column="51" selection-end-line="132" selection-end-column="51" />
               <folding>
-                <element signature="e#0#9#0" expanded="true" />
+                <element signature="e#15#38#0" expanded="true" />
+                <marker date="1548558271635" expanded="true" signature="1396:1399" ph="..." />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/../watch_study_fun/MuVS/venv/local/lib/python2.7/site-packages/tensorflow/python/framework/tensor_util.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="134">
+              <caret line="342" selection-start-line="342" selection-end-line="342" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/single_frame_estimation_hmr.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="192">
+              <caret line="291" column="41" lean-forward="true" selection-start-line="291" selection-start-column="41" selection-end-line="291" selection-end-column="41" />
+              <folding>
+                <element signature="e#0#18#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/util.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-3127">
+              <caret line="62" column="22" selection-start-line="62" selection-start-column="20" selection-end-line="62" selection-end-column="22" />
+              <folding>
+                <element signature="e#14#23#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -129,8 +142,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/single_frame_estimation_hmr_LR.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="513">
-              <caret line="627" column="16" lean-forward="true" selection-start-line="627" selection-start-column="16" selection-end-line="627" selection-end-column="16" />
+            <state relative-caret-position="264">
+              <caret line="590" column="23" selection-start-line="590" selection-start-column="23" selection-end-line="590" selection-end-column="23" />
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
               </folding>
@@ -139,45 +152,25 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/camera.py">
+        <entry file="file://$PROJECT_DIR$/RenderPanorama.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="329">
-              <caret line="12" column="32" selection-start-line="12" selection-start-column="24" selection-end-line="12" selection-end-column="32" />
+            <state relative-caret-position="317">
+              <caret line="12" column="19" selection-start-line="12" selection-start-column="19" selection-end-line="12" selection-end-column="19" />
+              <folding>
+                <element signature="e#0#10#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/single_frame_estimation_hmr_LR_periodrefine.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="630">
+              <caret line="87" column="34" selection-start-line="87" selection-start-column="34" selection-end-line="87" selection-end-column="34" />
               <folding>
                 <element signature="e#0#23#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/single_frame_estimation_hmr.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1208">
-              <caret line="598" column="28" selection-start-line="598" selection-start-column="28" selection-end-line="598" selection-end-column="28" />
-              <folding>
-                <element signature="e#0#18#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$USER_HOME$/.PyCharmCE2018.2/system/python_stubs/495512647/cv2/cv2/__init__.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="76">
-              <caret line="9155" column="4" selection-start-line="9155" selection-start-column="4" selection-end-line="9155" selection-end-column="4" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/util.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="21">
-              <caret line="64" column="12" lean-forward="true" selection-start-line="64" selection-start-column="12" selection-end-line="64" selection-end-column="12" />
-              <folding>
-                <element signature="e#14#23#0" expanded="true" />
+                <marker date="1548419531229" expanded="true" signature="339:340" ph="..." />
               </folding>
             </state>
           </provider>
@@ -208,16 +201,19 @@
         <option value="$PROJECT_DIR$/opendr_render/render.py" />
         <option value="$PROJECT_DIR$/smpl_np.py" />
         <option value="$PROJECT_DIR$/test_feature.py" />
-        <option value="$PROJECT_DIR$/single_frame_estimation_hmr.py" />
         <option value="$PROJECT_DIR$/test_optflow.py" />
-        <option value="$PROJECT_DIR$/test_function.py" />
         <option value="$PROJECT_DIR$/toolbox.py" />
         <option value="$PROJECT_DIR$/render_into_panorama_new.py" />
         <option value="$PROJECT_DIR$/render_into_panorama.py" />
-        <option value="$PROJECT_DIR$/util.py" />
-        <option value="$PROJECT_DIR$/single_frame_estimation_hmr_LR.py" />
-        <option value="$PROJECT_DIR$/period.py" />
+        <option value="$PROJECT_DIR$/test_function.py" />
         <option value="$PROJECT_DIR$/single_frame_estimation_hmr_LR_periodrefine.py" />
+        <option value="$PROJECT_DIR$/single_frame_estimation_hmr.py" />
+        <option value="$PROJECT_DIR$/single_frame_estimation_hmr_LR.py" />
+        <option value="$PROJECT_DIR$/smpl_batch.py" />
+        <option value="$PROJECT_DIR$/smpl_batch_body_parsing.py" />
+        <option value="$PROJECT_DIR$/single_frame_estimation_shape.py" />
+        <option value="$PROJECT_DIR$/util.py" />
+        <option value="$PROJECT_DIR$/period.py" />
       </list>
     </option>
   </component>
@@ -239,6 +235,22 @@
               <item name="SMPLify_TF" type="b2602c69:ProjectViewProjectNode" />
               <item name="SMPLify_TF" type="462c0819:PsiDirectoryNode" />
             </path>
+            <path>
+              <item name="SMPLify_TF" type="b2602c69:ProjectViewProjectNode" />
+              <item name="SMPLify_TF" type="462c0819:PsiDirectoryNode" />
+              <item name="Data" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="SMPLify_TF" type="b2602c69:ProjectViewProjectNode" />
+              <item name="SMPLify_TF" type="462c0819:PsiDirectoryNode" />
+              <item name="Data" type="462c0819:PsiDirectoryNode" />
+              <item name="Smpl_Model" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="SMPLify_TF" type="b2602c69:ProjectViewProjectNode" />
+              <item name="SMPLify_TF" type="462c0819:PsiDirectoryNode" />
+              <item name="garbage_but_saved_file" type="462c0819:PsiDirectoryNode" />
+            </path>
           </expand>
           <select />
         </subPane>
@@ -247,6 +259,7 @@
     </panes>
   </component>
   <component name="PropertiesComponent">
+    <property name="SearchEverywhereHistoryKey" value="&#9;FILE&#9;file:///home/lgh/code/SMPLify_TF/smpl_batch.py" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
@@ -293,6 +306,27 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="single_frame_estimation_hmr" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="human_reconstruction_SR" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/single_frame_estimation_hmr.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="single_frame_estimation_hmr_LR" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="human_reconstruction_SR" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -306,6 +340,27 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/single_frame_estimation_hmr_LR.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="single_frame_estimation_shape" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="human_reconstruction_SR" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/single_frame_estimation_shape.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -335,62 +390,20 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="test_optflow" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="human_reconstruction_SR" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/test_optflow.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="toolbox" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="human_reconstruction_SR" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/toolbox.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
     <list>
       <item itemvalue="Python.test_function" />
-      <item itemvalue="Python.test_optflow" />
-      <item itemvalue="Python.toolbox" />
       <item itemvalue="Python.render_into_panorama_new" />
       <item itemvalue="Python.single_frame_estimation_hmr_LR" />
+      <item itemvalue="Python.single_frame_estimation_hmr" />
+      <item itemvalue="Python.single_frame_estimation_shape" />
     </list>
     <recent_temporary>
       <list>
         <item itemvalue="Python.single_frame_estimation_hmr_LR" />
-        <item itemvalue="Python.render_into_panorama_new" />
-        <item itemvalue="Python.toolbox" />
+        <item itemvalue="Python.single_frame_estimation_shape" />
+        <item itemvalue="Python.single_frame_estimation_hmr" />
         <item itemvalue="Python.test_function" />
-        <item itemvalue="Python.test_optflow" />
+        <item itemvalue="Python.render_into_panorama_new" />
       </list>
     </recent_temporary>
   </component>
@@ -409,15 +422,14 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="1985" y="-4" width="1535" height="904" extended-state="6" />
-    <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.2559524" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.29828042" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.3298969" />
-      <window_info anchor="bottom" id="Run" order="2" weight="0.14561856" />
-      <window_info active="true" anchor="bottom" id="Debug" order="3" visible="true" weight="0.25902063" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.189433" />
+      <window_info anchor="bottom" id="Debug" order="3" visible="true" weight="0.12886597" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
@@ -438,21 +450,33 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/single_frame_estimation_hmr.py</url>
-          <line>461</line>
+          <line>442</line>
           <option name="timeStamp" value="23" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/period_new.py</url>
+          <line>183</line>
+          <option name="timeStamp" value="29" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/period_new.py</url>
+          <line>120</line>
+          <option name="timeStamp" value="35" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/period_new.py</url>
+          <line>113</line>
+          <option name="timeStamp" value="37" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/period.py</url>
+          <line>179</line>
+          <option name="timeStamp" value="44" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/../watch_study_fun/MuVS/venv/local/lib/python2.7/site-packages/tensorflow/contrib/bayesflow/python/ops/layers_util.py" />
-    <entry file="file://$PROJECT_DIR$/../watch_study_fun/MuVS/venv/local/lib/python2.7/site-packages/tensorflow/contrib/distributions/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="97">
-          <caret line="37" selection-start-line="37" selection-end-line="37" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/../watch_study_fun/MuVS/venv/local/lib/python2.7/site-packages/tensorflow/contrib/distributions/python/ops/estimator.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="97">
@@ -584,9 +608,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/util_beifen.py">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
     <entry file="file://$PROJECT_DIR$/camera_naomal.py">
       <provider selected="true" editor-type-id="text-editor">
         <state>
@@ -641,18 +662,6 @@
     <entry file="file://$PROJECT_DIR$/garbage_but_saved_file/render_model.py">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/smpl_batch_new.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1710" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/smpl_np.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="334">
-          <caret line="207" column="37" selection-start-line="207" selection-start-column="14" selection-end-line="207" selection-end-column="37" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/garbage_but_saved_file/smpl_smooth.py">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
@@ -686,30 +695,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/RenderPanorama.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="317">
-          <caret line="12" column="19" selection-start-line="12" selection-start-column="19" selection-end-line="12" selection-end-column="19" />
-          <folding>
-            <element signature="e#0#10#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test_function.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="498">
-          <caret line="368" column="33" selection-start-line="365" selection-start-column="4" selection-end-line="368" selection-end-column="33" />
-          <folding>
-            <element signature="e#0#10#0" expanded="true" />
-            <marker date="1548249719811" expanded="true" signature="17510:18155" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/smpl_batch.py">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
     <entry file="file://$USER_HOME$/.PyCharmCE2018.2/system/python_stubs/495512647/cv2/cv2/__init__.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="76">
@@ -737,16 +722,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/single_frame_estimation_hmr.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1208">
-          <caret line="598" column="28" selection-start-line="598" selection-start-column="28" selection-end-line="598" selection-end-column="28" />
-          <folding>
-            <element signature="e#0#18#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/garbage_but_saved_file/render_into_pano.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="771">
@@ -754,13 +729,6 @@
           <folding>
             <element signature="e#0#10#0" expanded="true" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/opendr_render/render.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="120">
-          <caret line="8" column="26" selection-start-line="8" selection-start-column="18" selection-end-line="8" selection-end-column="26" />
         </state>
       </provider>
     </entry>
@@ -774,33 +742,106 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/period_old.py">
+    <entry file="file://$PROJECT_DIR$/util_beifen.py">
       <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/opendr_render/render.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="180">
+          <caret line="71" column="55" selection-start-line="71" selection-start-column="50" selection-end-line="71" selection-end-column="55" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test_function.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="170">
+          <caret line="368" column="33" selection-start-line="368" selection-start-column="33" selection-end-line="368" selection-end-column="33" />
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
+            <marker date="1548403222283" expanded="true" signature="17510:18156" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/period_new.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="520">
+          <caret line="150" column="33" selection-start-line="150" selection-start-column="33" selection-end-line="150" selection-end-column="33" />
+          <folding>
+            <element signature="e#14#32#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/smpl_np.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="30">
+          <caret line="5" column="31" selection-start-line="5" selection-start-column="21" selection-end-line="5" selection-end-column="31" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/smpl_batch.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-630">
+          <caret line="12" column="12" selection-start-line="12" selection-start-column="8" selection-end-line="12" selection-end-column="12" />
+          <folding>
+            <element signature="e#15#38#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/RenderPanorama.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="317">
+          <caret line="12" column="19" selection-start-line="12" selection-start-column="19" selection-end-line="12" selection-end-column="19" />
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../watch_study_fun/MuVS/venv/local/lib/python2.7/site-packages/tensorflow/python/framework/tensor_util.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="134">
+          <caret line="342" selection-start-line="342" selection-end-line="342" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/single_frame_estimation_shape.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="293">
+          <caret line="120" column="46" lean-forward="true" selection-start-line="120" selection-start-column="46" selection-end-line="120" selection-end-column="46" />
+          <folding>
+            <element signature="e#0#13#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/smpl_batch_body_parsing.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="212">
+          <caret line="132" column="51" lean-forward="true" selection-start-line="132" selection-start-column="51" selection-end-line="132" selection-end-column="51" />
+          <folding>
+            <element signature="e#15#38#0" expanded="true" />
+            <marker date="1548558271635" expanded="true" signature="1396:1399" ph="..." />
+          </folding>
+        </state>
+      </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/util.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="21">
-          <caret line="64" column="12" lean-forward="true" selection-start-line="64" selection-start-column="12" selection-end-line="64" selection-end-column="12" />
+        <state relative-caret-position="-3127">
+          <caret line="62" column="22" selection-start-line="62" selection-start-column="20" selection-end-line="62" selection-end-column="22" />
           <folding>
             <element signature="e#14#23#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/single_frame_estimation_hmr_LR.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="513">
-          <caret line="627" column="16" lean-forward="true" selection-start-line="627" selection-start-column="16" selection-end-line="627" selection-end-column="16" />
-          <folding>
-            <element signature="e#0#18#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/period.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="149">
-          <caret line="181" column="20" selection-start-line="181" selection-start-column="12" selection-end-line="181" selection-end-column="20" />
+        <state relative-caret-position="252">
+          <caret line="179" selection-start-line="179" selection-end-line="180" />
           <folding>
             <element signature="e#14#32#0" expanded="true" />
           </folding>
@@ -809,11 +850,31 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/single_frame_estimation_hmr_LR_periodrefine.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-2760">
-          <caret line="10" column="31" lean-forward="true" selection-start-line="10" selection-start-column="31" selection-end-line="10" selection-end-column="31" />
+        <state relative-caret-position="630">
+          <caret line="87" column="34" selection-start-line="87" selection-start-column="34" selection-end-line="87" selection-end-column="34" />
           <folding>
             <element signature="e#0#23#0" expanded="true" />
-            <marker date="1548339309012" expanded="true" signature="339:340" ph="..." />
+            <marker date="1548419531229" expanded="true" signature="339:340" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/single_frame_estimation_hmr_LR.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="264">
+          <caret line="590" column="23" selection-start-line="590" selection-start-column="23" selection-end-line="590" selection-end-column="23" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/single_frame_estimation_hmr.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="192">
+          <caret line="291" column="41" lean-forward="true" selection-start-line="291" selection-start-column="41" selection-end-line="291" selection-end-column="41" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
           </folding>
         </state>
       </provider>

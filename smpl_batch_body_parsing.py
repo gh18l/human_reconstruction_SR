@@ -9,22 +9,36 @@ from smpl.smpl_webuser.serialization import load_model
 
 class SMPL:
 	# Read model paramters
-	def __init__(self, smpl_model_path):
+	def __init__(self, smpl_model_path, normal_smpl_model_path, body_parsing_idx):
 		data = pkl.load(open(smpl_model_path))
-		self.v_template = tf.constant(data['v_template'], dtype=tf.float32)
-		self.f = tf.constant(data['f'], dtype=tf.float32)
-		self.shapedirs = tf.constant(data['shapedirs'].r, dtype=tf.float32)
-		self.posedirs = tf.constant(data['posedirs'], dtype=tf.float32)
-		self.J_regressor = tf.constant(data['J_regressor'].todense(), dtype=tf.float32)
-		self.parent_ids = data['kintree_table'][0].astype(int)
-		self.weights = tf.constant(data['weights'], dtype=tf.float32)
+		data1 = pkl.load(open(normal_smpl_model_path))
+		self.v_template = tf.constant(data1['v_template'], dtype=tf.float32)
+		self.f = tf.constant(data1['f'], dtype=tf.float32)
+		shapedirs = []
+		### change shapedirs into shapedirs[4]
+		for i in range(len(body_parsing_idx)):
+			_shapedirs = data1['shapedirs'].r
+			new_shapedirs = np.zeros([6890, 3, 10], dtype=np.float32)
+			for j in range(len(body_parsing_idx[i])):
+				new_shapedirs[body_parsing_idx[i][j], :, :] = _shapedirs[body_parsing_idx[i][j], :, :]
+			shapedirs.append(new_shapedirs)
+		shapedirs = np.array(shapedirs)
+
+		self.shapedirs = tf.constant(shapedirs, dtype=tf.float32)
+		self.posedirs = tf.constant(data1['posedirs'], dtype=tf.float32)
+		self.J_regressor = tf.constant(data1['J_regressor'].todense(), dtype=tf.float32)
+		self.parent_ids = data1['kintree_table'][0].astype(int)
+		self.weights = tf.constant(data1['weights'], dtype=tf.float32)
 		self.joint_regressor = tf.constant(data['cocoplus_regressor'].T.todense(), dtype=tf.float32)
 
 
 	# N x 
 	def get_3d_joints(self, params, index_list):
-		betas = params[:, :10]
-		pose = params[:, 10:82]
+		#betas = params[:, :10]
+		#pose = params[:, 10:82]
+		#trans = params[:, -3:]
+		betas = tf.reshape(params[:, :40], [4, 10])
+		pose = params[:, 40:112]
 		trans = params[:, -3:]
 		smpl_animated = self.animate(betas, pose, trans)
 		A_global = smpl_animated['A_global']
@@ -68,10 +82,16 @@ class SMPL:
 		# Subtraction
 		pose_matrix_cur = pose_matrix_cur - pose_matrix_rest
 		pose_matrix = pose_matrix_cur #现在的pose旋转矩阵减去0 pose旋转矩阵
-		
+		v_shaped1 = tf.expand_dims(self.v_template, axis=0) + \
+			tf.einsum('ijk,lk->lij', self.shapedirs[0], tf.expand_dims(betas[0, :], 0))  # 6890 x 3 x 10, 1 * 10
+		v_shaped2 = tf.expand_dims(self.v_template, axis=0) + \
+			tf.einsum('ijk,lk->lij', self.shapedirs[1], tf.expand_dims(betas[1, :], 0))
+		v_shaped3 = tf.expand_dims(self.v_template, axis=0) + \
+			tf.einsum('ijk,lk->lij', self.shapedirs[2], tf.expand_dims(betas[2, :], 0))
+		v_shaped4 = tf.expand_dims(self.v_template, axis=0) + \
+			tf.einsum('ijk,lk->lij', self.shapedirs[3], tf.expand_dims(betas[3, :], 0))
 
-		v_shaped = tf.expand_dims(self.v_template, axis=0) + \
-			tf.einsum('ijk,lk->lij', self.shapedirs, betas)  # 10 x 6890 x 3
+		v_shaped = v_shaped1 + v_shaped2 + v_shaped3 + v_shaped4
 		#相当于生成一个关于beta的模
 		v_posed = v_shaped + tf.einsum('ijk,lk->lij', self.posedirs, pose_matrix)
 

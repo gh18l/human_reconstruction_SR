@@ -367,7 +367,7 @@ def generate_video():
         img_file_path = os.path.join(path, imgs_file)
         HR_img = cv2.imread(img_file_path)
         videowriter.write(HR_img)
-generate_video()
+#generate_video()
 #mask_texture()
 #HR_pose_prediction_full_replace_LR_pose()
 #preprocessHR()

@@ -9,8 +9,9 @@ from smpl.smpl_webuser.serialization import load_model
 
 class SMPL:
 	# Read model paramters
-	def __init__(self, smpl_model_path):
+	def __init__(self, smpl_model_path, normal_smpl_model_path):
 		data = pkl.load(open(smpl_model_path))
+		data1 = pkl.load(open(normal_smpl_model_path))
 		self.v_template = tf.constant(data['v_template'], dtype=tf.float32)
 		self.f = tf.constant(data['f'], dtype=tf.float32)
 		self.shapedirs = tf.constant(data['shapedirs'].r, dtype=tf.float32)

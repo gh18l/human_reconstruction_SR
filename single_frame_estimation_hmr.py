@@ -16,7 +16,7 @@ except:
 from opendr_render import render
 import time
 import pickle
-import period
+import period_new
 
 def demo_point(x, y, img_path = None):
     import matplotlib.pyplot as plt
@@ -267,46 +267,27 @@ def main(flength=2500.):
     for _, iii in enumerate(leg_index):
         length = len(weights[:, iii])
         for ii in range(length):
-            if weights[ii, iii] > 0.3:
+            if weights[ii, iii] > 0.395:
                 leg_idx[ii] = 1
                 test_idx[ii] = 1
     for _, iii in enumerate(arm_index):
         length = len(weights[:, iii])
         for ii in range(length):
-            if weights[ii, iii] > 0.3:
+            if weights[ii, iii] > 0.395:
                 arm_idx[ii] = 1
                 test_idx[ii] = 1
     for _, iii in enumerate(body_index):
         length = len(weights[:, iii])
         for ii in range(length):
-            if weights[ii, iii] > 0.3:
+            if weights[ii, iii] > 0.395:
                 body_idx[ii] = 1
                 test_idx[ii] = 1
     for _, iii in enumerate(head_index):
         length = len(weights[:, iii])
         for ii in range(length):
-            if weights[ii, iii] > 0.3:
+            if weights[ii, iii] > 0.395:
                 head_idx[ii] = 1
                 test_idx[ii] = 1
-
-
-    ##test
-    # import matplotlib.pyplot as plt
-    # from mpl_toolkits.mplot3d import Axes3D
-    # fig = plt.figure(1)
-    # #ax = plt.subplot(111)
-    # ax = fig.add_subplot(111, projection='3d')
-    # ax.scatter(v_template[leg_idx== 1, 0], v_template[leg_idx==1, 1], v_template[leg_idx==1, 2], c='b')
-    # ax.scatter(v_template[arm_idx == 1, 0], v_template[arm_idx == 1, 1], v_template[arm_idx == 1, 2], c='g')
-    # ax.scatter(v_template[body_idx == 1, 0], v_template[body_idx == 1, 1], v_template[body_idx == 1, 2], c='y')
-    # ax.scatter(v_template[head_idx == 1, 0], v_template[head_idx == 1, 1], v_template[head_idx == 1, 2], c='c')
-    #ax.scatter(v_template[:, 0], v_template[:, 1], v_template[:, 2], c='r', s=1)
-    #ax.scatter(j2ds_est_fixed1[12, 0], j2ds_est_fixed1[12, 1], c='r')
-    #ax.scatter(HR_j2ds_head[ind][iii, 0], HR_j2ds_head[ind][iii, 1], c='b')
-    #hmr_joint3d = hmr_joint3ds[ind,:,:]
-    #ax.scatter(hmr_joint3d[iii, 0], hmr_joint3d[iii, 1], hmr_joint3d[iii, 2], c='r', s=50)
-    #plt.show()
-
 
     hmr_dict, data_dict = util.load_hmr_data(util.hmr_path)
     hmr_thetas = hmr_dict["hmr_thetas"]
@@ -335,7 +316,7 @@ def main(flength=2500.):
     initial_param, pose_mean, pose_covariance = util.load_initial_param()
     pose_mean = tf.constant(pose_mean, dtype=tf.float32)
     pose_covariance = tf.constant(pose_covariance, dtype=tf.float32)
-    smpl_model = SMPL(util.SMPL_PATH)
+    smpl_model = SMPL(util.SMPL_PATH, util.NORMAL_SMPL_PATH)
     j3ds_old = []
     pose_final_old = []
     pose_final = []
@@ -637,7 +618,6 @@ def main(flength=2500.):
         # m = Mesh(v=np.squeeze(v_final[0]), f=model_f)
 
 
-
         # HR_verts.append(v_final[0])
         #
         # out_ply_path = os.path.join(util.base_path, "HR/output")
@@ -673,7 +653,7 @@ def main(flength=2500.):
 
     #write_obj_and_translation(util.HR_img_base_path + "/aa1small.jpg",
             #util.HR_img_base_path + "/output", util.LR_img_base_path + "/output")
-    period.save_pkl_to_csv(util.hmr_path + "output")
+    period_new.save_pkl_to_csv(util.hmr_path + "output")
 
 
 if __name__ == '__main__':

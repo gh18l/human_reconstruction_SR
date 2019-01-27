@@ -38,6 +38,7 @@ def refine_optimization(poses, betas, trans, data_dict, LR_cameras, texture_img,
                                     LR_cameras[ind][2], LR_cameras[ind][3], np.zeros(3))
         j3ds, v, jointsplus = smpl_model.get_3d_joints(initial_param_tf, util.SMPL_JOINT_IDS)
         j3ds = tf.reshape(j3ds, [-1, 3])
+        v = tf.reshape(v, [-1, 3])
         jointsplus = tf.reshape(jointsplus, [-1, 3])
         j2ds_est = cam_LR.project(tf.squeeze(j3ds))
         j2dsplus_est = cam_LR.project(tf.squeeze(jointsplus))
