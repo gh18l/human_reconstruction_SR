@@ -12,13 +12,13 @@ class SMPL:
 	def __init__(self, smpl_model_path, normal_smpl_model_path):
 		data = pkl.load(open(smpl_model_path))
 		data1 = pkl.load(open(normal_smpl_model_path))
-		self.v_template = tf.constant(data['v_template'], dtype=tf.float32)
-		self.f = tf.constant(data['f'], dtype=tf.float32)
-		self.shapedirs = tf.constant(data['shapedirs'].r, dtype=tf.float32)
-		self.posedirs = tf.constant(data['posedirs'], dtype=tf.float32)
-		self.J_regressor = tf.constant(data['J_regressor'].todense(), dtype=tf.float32)
-		self.parent_ids = data['kintree_table'][0].astype(int)
-		self.weights = tf.constant(data['weights'], dtype=tf.float32)
+		self.v_template = tf.constant(data1['v_template'], dtype=tf.float32)
+		self.f = tf.constant(data1['f'], dtype=tf.float32)
+		self.shapedirs = tf.constant(data1['shapedirs'].r, dtype=tf.float32)
+		self.posedirs = tf.constant(data1['posedirs'], dtype=tf.float32)
+		self.J_regressor = tf.constant(data1['J_regressor'].todense(), dtype=tf.float32)
+		self.parent_ids = data1['kintree_table'][0].astype(int)
+		self.weights = tf.constant(data1['weights'], dtype=tf.float32)
 		self.joint_regressor = tf.constant(data['cocoplus_regressor'].T.todense(), dtype=tf.float32)
 
 

@@ -61,6 +61,10 @@ def periodicDecomp(lr, hr, lr_points, hr_points):
 
     results = []
     for k in range(72):
+        ### no change rot
+        if k < 3:
+            results.append(np.array(lr[:, k][lr_points[0]:(lr_points[-1])]))
+            continue
         # 对HR分解周期并求和、求平均
         hr_4 = hr[:,k] #here
         # hr_pSeg = [6,21,36,51, 67,82]
@@ -111,7 +115,7 @@ def periodicDecomp(lr, hr, lr_points, hr_points):
             for i in range(lr_num):
                 # print("--j:--",j,"--i:--",i)
                 # print(lr_4_s[i][int(segLen[i]*(j-1)):int(segLen[i]*j)])
-                lr_4_m[i][int(lr_segLen[i] * (j - 1)):int(lr_segLen[i] * j+1)] += hr_factor_add_4[j-1]
+                lr_4_m[i][int(lr_segLen[i] * (j - 1)):int(lr_segLen[i] * j)] += hr_factor_add_4[j-1]
         result = []
         for i in range(len(lr_4_m)):
             for j in lr_4_m[i]:
@@ -174,8 +178,8 @@ def refine_LR_pose(HR_pose_path, hr_points, lr_points, LR_cameras, texture_img,
         for i in range(24 * 3):
             HR_array[ind, i] = pose[0, i]
 
-    np.save(util.hmr_path + "LR_array.npy", LR_array)
-    np.save(util.hmr_path + "HR_array.npy", HR_array)
+    LR_array = np.load(util.hmr_path + "LR_array.npy")
+    HR_array = np.load(util.hmr_path + "HR_array.npy")
 
     output = periodicDecomp(LR_array, HR_array, lr_points, hr_points)
 
@@ -209,3 +213,4 @@ def refine_LR_pose(HR_pose_path, hr_points, lr_points, LR_cameras, texture_img,
         img_result_naked_rotation = camera.render_naked_rotation(verts, 90, data_dict["imgs"][ind])
         cv2.imwrite(util.hmr_path + "output_after_refine/hmr_optimization_rotation_%04d.png" % ind,
                     img_result_naked_rotation)
+

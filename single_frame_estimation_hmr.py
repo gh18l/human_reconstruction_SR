@@ -329,7 +329,9 @@ def main(flength=2500.):
         hmr_theta = hmr_thetas[ind, :].squeeze()
         hmr_shape = hmr_betas[ind, :].squeeze()
         hmr_tran = hmr_trans[ind, :].squeeze()
-        hmr_cam = hmr_cams[ind, :].squeeze()
+        ### fix camera
+        hmr_cam = hmr_cams[0, :].squeeze()
+
         hmr_joint3d = hmr_joint3ds[ind, :, :]
         #print("the %d arm error is %f" % (ind, np.fabs((hmr_joint3d[6, 2] + hmr_joint3d[7, 2]) - (hmr_joint3d[10, 2] + hmr_joint3d[11, 2]))))
         arm_error = np.fabs((hmr_joint3d[6, 2] + hmr_joint3d[7, 2]) - (hmr_joint3d[10, 2] + hmr_joint3d[11, 2]))
@@ -370,21 +372,14 @@ def main(flength=2500.):
 
 
         param_shape = tf.Variable(hmr_shape.reshape([1, -1]), dtype=tf.float32)
-        param_shape_fixed = tf.constant(hmr_shape.reshape([1, -1]), dtype=tf.float32)
         param_rot = tf.Variable(hmr_theta[0:3].reshape([1, -1]), dtype=tf.float32)
-        param_rot_fixed = tf.constant(hmr_theta[0:3].reshape([1, -1]), dtype=tf.float32)
         param_pose = tf.Variable(hmr_theta[3:72].reshape([1, -1]), dtype=tf.float32)
-        param_pose_fixed = tf.constant(hmr_theta[3:72].reshape([1, -1]), dtype=tf.float32)
         param_trans = tf.Variable(hmr_tran.reshape([1, -1]), dtype=tf.float32)
-        param_trans_fixed = tf.constant(hmr_tran.reshape([1, -1]), dtype=tf.float32)
 
         ####tensorflow array initial_param_tf
         initial_param_tf = tf.concat([param_shape, param_rot, param_pose, param_trans], axis=1)
-        initial_param_fixed_tf = tf.concat([param_shape_fixed, param_rot_fixed, param_pose_fixed, param_trans_fixed], axis=1)
         #cam_HR, camera_t_final_HR = initialize_camera(smpl_model, HR_j2ds[0], HR_imgs[0], initial_param_np, flength)
         cam_HR = Perspective_Camera(hmr_cam[0], hmr_cam[0], hmr_cam[1],
-                                    hmr_cam[2], np.zeros(3), np.zeros(3))
-        cam_HR_fixed = Perspective_Camera(hmr_cam[0], hmr_cam[0], hmr_cam[1],
                                     hmr_cam[2], np.zeros(3), np.zeros(3))
         j3ds, v, jointsplus = smpl_model.get_3d_joints(initial_param_tf, util.SMPL_JOINT_IDS)
         j3ds = tf.reshape(j3ds, [-1, 3])
@@ -397,11 +392,6 @@ def main(flength=2500.):
         j2dsplus_est = cam_HR.project(tf.squeeze(jointsplus))
         verts_est = cam_HR.project(tf.squeeze(v))
 
-        j3ds_fixed, v_fixed, jointsplus_fixed = smpl_model.get_3d_joints(initial_param_fixed_tf, util.SMPL_JOINT_IDS)
-        j3ds_fixed = tf.reshape(j3ds_fixed, [-1, 3])
-        jointsplus_fixed = tf.reshape(jointsplus_fixed, [-1, 3])
-        j2ds_est_fixed = cam_HR_fixed.project(tf.squeeze(j3ds_fixed))
-        j2dsplus_est_fixed = cam_HR_fixed.project(tf.squeeze(jointsplus_fixed))
         # sess = tf.Session()
         # sess.run(tf.global_variables_initializer())
         # j3ds1 = sess.run(j3ds)
@@ -551,7 +541,7 @@ def main(flength=2500.):
         with tf.Session() as sess:
             sess.run(tf.global_variables_initializer())
             #L-BFGS-B
-            optimizer = scipy_pt(loss=loss, var_list=[param_rot, param_trans, param_pose, param_shape, cam_HR.cx, cam_HR.cy],
+            optimizer = scipy_pt(loss=loss, var_list=[param_rot, param_trans, param_pose, param_shape],
                              options={'eps': 1e-12, 'ftol': 1e-12, 'maxiter': 1000, 'disp': False}, method='L-BFGS-B')
             start_time = time.time()
             optimizer.minimize(sess)
@@ -559,6 +549,8 @@ def main(flength=2500.):
             print("minimize is %f" % duration)
             start_time = time.time()
             cam_HR1 = sess.run([cam_HR.fl_x, cam_HR.cx, cam_HR.cy, cam_HR.trans])
+            if not os.path.exists(util.hmr_path + "output/camera_after_optimization.npy"):
+                np.save(util.hmr_path + "output/camera_after_optimization.npy", cam_HR1)
             duration = time.time() - start_time
             print("cam_HR1 is %f" % duration)
             start_time = time.time()

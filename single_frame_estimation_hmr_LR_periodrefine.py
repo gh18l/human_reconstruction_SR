@@ -18,7 +18,7 @@ def refine_optimization(poses, betas, trans, data_dict, LR_cameras, texture_img,
     LR_confs_foot = data_dict["confs_foot"]
     LR_imgs = data_dict["imgs"]
     LR_masks = data_dict["masks"]
-    smpl_model = SMPL(util.SMPL_PATH)
+    smpl_model = SMPL(util.SMPL_PATH, util.NORMAL_SMPL_PATH)
     j3ds_old = []
     videowriter = []
     if util.video == True:

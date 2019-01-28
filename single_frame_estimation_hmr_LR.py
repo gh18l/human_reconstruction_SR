@@ -15,7 +15,7 @@ except:
     from smpl.smpl_webuser.serialization import load_model as _load_model
 from opendr_render import render
 import pickle
-import period
+import period_new
 def demo_point(x, y, img_path = None):
     import matplotlib.pyplot as plt
     if img_path != None:
@@ -587,8 +587,8 @@ def main(flength=2500.):
 
     #write_obj_and_translation(util.HR_img_base_path + "/aa1small.jpg",
             #util.HR_img_base_path + "/output", util.LR_img_base_path + "/output")
-    period.save_pkl_to_csv(util.hmr_path + "output")
-    period.refine_LR_pose(util.HR_pose_path, util.hr_points, util.lr_points, LR_cameras, texture_img,
+    period_new.save_pkl_to_csv(util.hmr_path + "output")
+    period_new.refine_LR_pose(util.HR_pose_path, util.hr_points, util.lr_points, LR_cameras, texture_img,
                               texture_vt, data_dict)
 
 

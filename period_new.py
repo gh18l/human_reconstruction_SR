@@ -61,6 +61,10 @@ def periodicDecomp(lr, hr, lr_points, hr_points):
 
     results = []
     for k in range(72):
+        ### no change rot
+        if k < 3:
+            results.append(np.array(lr[:, k][lr_points[0]:(lr_points[-1])]))
+            continue
         # 对HR分解周期并求和、求平均
         hr_4 = hr[:,k] #here
         # hr_pSeg = [6,21,36,51, 67,82]
@@ -76,7 +80,7 @@ def periodicDecomp(lr, hr, lr_points, hr_points):
             tempLen = 0
             for i in range(hr_num):
                 tempSum += np.mean(hr_4_s[i][int(hr_segLen[i]*(j-1)):int(hr_segLen[i]*j+1)])
-            hr_part_mean.append(tempSum/hr_num)
+            hr_part_mean.append(tempSum / hr_num)
         hr_factor_mul_4 = np.array(hr_part_mean) / hr_mean[k]
         hr_factor_add_4 = np.array(hr_part_mean) - hr_mean[k]
 
@@ -111,7 +115,7 @@ def periodicDecomp(lr, hr, lr_points, hr_points):
             for i in range(lr_num):
                 # print("--j:--",j,"--i:--",i)
                 # print(lr_4_s[i][int(segLen[i]*(j-1)):int(segLen[i]*j)])
-                lr_4_m[i][int(lr_segLen[i] * (j - 1)):int(lr_segLen[i] * j+1)] += hr_factor_add_4[j-1]
+                lr_4_m[i][int(lr_segLen[i] * (j - 1)):int(lr_segLen[i] * j)] += hr_factor_add_4[j-1]
         result = []
         for i in range(len(lr_4_m)):
             for j in lr_4_m[i]:
