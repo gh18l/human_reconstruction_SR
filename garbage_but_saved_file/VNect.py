@@ -16,7 +16,6 @@ def draw(v, img, option):
 
 
 path_2d = "/home/lgh/code/SMPLify_TF/test/temp_test_VNect_crop/vnect(1)/test_2d.txt"
-path_3d = "/home/lgh/code/SMPLify_TF/test/temp_test_VNect_crop/vnect(1)/test_3d.txt"
 data_2d = np.loadtxt(path_2d)
 data_2d = data_2d.reshape(-1,2)
 data_3d = np.loadtxt(path_3d)

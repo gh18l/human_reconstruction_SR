@@ -1,9 +1,9 @@
 import cv2
 import numpy as np
 import os
-import pickle
+import pickle as pkl
 import csv
-from libcpp_render import cpp_render
+from scipy import sparse as sp
 def polyfit3D():
     import matplotlib.pyplot as plt
     path = "/home/lgh/code/SMPLify_TF/test/temp0_tianyi/1/LR/output"
@@ -367,6 +367,7 @@ def generate_video():
         img_file_path = os.path.join(path, imgs_file)
         HR_img = cv2.imread(img_file_path)
         videowriter.write(HR_img)
+
 #generate_video()
 #mask_texture()
 #HR_pose_prediction_full_replace_LR_pose()

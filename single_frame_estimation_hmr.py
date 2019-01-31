@@ -441,12 +441,14 @@ def main(flength=2500.):
         delta_shape = tf.convert_to_tensor([HR_masks[ind].shape[0], HR_masks[ind].shape[1]],
                                            dtype=tf.int64)
         scatter = tf.scatter_nd(verts_est, temp_np, delta_shape)
+        with tf.Session() as sess:
+            sess.run(tf.global_variables_initializer())
+            scatter1 = sess.run(scatter)
         compare = np.zeros([HR_masks[ind].shape[0], HR_masks[ind].shape[1]])
         compare = tf.convert_to_tensor(compare, dtype=tf.float32)
         scatter = tf.not_equal(scatter, compare)
         scatter = tf.cast(scatter, dtype=tf.float32)
         scatter = scatter * tf.convert_to_tensor([255.0], dtype=tf.float32)
-
         scatter = tf.expand_dims(scatter, 0)
         scatter = tf.expand_dims(scatter, -1)
         ###########kernel###############
@@ -522,20 +524,25 @@ def main(flength=2500.):
         ##############################################################
         ###################mask obj###################################
         ##############################################################
-        objs['mask'] = 0.05 * tf.reduce_sum(verts2dsilhouette / 255.0 * (255.0 - HR_mask) / 255.0
-                                            + (255.0 - verts2dsilhouette) / 255.0 * HR_mask / 255.0)
+        objs['mask'] = 0.1 * tf.reduce_sum(verts2dsilhouette / 255.0 * (255.0 - HR_mask) / 255.0
+                                            + 0.0 * (255.0 - verts2dsilhouette) / 255.0 * HR_mask / 255.0)
 
         objs['face'] = 0.0 * tf.reduce_sum(tf.square(hmr_joint3d[14:19] - jointsplus[14:19]))
 
         objs['face_pose'] = 0.0 * tf.reduce_sum(tf.square(param_pose[0, 33:36] - hmr_theta[36:39])
                                           + tf.square(param_pose[0, 42:45] - hmr_theta[45:48]))
 
-        w_temporal = [0.5, 0.5, 1.0, 1.5, 2.5, 2.5, 1.5, 1.0, 1.0, 1.5, 2.0, 2.0, 1.5, 1.0, 6.0, 6.0]
+
+
+
+        w_temporal = [0.5, 0.5, 1.0, 1.5, 2.5, 2.5, 1.5, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 5.0, 5.0]
         if ind != 0:
-            objs['temporal'] = 50.0 * tf.reduce_sum(
+            objs['temporal'] = 800.0 * tf.reduce_sum(
                 w_temporal * tf.reduce_sum(tf.square(j3ds - j3ds_old), 1))
-            objs['temporal_pose'] = 200.0 * tf.reduce_sum(
+            objs['temporal_pose'] = 50.0 * tf.reduce_sum(
                 tf.square(pose_final_old[0, 3:72] - param_pose[0, :]))
+            objs['temporal_pose_rot'] = 10000.0 * tf.reduce_sum(
+                tf.square(pose_final_old[0, 0:3] - param_rot[0, :]))
 
         loss = tf.reduce_mean(objs.values())
         with tf.Session() as sess:
@@ -586,19 +593,8 @@ def main(flength=2500.):
             _objs = sess.run(objs)
             duration = time.time() - start_time
             print("_objs is %f" % duration)
-            print("the HR j2d loss is %f" % _objs['J2D_Loss'])
-            print("the HR J2D_face loss is %f" % _objs['J2D_face_Loss'])
-            print("the HR J2D_head loss is %f" % _objs['J2D_head_Loss'])
-            print("the HR J2D_foot loss is %f" % _objs['J2D_foot_Loss'])
-            print("the HR prior loss is %f" % _objs['Prior_Loss'])
-            print("the HR Prior_Shape loss is %f" % _objs['Prior_Shape'])
-            print("the HR angle_elbow_knee loss is %f" % _objs["angle_elbow_knee"])
-            print("the HR angle_head loss is %f" % _objs["angle_head"])
-            print("the HR mask loss is %f" % _objs['mask'])
-            print("the HR face loss is %f" % _objs['face'])
-            if ind != 0:
-                print("the HR temporal loss is %f" % _objs['temporal'])
-                print("the HR temporal_pose loss is %f" % _objs['temporal_pose'])
+            for name in _objs:
+                print("the HR %s loss is %f" % (name, _objs[name]))
             #print("the arm_leg_direction loss is %f" % sess.run(objs["arm_leg_direction"]))
             #model_f = model_f.astype(int).tolist()
             start_time = time.time()

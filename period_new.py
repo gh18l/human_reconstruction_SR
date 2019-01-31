@@ -62,9 +62,9 @@ def periodicDecomp(lr, hr, lr_points, hr_points):
     results = []
     for k in range(72):
         ### no change rot
-        if k < 3:
-            results.append(np.array(lr[:, k][lr_points[0]:(lr_points[-1])]))
-            continue
+        # if k < 3:
+        #     results.append(np.array(lr[:, k][lr_points[0]:(lr_points[-1])]))
+        #     continue
         # 对HR分解周期并求和、求平均
         hr_4 = hr[:,k] #here
         # hr_pSeg = [6,21,36,51, 67,82]
@@ -127,6 +127,31 @@ def periodicDecomp(lr, hr, lr_points, hr_points):
     # data.to_csv('tianyi_pose_0111.csv',header = False, index = False) # here
     # data.to_csv(output_file,header = False, index = False) # here
     return output
+
+def periodicCopy(lr, hr, lr_points, hr_points):
+    results = []
+    for k in range(72):
+        lr_new = lr[:, k]
+        hr_use = hr[:, k]
+        lr_new[lr_points[0]:(lr_points[-1]+1)] = hr_use[hr_points[0]:(hr_points[-1]+1)]
+        j = 0
+        for i in range(lr_points[0]):
+            index = hr_points[0] + j
+            lr_new[i] = hr_use[index]
+            if index > hr_points[-1]:
+                j = 0
+            j += 1
+        j = 0
+        for i in range(lr_points[-1]+1, len(lr_new)):
+            index = hr_points[0] + j
+            lr_new[i] = hr_use[index]
+            if index > hr_points[-1]:
+                j = 0
+            j += 1
+        results.append(np.array(lr_new))
+    output = np.array(results).T
+    return output
+
 def save_pkl_to_csv(pose_path):
     #####save csv before refine, extra output
     pkl_files = os.listdir(pose_path)
@@ -185,7 +210,7 @@ def refine_LR_pose(HR_pose_path, hr_points, lr_points, LR_cameras, texture_img,
         for i in range(24 * 3):
             HR_array[ind, i] = pose[0, i]
 
-    output = periodicDecomp(LR_array, HR_array, lr_points, hr_points)
+    output = periodicCopy(LR_array, HR_array, lr_points, hr_points)
     refine_opt.refine_optimization(output, LR_betas, LR_trans, data_dict,
                                    LR_cameras, texture_img, texture_vt)
 

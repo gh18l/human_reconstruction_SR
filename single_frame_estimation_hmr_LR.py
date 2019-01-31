@@ -429,7 +429,7 @@ def main(flength=2500.):
         weights = tf.constant(weights, dtype=tf.float32)
         objs['J2D_Loss'] = tf.reduce_sum(weights * tf.reduce_sum(tf.square(j2ds_est[2:, :] - LR_j2d), 1))
 
-        base_weights_face = 2.5 * np.array(
+        base_weights_face = 1.5 * np.array(
             [1.0, 1.0, 1.0, 1.0, 1.0])
         weights_face = LR_confs_face[ind] * base_weights_face
         weights_face = tf.constant(weights_face, dtype=tf.float32)
@@ -465,7 +465,7 @@ def main(flength=2500.):
             weights_foot * tf.reduce_sum(tf.square(_LR_j2ds_foot - j2ds_est[0:2, :]), 1))
 
         pose_diff = tf.reshape(param_pose - pose_mean, [1, -1])
-        objs['Prior_Loss'] = 1.0 * tf.squeeze(tf.matmul(tf.matmul(pose_diff, pose_covariance), tf.transpose(pose_diff)))
+        objs['Prior_Loss'] = 0.5 * tf.squeeze(tf.matmul(tf.matmul(pose_diff, pose_covariance), tf.transpose(pose_diff)))
         objs['Prior_Shape'] = 5.0 * tf.reduce_sum(tf.square(param_shape))
         ##############################################################
         ##########control the angle of the elbow and knee#############
@@ -487,20 +487,22 @@ def main(flength=2500.):
         ##############################################################
         ###################mask obj###################################
         ##############################################################
-        objs['mask'] = 0.02 * tf.reduce_sum(verts2dsilhouette / 255.0 * (255.0 - LR_mask) / 255.0
-                                            + (255.0 - verts2dsilhouette) / 255.0 * LR_mask / 255.0)
+        objs['mask'] = 0.1 * tf.reduce_sum(verts2dsilhouette / 255.0 * (255.0 - LR_mask) / 255.0
+                                            + 0.0 * (255.0 - verts2dsilhouette) / 255.0 * LR_mask / 255.0)
 
         objs['face'] = 0.0 * tf.reduce_sum(tf.square(hmr_joint3d[14:19] - jointsplus[14:19]))
 
         objs['face_pose'] = 0.0 * tf.reduce_sum(tf.square(param_pose[0, 33:36] - hmr_theta[36:39])
                                           + tf.square(param_pose[0, 42:45] - hmr_theta[45:48]))
 
-        w_temporal = [0.5, 0.5, 1.0, 1.5, 2.5, 2.5, 1.5, 1.0, 0.0, 0.0, 2.0, 2.0, 0.0, 0.0, 7.0, 7.0]
+        w_temporal = [0.5, 0.5, 1.0, 1.5, 2.5, 2.5, 1.5, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 7.0, 7.0]
         if ind != 0:
-            objs['temporal'] = 200.0 * tf.reduce_sum(
+            objs['temporal'] = 800.0 * tf.reduce_sum(
                 w_temporal * tf.reduce_sum(tf.square(j3ds - j3ds_old), 1))
-            objs['temporal_pose'] = 100.0 * tf.reduce_sum(
+            objs['temporal_pose'] = 50.0 * tf.reduce_sum(
                 tf.square(pose_final_old[0, 3:72] - param_pose[0,:]))
+            objs['temporal_pose_rot'] = 10000.0 * tf.reduce_sum(
+                tf.square(pose_final_old[0, 0:3] - param_rot[0, :]))
         # pose1 = param_pose[0, 52]
         # pose2 = param_pose[0, 55]
         # pose3 = param_pose[0, 9]
@@ -529,19 +531,20 @@ def main(flength=2500.):
             cv2.imwrite(util.hmr_path + "output/hmr_optimization_rotation_%04d.png" % ind, img_result_naked_rotation)
             #model_f = sess.run(smpl_model.f)
             _objs = sess.run(objs)
-            print("the LR j2d loss is %f" % _objs['J2D_Loss'])
-            print("the LR J2D_face loss is %f" % _objs['J2D_face_Loss'])
-            print("the LR J2D_head loss is %f" % _objs['J2D_head_Loss'])
-            print("the LR J2D_foot loss is %f" % _objs['J2D_foot_Loss'])
-            print("the LR prior loss is %f" % _objs['Prior_Loss'])
-            print("the LR Prior_Shape loss is %f" % _objs['Prior_Shape'])
-            print("the LR angle_elbow_knee loss is %f" % _objs["angle_elbow_knee"])
-            print("the LR angle_head loss is %f" % _objs["angle_head"])
-            print("the LR mask loss is %f" % _objs['mask'])
-            print("the LR face loss is %f" % _objs['face'])
-            if ind != 0:
-                print("the LR temporal loss is %f" % _objs['temporal'])
-                print("the LR temporal_pose loss is %f" % _objs['temporal_pose'])
+            for name in _objs:
+                print("the LR %s loss is %f" % (name, _objs[name]))
+            # print("the LR J2D_face loss is %f" % _objs['J2D_face_Loss'])
+            # print("the LR J2D_head loss is %f" % _objs['J2D_head_Loss'])
+            # print("the LR J2D_foot loss is %f" % _objs['J2D_foot_Loss'])
+            # print("the LR prior loss is %f" % _objs['Prior_Loss'])
+            # print("the LR Prior_Shape loss is %f" % _objs['Prior_Shape'])
+            # print("the LR angle_elbow_knee loss is %f" % _objs["angle_elbow_knee"])
+            # print("the LR angle_head loss is %f" % _objs["angle_head"])
+            # print("the LR mask loss is %f" % _objs['mask'])
+            # print("the LR face loss is %f" % _objs['face'])
+            # if ind != 0:
+            #     print("the LR temporal loss is %f" % _objs['temporal'])
+            #     print("the LR temporal_pose loss is %f" % _objs['temporal_pose'])
             #print("the arm_leg_direction loss is %f" % sess.run(objs["arm_leg_direction"]))
             #model_f = model_f.astype(int).tolist()
             pose_final, betas_final, trans_final = sess.run(

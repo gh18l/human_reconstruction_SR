@@ -7,6 +7,7 @@ from tensorflow.contrib.opt import ScipyOptimizerInterface as scipy_pt
 from opendr_render import render
 import os
 import cv2
+
 def refine_optimization(poses, betas, trans, data_dict, LR_cameras, texture_img, texture_vt):
     LR_j2ds = data_dict["j2ds"]
     LR_confs = data_dict["confs"]
@@ -26,7 +27,7 @@ def refine_optimization(poses, betas, trans, data_dict, LR_cameras, texture_img,
         size = (LR_imgs[0].shape[1], LR_imgs[0].shape[0])
         video_path = util.hmr_path + "output_after_refine/texture.mp4"
         videowriter = cv2.VideoWriter(video_path, cv2.VideoWriter_fourcc('D', 'I', 'V', 'X'), fps, size)
-
+    pose_final_old = []
     for ind in range(len(poses)):
         print("The refine %d iteration" % ind)
         param_shape = tf.Variable(betas[ind, :].reshape([1, -1]), dtype=tf.float32)
@@ -50,7 +51,7 @@ def refine_optimization(poses, betas, trans, data_dict, LR_cameras, texture_img,
         weights = tf.constant(weights, dtype=tf.float32)
         objs['J2D_Loss'] = tf.reduce_sum(weights * tf.reduce_sum(tf.square(j2ds_est[2:, :] - LR_j2ds[ind]), 1))
 
-        base_weights_face = 2.5 * np.array(
+        base_weights_face = 1.5 * np.array(
             [1.0, 1.0, 1.0, 1.0, 1.0])
         weights_face = LR_confs_face[ind] * base_weights_face
         weights_face = tf.constant(weights_face, dtype=tf.float32)
@@ -93,18 +94,24 @@ def refine_optimization(poses, betas, trans, data_dict, LR_cameras, texture_img,
         objs["angle_elbow_knee"] = 0.005 * tf.reduce_sum(w1 * [
             tf.exp(param_pose[0, 52]), tf.exp(-param_pose[0, 55]),
             tf.exp(-param_pose[0, 9]), tf.exp(-param_pose[0, 12])])
-        w_temporal = [0.5, 0.5, 1.0, 1.5, 2.5, 2.5, 1.5, 1.0, 0.0, 0.0, 2.0, 2.0, 0.0, 0.0, 7.0, 7.0]
+        w_temporal = [0.5, 0.5, 1.0, 1.5, 2.5, 2.5, 1.5, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 7.0, 7.0]
         if ind != 0:
             objs['temporal'] = 200.0 * tf.reduce_sum(
                 w_temporal * tf.reduce_sum(tf.square(j3ds - j3ds_old), 1))
+            objs['temporal_pose'] = 50.0 * tf.reduce_sum(
+                tf.square(pose_final_old[0, 3:72] - param_pose[0, :]))
+            objs['temporal_pose_rot'] = 10000.0 * tf.reduce_sum(
+                tf.square(pose_final_old[0, 0:3] - param_rot[0, :]))
         loss = tf.reduce_mean(objs.values())
         with tf.Session() as sess:
             sess.run(tf.global_variables_initializer())
             #L-BFGS-B
             optimizer = scipy_pt(loss=loss,
-                        var_list=[param_rot, param_trans, param_pose, param_shape],
+                        var_list=[param_rot, param_trans, param_shape],
                     options={'eps': 1e-12, 'ftol': 1e-12, 'maxiter': 500, 'disp': False})
             optimizer.minimize(sess)
+            pose_final, betas_final, trans_final = sess.run(
+                [tf.concat([param_rot, param_pose], axis=1), param_shape, param_trans])
             v_final = sess.run([v, j3ds])
             cam_LR1 = sess.run([cam_LR.fl_x, cam_LR.cx, cam_LR.cy, cam_LR.trans])
             camera = render.camera(cam_LR1[0], cam_LR1[1], cam_LR1[2], cam_LR1[3])
@@ -128,3 +135,4 @@ def refine_optimization(poses, betas, trans, data_dict, LR_cameras, texture_img,
             print("the refine angle_elbow_knee loss is %f" % _objs["angle_elbow_knee"])
 
             j3ds_old = v_final[1]
+            pose_final_old = pose_final

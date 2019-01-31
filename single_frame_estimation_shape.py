@@ -8,7 +8,7 @@ import os
 import cv2
 from smpl_batch_body_parsing import SMPL
 from opendr_render import render
-
+import pickle as pkl
 dd = pickle.load(open(util.NORMAL_SMPL_PATH))
 weights = dd['weights']
 vert_sym_idxs = dd['vert_sym_idxs']
@@ -25,62 +25,60 @@ _head_idx = np.zeros(6890)
 placeholder_idx = np.zeros(6890)
 _test_idx = np.zeros(6890)
 
-for _, iii in enumerate(body_index):
-    length = len(weights[:, iii])
-    for ii in range(length):
-        if weights[ii, iii] > 0.3 and placeholder_idx[ii] == 0:
-            _body_idx[ii] = 1
-            placeholder_idx[ii] = 1
-            _test_idx[ii] = 1
-body_idx = np.where(_body_idx == 1)
-body_parsing_idx.append(body_idx)
+# for _, iii in enumerate(body_index):
+#     length = len(weights[:, iii])
+#     for ii in range(length):
+#         if weights[ii, iii] > 0.3 and placeholder_idx[ii] == 0:
+#             _body_idx[ii] = 1
+#             placeholder_idx[ii] = 1
+#             _test_idx[ii] = 1
+# body_idx = np.where(_body_idx == 1)
+# body_parsing_idx.append(body_idx)
+#
+# for _, iii in enumerate(head_index):
+#     length = len(weights[:, iii])
+#     for ii in range(length):
+#         if weights[ii, iii] > 0.3 and placeholder_idx[ii] == 0:
+#             _head_idx[ii] = 1
+#             placeholder_idx[ii] = 1
+#             _test_idx[ii] = 1
+# head_idx = np.where(_head_idx == 1)
+# body_parsing_idx.append(head_idx)
+#
+# for _, iii in enumerate(leg_index):
+#     length = len(weights[:, iii])
+#     for ii in range(length):
+#         if weights[ii, iii] > 0.3 and placeholder_idx[ii] == 0:
+#             _leg_idx[ii] = 1
+#             placeholder_idx[ii] = 1
+#             _test_idx[ii] = 1
+# leg_idx = np.where(_leg_idx == 1)
+# body_parsing_idx.append(leg_idx)
+#
+# for _, iii in enumerate(arm_index):
+#     length = len(weights[:, iii])
+#     for ii in range(length):
+#         if weights[ii, iii] > 0.3 and placeholder_idx[ii] == 0:
+#             _arm_idx[ii] = 1
+#             placeholder_idx[ii] = 1
+#             _test_idx[ii] = 1
+# arm_idx = np.where(_arm_idx == 1)
+# body_parsing_idx.append(arm_idx)
 
-for _, iii in enumerate(head_index):
-    length = len(weights[:, iii])
-    for ii in range(length):
-        if weights[ii, iii] > 0.3 and placeholder_idx[ii] == 0:
-            _head_idx[ii] = 1
-            placeholder_idx[ii] = 1
-            _test_idx[ii] = 1
-head_idx = np.where(_head_idx == 1)
-body_parsing_idx.append(head_idx)
-
-for _, iii in enumerate(leg_index):
-    length = len(weights[:, iii])
-    for ii in range(length):
-        if weights[ii, iii] > 0.3 and placeholder_idx[ii] == 0:
-            _leg_idx[ii] = 1
-            placeholder_idx[ii] = 1
-            _test_idx[ii] = 1
-leg_idx = np.where(_leg_idx == 1)
-body_parsing_idx.append(leg_idx)
-
-for _, iii in enumerate(arm_index):
-    length = len(weights[:, iii])
-    for ii in range(length):
-        if weights[ii, iii] > 0.3 and placeholder_idx[ii] == 0:
-            _arm_idx[ii] = 1
-            placeholder_idx[ii] = 1
-            _test_idx[ii] = 1
-arm_idx = np.where(_arm_idx == 1)
-body_parsing_idx.append(arm_idx)
-
+with open("./smpl/models/bodyparts.pkl",'rb') as f:
+    v_ids = pkl.load(f)
 ##test
 # import matplotlib.pyplot as plt
 # from mpl_toolkits.mplot3d import Axes3D
 # fig = plt.figure(1)
 # #ax = plt.subplot(111)
 # ax = fig.add_subplot(111, projection='3d')
-# ax.scatter(v_template[leg_idx== 1, 0], v_template[leg_idx==1, 1], v_template[leg_idx==1, 2], c='b')
-# ax.scatter(v_template[arm_idx == 1, 0], v_template[arm_idx == 1, 1], v_template[arm_idx == 1, 2], c='g')
-# ax.scatter(v_template[body_idx == 1, 0], v_template[body_idx == 1, 1], v_template[body_idx == 1, 2], c='y')
-# ax.scatter(v_template[head_idx == 1, 0], v_template[head_idx == 1, 1], v_template[head_idx == 1, 2], c='c')
-#ax.scatter(v_template[:, 0], v_template[:, 1], v_template[:, 2], c='r', s=1)
-#ax.scatter(j2ds_est_fixed1[12, 0], j2ds_est_fixed1[12, 1], c='r')
-#ax.scatter(HR_j2ds_head[ind][iii, 0], HR_j2ds_head[ind][iii, 1], c='b')
-#hmr_joint3d = hmr_joint3ds[ind,:,:]
-#ax.scatter(hmr_joint3d[iii, 0], hmr_joint3d[iii, 1], hmr_joint3d[iii, 2], c='r', s=50)
-# #plt.show()
+# ax.scatter(v_template[v_ids['face'], 0], v_template[v_ids['face'], 1], v_template[v_ids['face'], 2], c='b')
+# ax.scatter(v_template[v_ids['hand_l'], 0], v_template[v_ids['hand_l'], 1], v_template[v_ids['hand_l'], 2], c='g')
+# #ax.scatter(v_template[v_ids['hand_r'], 0], v_template[v_ids['hand_r'], 1], v_template[v_ids['hand_r'], 2], c='y')
+# ax.scatter(v_template[v_ids['fingers_l'], 0], v_template[v_ids['fingers_l'], 1], v_template[v_ids['fingers_l'], 2], c='c')
+# #ax.scatter(v_template[:, 0], v_template[:, 1], v_template[:, 2], c='r', s=1)
+# plt.show()
 
 hmr_dict, data_dict = util.load_hmr_data(util.hmr_path)
 hmr_thetas = hmr_dict["hmr_thetas"]
