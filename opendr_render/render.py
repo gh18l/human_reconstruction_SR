@@ -67,16 +67,21 @@ class camera():
     '''
     img is texture image, arbitrary size
     '''
-    def render_texture(self, verts, img, vt, mask=None):
+    def render_texture(self, verts, img, vt):
         self.write_camera("./render_temp/camera.txt")
         self.write_obj("./render_temp/model.obj", verts, vt)
-        if mask is not None:
-            img = cv2.add(img, np.zeros(np.shape(img), dtype=np.uint8),
-                mask=mask)
         cv2.imwrite("./render_temp/HR.png", img)
         cpp_render(img.shape[1])
         render_result = cv2.imread("./render_temp/result.png")
-        return render_result, img
+        return render_result
+    '''
+    save cropped texture
+    '''
+    def save_texture_img(self, img, mask=None):
+        if mask is not None:
+            img = cv2.add(img, np.zeros(np.shape(img), dtype=np.uint8),
+                mask=mask)
+        return img
 
     '''
     img is texture image, arbitrary size

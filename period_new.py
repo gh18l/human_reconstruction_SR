@@ -152,6 +152,17 @@ def periodicCopy(lr, hr, lr_points, hr_points):
     output = np.array(results).T
     return output
 
+def save_prerefine_data(LR_cameras, texture_img, texture_vt, data_dict):
+    if not os.path.exists(util.hmr_path + "refine_data"):
+        os.makedirs(util.hmr_path + "refine_data")
+    np.save(util.hmr_path + "refine_data/LR_cameras.npy", LR_cameras)
+    cv2.imwrite(util.hmr_path + "refine_data/texture_img.jpg", texture_img)
+    np.save(util.hmr_path + "refine_data/texture_vt.npy", texture_vt)
+    np.save(util.hmr_path + "refine_data/data_dict.npy", data_dict)
+
+
+
+
 def save_pkl_to_csv(pose_path):
     #####save csv before refine, extra output
     pkl_files = os.listdir(pose_path)
@@ -171,8 +182,12 @@ def save_pkl_to_csv(pose_path):
         for row in array:
             writer.writerow(row)
 
-def refine_LR_pose(HR_pose_path, hr_points, lr_points, LR_cameras, texture_img,
-                   texture_vt, data_dict):
+def refine_LR_pose(HR_pose_path, hr_points, lr_points):
+    LR_cameras = np.load(util.hmr_path + "refine_data/LR_cameras.npy")
+    texture_img = cv2.imread(util.hmr_path + "refine_data/texture_img.jpg")
+    texture_vt = np.load(util.hmr_path + "refine_data/texture_vt.npy")
+    data_dict = np.load(util.hmr_path + "refine_data/data_dict.npy").item()
+
     LR_path = util.hmr_path + "output"
     LR_pkl_files = os.listdir(LR_path)
     LR_pkl_files = sorted([filename for filename in LR_pkl_files if filename.endswith(".pkl")],

@@ -51,9 +51,9 @@ HR_pkl_base_path = base_path + "/HR/output"
 LR_j2d_dctsmooth_base_path = base_path + "/LRdctsmooth"
 LR_img_dctsmooth_base_path = base_path + "/LRdctsmooth"
 
-hmr_path = "/home/lgh/code/SMPLify_TF/test/test_hmr_init/xiongfei/"
-texture_path = "/home/lgh/code/SMPLify_TF/test/test_hmr_init/HR_multi_crop_small2/output/texture_file/"
-HR_pose_path = "/home/lgh/code/SMPLify_TF/test/test_hmr_init/HR_multi_crop_small2/output/"
+hmr_path = "/home/lgh/code/SMPLify_TF/test/test_hmr_init/HR_multi_crop_small3/"
+texture_path = "/home/lgh/code/SMPLify_TF/test/test_hmr_init/HR_multi_crop_small3/output/texture_file/"
+HR_pose_path = "/home/lgh/code/SMPLify_TF/test/test_hmr_init/HR_multi_crop_small3/output/"
 crop_texture = True  ###only use in small texture
 index_data = 0
 video = True
@@ -64,8 +64,8 @@ video = True
 ###xiongfei
 # lr_points = [0, 18, 36, 54, 72]    ###[0, 18, 36, 54, 72]
 # hr_points = [1, 19, 37]
-lr_points = [0, 18]    ###[0, 18, 36, 54, 72]
-hr_points = [1, 19]
+# lr_points = [0, 18]    ###[0, 18, 36, 54, 72]
+# hr_points = [1, 19]
 ###jianing
 # lr_points = [0, 16, 32, 48, 64, 80]    ###[0, 18, 36, 54, 72]
 # hr_points = [11, 27, 43, 59]
@@ -73,8 +73,8 @@ hr_points = [1, 19]
 # lr_points = [0, 16, 32, 48, 64, 81]    ###[0, 18, 36, 54, 72]
 # hr_points = [14, 30, 46, 62]
 ###jianing2copy
-# lr_points = [0, 16]    ###[0, 18, 36, 54, 72]
-# hr_points = [14, 30]
+lr_points = [0, 16]    ###[0, 18, 36, 54, 72]
+hr_points = [14, 30]
 
 
 which_people = "tianyi_LR"
@@ -188,7 +188,7 @@ def load_hmr_data(path):
     MPI_j2d_files = sorted([filename for filename in MPI_j2d_files if filename.endswith(".json")],
                             key=lambda d: int((d.split('_')[0])))
     img_files = os.listdir(path)
-    img_files = sorted([filename for filename in img_files if filename.endswith(".png") and "mask" not in filename])
+    img_files = sorted([filename for filename in img_files if filename.endswith(".jpg") and "mask" not in filename])
     mask_files = os.listdir(path)
     mask_files = sorted([filename for filename in mask_files if filename.endswith(".png") and "mask" in filename],
                         key=lambda d: int((d.split('_')[1]).split('.')[0]))

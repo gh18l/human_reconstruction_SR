@@ -320,6 +320,7 @@ def main(flength=2500.):
     j3ds_old = []
     pose_final_old = []
     pose_final = []
+    vt_HRview = []
     ###########################################################
     for ind, HR_j2d in enumerate(HR_j2ds):
         print("the HR %d iteration" % ind)
@@ -470,7 +471,7 @@ def main(flength=2500.):
         weights = tf.constant(weights, dtype=tf.float32)
         objs['J2D_Loss'] = 1.0 * tf.reduce_sum(weights * tf.reduce_sum(tf.square(j2ds_est[2:, :] - HR_j2d), 1))
 
-        base_weights_face = 2.5 * np.array(
+        base_weights_face = 1.0 * np.array(
             [1.0, 1.0, 1.0, 1.0, 1.0])
         weights_face = HR_confs_face[ind] * base_weights_face
         weights_face = tf.constant(weights_face, dtype=tf.float32)
@@ -479,7 +480,7 @@ def main(flength=2500.):
         #objs['J2D_face_Loss'] = 10000000.0 * tf.reduce_sum(
               #tf.square(j2dsplus_est[14, :] - HR_j2ds_face[ind][0, :]))
 
-        base_weights_head = 1.0 * np.array(
+        base_weights_head = 0.0 * np.array(
             [1.0, 1.0])
         weights_head = HR_confs_head[ind] * base_weights_head
         weights_head = tf.constant(weights_head, dtype=tf.float32)
@@ -487,7 +488,7 @@ def main(flength=2500.):
             weights_head * tf.reduce_sum(tf.square(HR_j2ds_head[ind] - j2ds_est[14:16, :]), 1))
 
         base_weights_foot = 1.0 * np.array(
-            [1.0, 1.0])
+            [0.0, 0.0])
         _HR_confs_foot = np.zeros(2)
         if HR_confs_foot[ind][0] != 0 and HR_confs_foot[ind][1] != 0:
             _HR_confs_foot[0] = (HR_confs_foot[ind][0] + HR_confs_foot[ind][1]) / 2.0
@@ -539,9 +540,9 @@ def main(flength=2500.):
         if ind != 0:
             objs['temporal'] = 800.0 * tf.reduce_sum(
                 w_temporal * tf.reduce_sum(tf.square(j3ds - j3ds_old), 1))
-            objs['temporal_pose'] = 50.0 * tf.reduce_sum(
+            objs['temporal_pose'] = 0.0 * tf.reduce_sum(
                 tf.square(pose_final_old[0, 3:72] - param_pose[0, :]))
-            objs['temporal_pose_rot'] = 10000.0 * tf.reduce_sum(
+            objs['temporal_pose_rot'] = 0.0 * tf.reduce_sum(
                 tf.square(pose_final_old[0, 0:3] - param_rot[0, :]))
 
         loss = tf.reduce_mean(objs.values())
@@ -566,16 +567,19 @@ def main(flength=2500.):
             print("v_final is %f" % duration)
             camera = render.camera(cam_HR1[0], cam_HR1[1], cam_HR1[2], cam_HR1[3])
             _, vt = camera.generate_uv(v_final[0], HR_imgs[ind])
+            if ind == 0:
+                vt_HRview = vt
             if not os.path.exists(util.hmr_path + "output"):
                 os.makedirs(util.hmr_path + "output")
             if util.crop_texture is True:
-                img_result_texture, HR_mask_img = camera.render_texture(v_final[0], HR_imgs[ind], vt, HR_masks[ind])
+                img_result_texture = camera.render_texture(v_final[0], HR_imgs[0], vt_HRview)
                 if ind == 4:
                     if not os.path.exists(util.texture_path):
                         os.makedirs(util.texture_path)
+                    HR_mask_img = camera.save_texture_img(HR_imgs[ind], HR_masks[ind])
                     camera.write_texture_data(util.texture_path, HR_mask_img, vt)
             else:
-                img_result_texture, _ = camera.render_texture(v_final[0], HR_imgs[ind], vt)
+                img_result_texture = camera.render_texture(v_final[0], HR_imgs[0], vt_HRview)
                 if ind == 4:
                     if not os.path.exists(util.texture_path):
                         os.makedirs(util.texture_path)

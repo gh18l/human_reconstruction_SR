@@ -465,7 +465,7 @@ def main(flength=2500.):
             weights_foot * tf.reduce_sum(tf.square(_LR_j2ds_foot - j2ds_est[0:2, :]), 1))
 
         pose_diff = tf.reshape(param_pose - pose_mean, [1, -1])
-        objs['Prior_Loss'] = 0.5 * tf.squeeze(tf.matmul(tf.matmul(pose_diff, pose_covariance), tf.transpose(pose_diff)))
+        objs['Prior_Loss'] = 1.0 * tf.squeeze(tf.matmul(tf.matmul(pose_diff, pose_covariance), tf.transpose(pose_diff)))
         objs['Prior_Shape'] = 5.0 * tf.reduce_sum(tf.square(param_shape))
         ##############################################################
         ##########control the angle of the elbow and knee#############
@@ -501,8 +501,8 @@ def main(flength=2500.):
                 w_temporal * tf.reduce_sum(tf.square(j3ds - j3ds_old), 1))
             objs['temporal_pose'] = 50.0 * tf.reduce_sum(
                 tf.square(pose_final_old[0, 3:72] - param_pose[0,:]))
-            objs['temporal_pose_rot'] = 10000.0 * tf.reduce_sum(
-                tf.square(pose_final_old[0, 0:3] - param_rot[0, :]))
+            #objs['temporal_pose_rot'] = 10000.0 * tf.reduce_sum(
+                #tf.square(pose_final_old[0, 0:3] - param_rot[0, :]))
         # pose1 = param_pose[0, 52]
         # pose2 = param_pose[0, 55]
         # pose3 = param_pose[0, 9]
@@ -587,12 +587,8 @@ def main(flength=2500.):
         # cam_HR_init_trans = camera_t_final_HR
         j3ds_old = v_final[2]
         pose_final_old = pose_final
-
-    #write_obj_and_translation(util.HR_img_base_path + "/aa1small.jpg",
-            #util.HR_img_base_path + "/output", util.LR_img_base_path + "/output")
+    period_new.save_prerefine_data(LR_cameras, texture_img, texture_vt, data_dict)
     period_new.save_pkl_to_csv(util.hmr_path + "output")
-    period_new.refine_LR_pose(util.HR_pose_path, util.hr_points, util.lr_points, LR_cameras, texture_img,
-                              texture_vt, data_dict)
 
 
 if __name__ == '__main__':

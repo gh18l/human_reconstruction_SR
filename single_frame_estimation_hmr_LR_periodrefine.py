@@ -98,10 +98,10 @@ def refine_optimization(poses, betas, trans, data_dict, LR_cameras, texture_img,
         if ind != 0:
             objs['temporal'] = 200.0 * tf.reduce_sum(
                 w_temporal * tf.reduce_sum(tf.square(j3ds - j3ds_old), 1))
-            objs['temporal_pose'] = 50.0 * tf.reduce_sum(
+            objs['temporal_pose'] = 0.0 * tf.reduce_sum(
                 tf.square(pose_final_old[0, 3:72] - param_pose[0, :]))
-            objs['temporal_pose_rot'] = 10000.0 * tf.reduce_sum(
-                tf.square(pose_final_old[0, 0:3] - param_rot[0, :]))
+            #objs['temporal_pose_rot'] = 10000.0 * tf.reduce_sum(
+                #tf.square(pose_final_old[0, 0:3] - param_rot[0, :]))
         loss = tf.reduce_mean(objs.values())
         with tf.Session() as sess:
             sess.run(tf.global_variables_initializer())

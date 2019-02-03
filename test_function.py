@@ -4,6 +4,7 @@ import os
 import pickle as pkl
 import csv
 from scipy import sparse as sp
+import tensorflow as tf
 def polyfit3D():
     import matplotlib.pyplot as plt
     path = "/home/lgh/code/SMPLify_TF/test/temp0_tianyi/1/LR/output"
@@ -368,6 +369,15 @@ def generate_video():
         HR_img = cv2.imread(img_file_path)
         videowriter.write(HR_img)
 
+W = np.array([1, 2]).squeeze()
+I = np.array([0, 1]).squeeze()
+J = np.array([0, 1]).squeeze()
+n = 4
+L = sp.csr_matrix((W, (I, J)), shape=(n, n))
+a = L * np.ones(n)
+
+L = L - sp.spdiags(L * np.ones(n), 0, n, n)
+b = 1
 #generate_video()
 #mask_texture()
 #HR_pose_prediction_full_replace_LR_pose()

@@ -52,16 +52,36 @@ def get_laplace_weights():
     weights[v_ids['ear_r']] = 10.
     return weights
 
+def get_model_weights():
+    weights = np.ones(6890)
+    with open('./smpl/models/bodyparts.pkl', 'rb') as f:
+        v_ids = pkl.load(f)
+
+    weights[v_ids['face']] = 7.
+    weights[v_ids['hand_l']] = 12.
+    weights[v_ids['hand_r']] = 12.
+    weights[v_ids['fingers_l']] = 15.
+    weights[v_ids['fingers_r']] = 15.
+    weights[v_ids['foot_l']] = 12.
+    weights[v_ids['foot_r']] = 12.
+    weights[v_ids['toes_l']] = 15.
+    weights[v_ids['toes_r']] = 15.
+    weights[v_ids['ear_l']] = 10.
+    weights[v_ids['ear_r']] = 10.
+
+    return weights
+
 ### v is a tensor
 def get_laplace_operator(v, f):
     n = list(v.get_shape())[0]
-    v_a = f[:, 0]
-    v_b = f[:, 1]
-    v_c = f[:, 2]
+    v_a = f[:, 0].reshape([-1, 1])
+    v_b = f[:, 1].reshape([-1, 1])
+    v_c = f[:, 2].reshape([-1, 1])
 
-    ab = v[v_a] - v[v_b]
-    bc = v[v_b] - v[v_c]
-    ca = v[v_c] - v[v_a]
+
+    ab = tf.gather_nd(v, v_a) - tf.gather_nd(v, v_b)
+    bc = tf.gather_nd(v, v_b) - tf.gather_nd(v, v_c)
+    ca = tf.gather_nd(v, v_c) - tf.gather_nd(v, v_a)
 
     cot_a = -1 * tf.reduce_sum(ab * ca, 1) / tf.sqrt(tf.reduce_sum(tf.cross(ab, ca) ** 2, -1))
     cot_b = -1 * tf.reduce_sum(bc * ab, 1) / tf.sqrt(tf.reduce_sum(tf.cross(bc, ab) ** 2, -1))
@@ -70,8 +90,8 @@ def get_laplace_operator(v, f):
     I = tf.concat([v_a, v_c, v_a, v_b, v_b, v_c], 0)
     J = tf.concat([v_c, v_a, v_b, v_a, v_c, v_b], 0)
     W = 0.5 * tf.concat([cot_b, cot_b, cot_c, cot_c, cot_a, cot_a], 0)
-
-    L = tf.SparseTensor(indices=[I, J], values=W, dense_shape=[n, n])
-
-    L = L - tf.matrix_diag(L * tf.ones(n))
+    indices = tf.concat([I, J], 1)
+    sparseL = tf.SparseTensor(indices=indices, values=W, dense_shape=[n, n])
+    L = tf.sparse_tensor_to_dense(sparseL, validate_indices=False)
+    L = L - tf.matrix_diag(tf.squeeze(tf.matmul(L, tf.ones([n, 1]))))
     return L
