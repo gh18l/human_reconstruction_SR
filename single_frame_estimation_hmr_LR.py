@@ -519,7 +519,7 @@ def main(flength=2500.):
             cam_LR1 = sess.run([cam_LR.fl_x, cam_LR.cx, cam_LR.cy, cam_LR.trans])
             LR_cameras.append(cam_LR1)
             camera = render.camera(cam_LR1[0], cam_LR1[1], cam_LR1[2], cam_LR1[3])
-            img_result_texture, _ = camera.render_texture(v_final[0], texture_img, texture_vt)
+            img_result_texture = camera.render_texture(v_final[0], texture_img, texture_vt)
             if not os.path.exists(util.hmr_path + "output"):
                 os.makedirs(util.hmr_path + "output")
             cv2.imwrite(util.hmr_path + "output/hmr_optimization_texture_%04d.png" % ind, img_result_texture)

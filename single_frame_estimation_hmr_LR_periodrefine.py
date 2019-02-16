@@ -65,7 +65,7 @@ def refine_optimization(poses, betas, trans, data_dict, LR_cameras, texture_img,
         objs['J2D_head_Loss'] = tf.reduce_sum(
             weights_head * tf.reduce_sum(tf.square(LR_j2ds_head[ind] - j2ds_est[14:16, :]), 1))
 
-        base_weights_foot = 0.5 * np.array(
+        base_weights_foot = 1.0 * np.array(
             [1.0, 1.0])
         _LR_confs_foot = np.zeros(2)
         if LR_confs_foot[ind][0] != 0 and LR_confs_foot[ind][1] != 0:
@@ -96,7 +96,7 @@ def refine_optimization(poses, betas, trans, data_dict, LR_cameras, texture_img,
             tf.exp(-param_pose[0, 9]), tf.exp(-param_pose[0, 12])])
         w_temporal = [0.5, 0.5, 1.0, 1.5, 2.5, 2.5, 1.5, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 7.0, 7.0]
         if ind != 0:
-            objs['temporal'] = 200.0 * tf.reduce_sum(
+            objs['temporal'] = 100.0 * tf.reduce_sum(
                 w_temporal * tf.reduce_sum(tf.square(j3ds - j3ds_old), 1))
             objs['temporal_pose'] = 0.0 * tf.reduce_sum(
                 tf.square(pose_final_old[0, 3:72] - param_pose[0, :]))
@@ -115,7 +115,7 @@ def refine_optimization(poses, betas, trans, data_dict, LR_cameras, texture_img,
             v_final = sess.run([v, j3ds])
             cam_LR1 = sess.run([cam_LR.fl_x, cam_LR.cx, cam_LR.cy, cam_LR.trans])
             camera = render.camera(cam_LR1[0], cam_LR1[1], cam_LR1[2], cam_LR1[3])
-            img_result_texture, _ = camera.render_texture(v_final[0], texture_img, texture_vt)
+            img_result_texture = camera.render_texture(v_final[0], texture_img, texture_vt)
             if not os.path.exists(util.hmr_path + "output_after_refine"):
                 os.makedirs(util.hmr_path + "output_after_refine")
             cv2.imwrite(util.hmr_path + "output_after_refine/hmr_optimization_texture_%04d.png" % ind, img_result_texture)

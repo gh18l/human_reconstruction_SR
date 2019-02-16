@@ -205,7 +205,8 @@ class SMPLModel():
 
 
 
-def get_verts(pose, beta, trans, smpl):
+def get_verts(pose, beta, trans):
+  smpl = SMPLModel('./smpl/models/basicmodel_m_lbs_10_207_0_v1.0.0.pkl')
   pose = pose.reshape((24, 3))
   beta = beta.reshape(10,)
   trans = trans.reshape(3,)

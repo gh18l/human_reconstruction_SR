@@ -8,7 +8,6 @@ import os
 import cv2
 import pickle as pkl
 import hmr
-
 try:
     from smpl.serialization import load_model as _load_model
 except:
@@ -17,7 +16,8 @@ from opendr_render import render
 import time
 import pickle
 import period_new
-
+import optimization_prepare as opt_pre
+import smpl_np
 def demo_point(x, y, img_path = None):
     import matplotlib.pyplot as plt
     if img_path != None:
@@ -251,44 +251,44 @@ def main(flength=2500.):
     '''
 
     model = _load_model(util.SMPL_PATH)
-    dd = pickle.load(open(util.NORMAL_SMPL_PATH))
-    weights = dd['weights']
-    vert_sym_idxs = dd['vert_sym_idxs']
-    v_template = dd['v_template']
-    leg_index = [1, 4, 7, 10, 2, 5, 8, 11]
-    arm_index = [17, 19, 21, 23, 16, 18, 20, 22, 14, 13]
-    body_index = [0, 3, 6, 9]
-    head_index = [12, 15]
-    leg_idx = np.zeros(6890)
-    arm_idx = np.zeros(6890)
-    body_idx = np.zeros(6890)
-    head_idx = np.zeros(6890)
-    test_idx = np.zeros(6890)
-    for _, iii in enumerate(leg_index):
-        length = len(weights[:, iii])
-        for ii in range(length):
-            if weights[ii, iii] > 0.395:
-                leg_idx[ii] = 1
-                test_idx[ii] = 1
-    for _, iii in enumerate(arm_index):
-        length = len(weights[:, iii])
-        for ii in range(length):
-            if weights[ii, iii] > 0.395:
-                arm_idx[ii] = 1
-                test_idx[ii] = 1
-    for _, iii in enumerate(body_index):
-        length = len(weights[:, iii])
-        for ii in range(length):
-            if weights[ii, iii] > 0.395:
-                body_idx[ii] = 1
-                test_idx[ii] = 1
-    for _, iii in enumerate(head_index):
-        length = len(weights[:, iii])
-        for ii in range(length):
-            if weights[ii, iii] > 0.395:
-                head_idx[ii] = 1
-                test_idx[ii] = 1
-
+    body_parsing_idx = opt_pre.load_body_parsing()
+    # dd = pickle.load(open(util.NORMAL_SMPL_PATH))
+    # weights = dd['weights']
+    # vert_sym_idxs = dd['vert_sym_idxs']
+    # v_template = dd['v_template']
+    # leg_index = [1, 4, 7, 10, 2, 5, 8, 11]
+    # arm_index = [17, 19, 21, 23, 16, 18, 20, 22, 14, 13]
+    # body_index = [0, 3, 6, 9]
+    # head_index = [12, 15]
+    # leg_idx = np.zeros(6890)
+    # arm_idx = np.zeros(6890)
+    # body_idx = np.zeros(6890)
+    # head_idx = np.zeros(6890)
+    # test_idx = np.zeros(6890)
+    # for _, iii in enumerate(leg_index):
+    #     length = len(weights[:, iii])
+    #     for ii in range(length):
+    #         if weights[ii, iii] > 0.6:
+    #             leg_idx[ii] = 1
+    #             test_idx[ii] = 1
+    # for _, iii in enumerate(arm_index):
+    #     length = len(weights[:, iii])
+    #     for ii in range(length):
+    #         if weights[ii, iii] > 0.6:
+    #             arm_idx[ii] = 1
+    #             test_idx[ii] = 1
+    # for _, iii in enumerate(body_index):
+    #     length = len(weights[:, iii])
+    #     for ii in range(length):
+    #         if weights[ii, iii] > 0.6:
+    #             body_idx[ii] = 1
+    #             test_idx[ii] = 1
+    # for _, iii in enumerate(head_index):
+    #     length = len(weights[:, iii])
+    #     for ii in range(length):
+    #         if weights[ii, iii] > 0.6:
+    #             head_idx[ii] = 1
+    #             test_idx[ii] = 1
     hmr_dict, data_dict = util.load_hmr_data(util.hmr_path)
     hmr_thetas = hmr_dict["hmr_thetas"]
     hmr_betas = hmr_dict["hmr_betas"]
@@ -321,6 +321,7 @@ def main(flength=2500.):
     pose_final_old = []
     pose_final = []
     vt_HRview = []
+    verts_body_old = []
     ###########################################################
     for ind, HR_j2d in enumerate(HR_j2ds):
         print("the HR %d iteration" % ind)
@@ -371,28 +372,37 @@ def main(flength=2500.):
         ####numpy array initial_param
         initial_param_np = np.concatenate([hmr_shape.reshape([1, -1]), hmr_theta.reshape([1, -1]), hmr_tran.reshape([1, -1])], axis=1)
 
-
         param_shape = tf.Variable(hmr_shape.reshape([1, -1]), dtype=tf.float32)
         param_rot = tf.Variable(hmr_theta[0:3].reshape([1, -1]), dtype=tf.float32)
         param_pose = tf.Variable(hmr_theta[3:72].reshape([1, -1]), dtype=tf.float32)
         param_trans = tf.Variable(hmr_tran.reshape([1, -1]), dtype=tf.float32)
 
+        ###to get hmr 2d verts
+        param_shape_fixed = tf.constant(hmr_shape.reshape([1, -1]), dtype=tf.float32)
+        hmr_param_rot_fixed = tf.constant(hmr_theta[0:3].reshape([1, -1]), dtype=tf.float32)
+        hmr_param_pose_fixed = tf.constant(hmr_theta[3:72].reshape([1, -1]), dtype=tf.float32)
+        hmr_param_trans_fixed = tf.constant(hmr_tran.reshape([1, -1]), dtype=tf.float32)
+
         ####tensorflow array initial_param_tf
         initial_param_tf = tf.concat([param_shape, param_rot, param_pose, param_trans], axis=1)
+        initial_param_tf_fixed = tf.concat([param_shape_fixed, hmr_param_rot_fixed, hmr_param_pose_fixed, hmr_param_trans_fixed], axis=1)
         #cam_HR, camera_t_final_HR = initialize_camera(smpl_model, HR_j2ds[0], HR_imgs[0], initial_param_np, flength)
         cam_HR = Perspective_Camera(hmr_cam[0], hmr_cam[0], hmr_cam[1],
                                     hmr_cam[2], np.zeros(3), np.zeros(3))
         j3ds, v, jointsplus = smpl_model.get_3d_joints(initial_param_tf, util.SMPL_JOINT_IDS)
+        _, v_hmr_fixed, __ = smpl_model.get_3d_joints(initial_param_tf_fixed, util.SMPL_JOINT_IDS)
         j3ds = tf.reshape(j3ds, [-1, 3])
         jointsplus = tf.reshape(jointsplus, [-1, 3])
         hmr_joint3d = tf.constant(hmr_joint3d.reshape([-1, 3]), dtype=tf.float32)
         v = tf.reshape(v, [-1, 3])
+        v_hmr_fixed= tf.reshape(v_hmr_fixed, [-1, 3])
         j2ds_est = []
-        verts_est = []
+        verts_est_mask = []
         j2ds_est = cam_HR.project(tf.squeeze(j3ds))
         j2dsplus_est = cam_HR.project(tf.squeeze(jointsplus))
+        verts_est_mask = cam_HR.project(tf.squeeze(v))
         verts_est = cam_HR.project(tf.squeeze(v))
-
+        verts_est_fixed = cam_HR.project(tf.squeeze(v_hmr_fixed))
         # sess = tf.Session()
         # sess.run(tf.global_variables_initializer())
         # j3ds1 = sess.run(j3ds)
@@ -432,16 +442,16 @@ def main(flength=2500.):
         #########################################################################################
 
         HR_mask = tf.convert_to_tensor(HR_masks[ind], dtype=tf.float32)
-        verts_est = tf.cast(verts_est, dtype=tf.int64)
-        verts_est = tf.concat([tf.expand_dims(verts_est[:, 1],1),
-                               tf.expand_dims(verts_est[:, 0],1)], 1)
+        verts_est_mask = tf.cast(verts_est_mask, dtype=tf.int64)
+        verts_est_mask = tf.concat([tf.expand_dims(verts_est_mask[:, 1],1),
+                               tf.expand_dims(verts_est_mask[:, 0],1)], 1)
 
-        verts_est_shape = verts_est.get_shape().as_list()
+        verts_est_shape = verts_est_mask.get_shape().as_list()
         temp_np = np.ones([verts_est_shape[0]]) * 255
         temp_np = tf.convert_to_tensor(temp_np, dtype=tf.float32)
         delta_shape = tf.convert_to_tensor([HR_masks[ind].shape[0], HR_masks[ind].shape[1]],
                                            dtype=tf.int64)
-        scatter = tf.scatter_nd(verts_est, temp_np, delta_shape)
+        scatter = tf.scatter_nd(verts_est_mask, temp_np, delta_shape)
         with tf.Session() as sess:
             sess.run(tf.global_variables_initializer())
             scatter1 = sess.run(scatter)
@@ -480,7 +490,7 @@ def main(flength=2500.):
         #objs['J2D_face_Loss'] = 10000000.0 * tf.reduce_sum(
               #tf.square(j2dsplus_est[14, :] - HR_j2ds_face[ind][0, :]))
 
-        base_weights_head = 0.0 * np.array(
+        base_weights_head = 1.0 * np.array(
             [1.0, 1.0])
         weights_head = HR_confs_head[ind] * base_weights_head
         weights_head = tf.constant(weights_head, dtype=tf.float32)
@@ -488,7 +498,7 @@ def main(flength=2500.):
             weights_head * tf.reduce_sum(tf.square(HR_j2ds_head[ind] - j2ds_est[14:16, :]), 1))
 
         base_weights_foot = 1.0 * np.array(
-            [0.0, 0.0])
+            [1.0, 1.0])
         _HR_confs_foot = np.zeros(2)
         if HR_confs_foot[ind][0] != 0 and HR_confs_foot[ind][1] != 0:
             _HR_confs_foot[0] = (HR_confs_foot[ind][0] + HR_confs_foot[ind][1]) / 2.0
@@ -538,12 +548,20 @@ def main(flength=2500.):
 
         w_temporal = [0.5, 0.5, 1.0, 1.5, 2.5, 2.5, 1.5, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 5.0, 5.0]
         if ind != 0:
-            objs['temporal'] = 800.0 * tf.reduce_sum(
+            objs['temporal'] = 100.0 * tf.reduce_sum(
                 w_temporal * tf.reduce_sum(tf.square(j3ds - j3ds_old), 1))
             objs['temporal_pose'] = 0.0 * tf.reduce_sum(
                 tf.square(pose_final_old[0, 3:72] - param_pose[0, :]))
             objs['temporal_pose_rot'] = 0.0 * tf.reduce_sum(
                 tf.square(pose_final_old[0, 0:3] - param_rot[0, :]))
+
+            ##optical flow constraint
+            body_idx = np.array(np.hstack([body_parsing_idx[0], body_parsing_idx[1]])
+                                ).squeeze()
+            body_idx = body_idx.reshape([-1, 1]).astype(np.int64)
+            verts_est_body = tf.gather_nd(verts_est, body_idx)
+            objs['dense_optflow'] = 0.1 * tf.reduce_sum(tf.square(
+                verts_est_body - verts_body_old))
 
         loss = tf.reduce_mean(objs.values())
         with tf.Session() as sess:
@@ -563,6 +581,7 @@ def main(flength=2500.):
             print("cam_HR1 is %f" % duration)
             start_time = time.time()
             v_final = sess.run([v, verts_est, j3ds])
+            v_final_fixed = sess.run(verts_est_fixed)
             duration = time.time() - start_time
             print("v_final is %f" % duration)
             camera = render.camera(cam_HR1[0], cam_HR1[1], cam_HR1[2], cam_HR1[3])
@@ -642,6 +661,22 @@ def main(flength=2500.):
         # cam_HR_init_trans = camera_t_final_HR
         j3ds_old = v_final[2]
         pose_final_old = pose_final
+        #### get body vertex corresponding 2d index
+        if ind != len(HR_j2ds) - 1:
+            if ind == 0:   ###first is confident in hmr
+                body_idx = np.array(body_parsing_idx[0]).squeeze()  ##body part
+                head_idx = np.array(body_parsing_idx[1]).squeeze()
+                verts_body = np.vstack([v_final_fixed[body_idx], v_final[1][head_idx]])
+                verts_body_old = opt_pre.get_dense_correspondence(verts_body,
+                                    HR_imgs[ind], HR_imgs[ind + 1])
+            else:
+                body_idx = np.array(body_parsing_idx[0]).squeeze()  ##body part
+                head_idx = np.array(body_parsing_idx[1]).squeeze()
+                verts_body = np.vstack([v_final[1][body_idx], v_final[1][head_idx]])
+                verts_body_old = opt_pre.get_dense_correspondence(verts_body,
+                                        HR_imgs[ind], HR_imgs[ind + 1])
+
+
 
     #write_obj_and_translation(util.HR_img_base_path + "/aa1small.jpg",
             #util.HR_img_base_path + "/output", util.LR_img_base_path + "/output")

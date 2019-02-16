@@ -225,7 +225,7 @@ def refine_LR_pose(HR_pose_path, hr_points, lr_points):
         for i in range(24 * 3):
             HR_array[ind, i] = pose[0, i]
 
-    output = periodicCopy(LR_array, HR_array, lr_points, hr_points)
+    output = periodicDecomp(LR_array, HR_array, lr_points, hr_points)
     refine_opt.refine_optimization(output, LR_betas, LR_trans, data_dict,
                                    LR_cameras, texture_img, texture_vt)
 

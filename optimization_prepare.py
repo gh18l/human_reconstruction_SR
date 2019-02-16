@@ -2,6 +2,10 @@ import tensorflow as tf
 import numpy as np
 import pickle as pkl
 from scipy import sparse as sp
+import cv2
+import pickle
+import util
+import copy
 def get_tf_mask(verts_est, HR_mask):
     verts_est = tf.cast(verts_est, dtype=tf.int64)
     verts_est = tf.concat([tf.expand_dims(verts_est[:, 1], 1),
@@ -95,3 +99,81 @@ def get_laplace_operator(v, f):
     L = tf.sparse_tensor_to_dense(sparseL, validate_indices=False)
     L = L - tf.matrix_diag(tf.squeeze(tf.matmul(L, tf.ones([n, 1]))))
     return L
+
+def load_body_parsing():
+    dd = pickle.load(open(util.NORMAL_SMPL_PATH))
+    weights = dd['weights']
+    leg_index = [1, 4, 7, 10, 2, 5, 8, 11]
+    arm_index = [17, 19, 21, 23, 16, 18, 20, 22, 14, 13]
+    body_index = [0, 3, 6, 9]
+    head_index = [12, 15]
+    body_parsing_idx = []  ###body head
+    _leg_idx = np.zeros(6890)
+    _arm_idx = np.zeros(6890)
+    _body_idx = np.zeros(6890)
+    _head_idx = np.zeros(6890)
+    placeholder_idx = np.zeros(6890)
+    _test_idx = np.zeros(6890)
+
+    for _, iii in enumerate(body_index):
+        length = len(weights[:, iii])
+        for ii in range(length):
+            if weights[ii, iii] > 0.6 and placeholder_idx[ii] == 0:
+                _body_idx[ii] = 1
+                placeholder_idx[ii] = 1
+                _test_idx[ii] = 1
+    body_idx = np.where(_body_idx == 1)
+    body_parsing_idx.append(body_idx)
+
+    for _, iii in enumerate(head_index):
+        length = len(weights[:, iii])
+        for ii in range(length):
+            if weights[ii, iii] > 0.6 and placeholder_idx[ii] == 0:
+                _head_idx[ii] = 1
+                placeholder_idx[ii] = 1
+                _test_idx[ii] = 1
+    head_idx = np.where(_head_idx == 1)
+    body_parsing_idx.append(head_idx)
+
+    for _, iii in enumerate(leg_index):
+        length = len(weights[:, iii])
+        for ii in range(length):
+            if weights[ii, iii] > 0.6 and placeholder_idx[ii] == 0:
+                _leg_idx[ii] = 1
+                placeholder_idx[ii] = 1
+                _test_idx[ii] = 1
+    leg_idx = np.where(_leg_idx == 1)
+    body_parsing_idx.append(leg_idx)
+
+    for _, iii in enumerate(arm_index):
+        length = len(weights[:, iii])
+        for ii in range(length):
+            if weights[ii, iii] > 0.6 and placeholder_idx[ii] == 0:
+                _arm_idx[ii] = 1
+                placeholder_idx[ii] = 1
+                _test_idx[ii] = 1
+    arm_idx = np.where(_arm_idx == 1)
+    body_parsing_idx.append(arm_idx)
+    return body_parsing_idx
+
+
+def get_dense_correspondence(verts, img1, img2):
+    flow = np.array([])
+    retval = cv2.DISOpticalFlow_create(2)
+    img1 = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
+    img2 = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)
+    ### the flow from img1 to img2
+    flow = retval.calc(img1, img2, flow)
+    verts_new = copy.deepcopy(verts)
+    ## x y
+    for i in range(len(verts)):
+        position_x = verts[i][0]
+        position_y = verts[i][1]
+        y = np.round(position_y).astype(np.int)
+        x = np.round(position_x).astype(np.int)
+        verts_new[i][0] = position_x + flow[y, x, 0]  ##x
+        verts_new[i][1] = position_y + flow[y, x, 1]  ##y
+    return verts_new
+
+
+

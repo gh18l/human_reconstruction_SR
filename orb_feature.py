@@ -1,8 +1,15 @@
-# coding:utf-8
 import cv2
 import numpy as np
-# 按照灰度图像的方式读入两幅图片
-orb = cv2.ORB_create()
+
+def orb_feature(img1, img2):
+    orb = cv2.ORB_create()
+    img1 = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
+    img2 = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)
+    keypoint1, descriptor1 = orb.detectAndCompute(img1, None)
+    keypoint2, descriptor2 = orb.detectAndCompute(img2, None)
+    bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
+    maches = bf.match(descriptor1, descriptor2)
+    maches = sorted(maches, key=lambda x: x.distance)
 for i in range(100):
     img1 = cv2.imread("/home/lgh/code/SMPLify_TF/test/test_hmr_init/HR_multi_crop_small2/output_mask/mask_%04d.png" % i,
                       cv2.IMREAD_GRAYSCALE)

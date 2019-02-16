@@ -198,8 +198,7 @@ def refine_LR_pose(HR_pose_path, hr_points, lr_points, LR_cameras, texture_img,
         tran = param['trans']
         pose = output[ind, :]
 
-        smpl = smpl_np.SMPLModel('./smpl/models/basicmodel_m_lbs_10_207_0_v1.0.0.pkl')
-        verts = smpl_np.get_verts(pose, beta, tran, smpl)
+        verts = smpl_np.get_verts(pose, beta, tran)
 
         camera = render.camera(LR_cameras[ind][0], LR_cameras[ind][1], LR_cameras[ind][2], LR_cameras[ind][3])
         img_result_texture, _ = camera.render_texture(verts, texture_img, texture_vt)

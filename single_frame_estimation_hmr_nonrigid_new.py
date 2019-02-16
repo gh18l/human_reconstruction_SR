@@ -224,13 +224,13 @@ def nonrigid_estimation():
             #[tf.concat([param_rot, param_pose], axis=1), param_shape, param_trans])
     verts2d = v_final[1]
     for z in range(len(verts2d)):
-        if int(verts2d[z][0]) > HR_masks[ind].shape[0] - 1:
+        if int(verts2d[z][0]) > HR_masks[ind].shape[1] - 1:
             print(int(verts2d[z][0]))
-            verts2d[z][0] = HR_masks[ind].shape[0] - 1
-        if int(verts2d[z][1]) > HR_masks[ind].shape[1] - 1:
+            verts2d[z][0] = HR_masks[ind].shape[1] - 1
+        if int(verts2d[z][1]) > HR_masks[ind].shape[0] - 1:
             print(int(verts2d[z][1]))
-            verts2d[z][1] = HR_masks[ind].shape[1] - 1
-        (HR_masks[ind])[int(verts2d[z][0]), int(verts2d[z][1])] = 127
+            verts2d[z][1] = HR_masks[ind].shape[0] - 1
+        (HR_masks[ind])[int(verts2d[z][1]), int(verts2d[z][0])] = 127
     if not os.path.exists(util.hmr_path + "output_mask"):
         os.makedirs(util.hmr_path + "output_mask")
     cv2.imwrite(util.hmr_path + "output_mask/%04d.png" % ind, HR_masks[ind])
@@ -281,7 +281,7 @@ def nonrigid_estimation():
     verts_est_contours = tf.gather_nd(verts_est, contours_smpl_index)
     objs_nonrigid['verts_loss'] = 0.08 * tf.reduce_sum(tf.square(verts_est_contours - contours[contours_index].squeeze()))
     #### norm choose
-    objs_nonrigid['laplace'] = 0.1 * tf.reduce_sum(weights_laplace * tf.reduce_sum(tf.square(tf.matmul(L, v_tf) - delta), 1))
+    objs_nonrigid['laplace'] = 0.05 * tf.reduce_sum(weights_laplace * tf.reduce_sum(tf.square(tf.matmul(L, v_tf) - delta), 1))
     objs_nonrigid['smooth_loss'] = 1.0 * tf.reduce_sum(tf.square(v_tf - v_shaped_tf))
 
     loss = tf.reduce_mean(objs_nonrigid.values())
@@ -310,12 +310,14 @@ def nonrigid_estimation():
     camera.write_obj(util.hmr_path + "output_nonrigid/hmr_optimization_rotation_nonrigid_%04d.obj" % ind, v_nonrigid_final, vt)
 
     for z in range(len(verts2d)):
-        if int(verts2d[z][0]) > HR_masks[ind].shape[0] - 1:
+        if int(verts2d[z][0]) > HR_masks[ind].shape[1] - 1:
             print(int(verts2d[z][0]))
-            verts2d[z][0] = HR_masks[ind].shape[0] - 1
-        if int(verts2d[z][1]) > HR_masks[ind].shape[1] - 1:
+            verts2d[z][0] = HR_masks[ind].shape[1] - 1
+        if int(verts2d[z][1]) > HR_masks[ind].shape[0] - 1:
             print(int(verts2d[z][1]))
-            verts2d[z][1] = HR_masks[ind].shape[1] - 1
-        (HR_masks[ind])[int(verts2d[z][0]), int(verts2d[z][1])] = 127
-    cv2.imwrite(util.hmr_path + "output_nonrigid/mask_check_%04d.png" % ind, HR_masks[ind])
+            verts2d[z][1] = HR_masks[ind].shape[0] - 1
+        (HR_masks[ind])[int(verts2d[z][1]), int(verts2d[z][0])] = 127
+    if not os.path.exists(util.hmr_path + "output_mask"):
+        os.makedirs(util.hmr_path + "output_mask")
+    cv2.imwrite(util.hmr_path + "output_mask/%04d_nonrigid.png" % ind, HR_masks[ind])
 nonrigid_estimation()
