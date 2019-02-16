@@ -17,7 +17,6 @@ import time
 import pickle
 import period_new
 import optimization_prepare as opt_pre
-import smpl_np
 def demo_point(x, y, img_path = None):
     import matplotlib.pyplot as plt
     if img_path != None:

@@ -105,7 +105,8 @@ def load_body_parsing():
     weights = dd['weights']
     leg_index = [1, 4, 7, 10, 2, 5, 8, 11]
     arm_index = [17, 19, 21, 23, 16, 18, 20, 22, 14, 13]
-    body_index = [0, 3, 6, 9]
+    #body_index = [0, 3, 6, 9]
+    body_index = [9]
     head_index = [12, 15]
     body_parsing_idx = []  ###body head
     _leg_idx = np.zeros(6890)
