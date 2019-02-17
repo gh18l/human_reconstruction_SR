@@ -187,6 +187,8 @@ def refine_LR_pose(HR_pose_path, hr_points, lr_points):
     texture_img = cv2.imread(util.hmr_path + "refine_data/texture_img.jpg")
     texture_vt = np.load(util.hmr_path + "refine_data/texture_vt.npy")
     data_dict = np.load(util.hmr_path + "refine_data/data_dict.npy").item()
+    hmr_dict, _ = util.load_hmr_data(util.hmr_path)
+
 
     LR_path = util.hmr_path + "output"
     LR_pkl_files = os.listdir(LR_path)
@@ -227,5 +229,5 @@ def refine_LR_pose(HR_pose_path, hr_points, lr_points):
 
     output = periodicDecomp(LR_array, HR_array, lr_points, hr_points)
     refine_opt.refine_optimization(output, LR_betas, LR_trans, data_dict,
-                                   LR_cameras, texture_img, texture_vt)
+                            hmr_dict, LR_cameras, texture_img, texture_vt)
 

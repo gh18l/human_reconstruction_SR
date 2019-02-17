@@ -517,7 +517,7 @@ def main(flength=2500.):
             body_idx = np.array(body_parsing_idx[0]).squeeze()
             body_idx = body_idx.reshape([-1, 1]).astype(np.int64)
             verts_est_body = tf.gather_nd(verts_est, body_idx)
-            objs['dense_optflow'] = 0.1 * tf.reduce_sum(tf.square(
+            objs['dense_optflow'] = 0.0 * tf.reduce_sum(tf.square(
                 verts_est_body - verts_body_old))
         # pose1 = param_pose[0, 52]
         # pose2 = param_pose[0, 55]
@@ -528,7 +528,7 @@ def main(flength=2500.):
             sess.run(tf.global_variables_initializer())
             #L-BFGS-B
             optimizer = scipy_pt(loss=loss,
-                        var_list=[param_rot, param_trans, param_pose, param_shape, cam_LR.cx, cam_LR.cy],
+                        var_list=[param_rot, param_trans, param_pose, cam_LR.cx, cam_LR.cy],
                     options={'eps': 1e-12, 'ftol': 1e-12, 'maxiter': 500, 'disp': False})
             optimizer.minimize(sess)
             v_final = sess.run([v, verts_est, j3ds])

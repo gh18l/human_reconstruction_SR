@@ -103,11 +103,13 @@ def get_laplace_operator(v, f):
 def load_body_parsing():
     dd = pickle.load(open(util.NORMAL_SMPL_PATH))
     weights = dd['weights']
-    leg_index = [1, 4, 7, 10, 2, 5, 8, 11]
+    #leg_index = [1, 4, 7, 10, 2, 5, 8, 11]
+    leg_index = [1, 2]
     arm_index = [17, 19, 21, 23, 16, 18, 20, 22, 14, 13]
     #body_index = [0, 3, 6, 9]
-    body_index = [9]
+    body_index = [6, 9]
     head_index = [12, 15]
+    threshold = 0.6
     body_parsing_idx = []  ###body head
     _leg_idx = np.zeros(6890)
     _arm_idx = np.zeros(6890)
@@ -119,7 +121,7 @@ def load_body_parsing():
     for _, iii in enumerate(body_index):
         length = len(weights[:, iii])
         for ii in range(length):
-            if weights[ii, iii] > 0.6 and placeholder_idx[ii] == 0:
+            if weights[ii, iii] > threshold and placeholder_idx[ii] == 0:
                 _body_idx[ii] = 1
                 placeholder_idx[ii] = 1
                 _test_idx[ii] = 1
@@ -129,7 +131,7 @@ def load_body_parsing():
     for _, iii in enumerate(head_index):
         length = len(weights[:, iii])
         for ii in range(length):
-            if weights[ii, iii] > 0.6 and placeholder_idx[ii] == 0:
+            if weights[ii, iii] > threshold and placeholder_idx[ii] == 0:
                 _head_idx[ii] = 1
                 placeholder_idx[ii] = 1
                 _test_idx[ii] = 1
@@ -139,7 +141,7 @@ def load_body_parsing():
     for _, iii in enumerate(leg_index):
         length = len(weights[:, iii])
         for ii in range(length):
-            if weights[ii, iii] > 0.6 and placeholder_idx[ii] == 0:
+            if weights[ii, iii] > threshold and placeholder_idx[ii] == 0:
                 _leg_idx[ii] = 1
                 placeholder_idx[ii] = 1
                 _test_idx[ii] = 1
@@ -149,7 +151,7 @@ def load_body_parsing():
     for _, iii in enumerate(arm_index):
         length = len(weights[:, iii])
         for ii in range(length):
-            if weights[ii, iii] > 0.6 and placeholder_idx[ii] == 0:
+            if weights[ii, iii] > threshold and placeholder_idx[ii] == 0:
                 _arm_idx[ii] = 1
                 placeholder_idx[ii] = 1
                 _test_idx[ii] = 1

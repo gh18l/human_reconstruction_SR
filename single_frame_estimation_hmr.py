@@ -257,7 +257,8 @@ def main(flength=2500.):
     # v_template = dd['v_template']
     # leg_index = [1, 4, 7, 10, 2, 5, 8, 11]
     # arm_index = [17, 19, 21, 23, 16, 18, 20, 22, 14, 13]
-    # body_index = [0, 3, 6, 9]
+    # #body_index = [0, 3, 6, 9]
+    # body_index = [9]
     # head_index = [12, 15]
     # leg_idx = np.zeros(6890)
     # arm_idx = np.zeros(6890)
@@ -480,7 +481,7 @@ def main(flength=2500.):
         weights = tf.constant(weights, dtype=tf.float32)
         objs['J2D_Loss'] = 1.0 * tf.reduce_sum(weights * tf.reduce_sum(tf.square(j2ds_est[2:, :] - HR_j2d), 1))
 
-        base_weights_face = 1.0 * np.array(
+        base_weights_face = 2.5 * np.array(
             [1.0, 1.0, 1.0, 1.0, 1.0])
         weights_face = HR_confs_face[ind] * base_weights_face
         weights_face = tf.constant(weights_face, dtype=tf.float32)
@@ -547,7 +548,7 @@ def main(flength=2500.):
 
         w_temporal = [0.5, 0.5, 1.0, 1.5, 2.5, 2.5, 1.5, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 5.0, 5.0]
         if ind != 0:
-            objs['temporal'] = 100.0 * tf.reduce_sum(
+            objs['temporal'] = 800.0 * tf.reduce_sum(
                 w_temporal * tf.reduce_sum(tf.square(j3ds - j3ds_old), 1))
             objs['temporal_pose'] = 0.0 * tf.reduce_sum(
                 tf.square(pose_final_old[0, 3:72] - param_pose[0, :]))
@@ -555,18 +556,18 @@ def main(flength=2500.):
                 tf.square(pose_final_old[0, 0:3] - param_rot[0, :]))
 
             ##optical flow constraint
-            body_idx = np.array(np.hstack([body_parsing_idx[0], body_parsing_idx[1]])
-                                ).squeeze()
+            body_idx = np.array(np.hstack([body_parsing_idx[0],
+                                           body_parsing_idx[2]])).squeeze()
             body_idx = body_idx.reshape([-1, 1]).astype(np.int64)
             verts_est_body = tf.gather_nd(verts_est, body_idx)
-            objs['dense_optflow'] = 0.1 * tf.reduce_sum(tf.square(
+            objs['dense_optflow'] = 0.05 * tf.reduce_sum(tf.square(
                 verts_est_body - verts_body_old))
 
         loss = tf.reduce_mean(objs.values())
         with tf.Session() as sess:
             sess.run(tf.global_variables_initializer())
             #L-BFGS-B
-            optimizer = scipy_pt(loss=loss, var_list=[param_rot, param_trans, param_pose, param_shape],
+            optimizer = scipy_pt(loss=loss, var_list=[param_rot, param_trans, param_pose],
                              options={'eps': 1e-12, 'ftol': 1e-12, 'maxiter': 1000, 'disp': False}, method='L-BFGS-B')
             start_time = time.time()
             optimizer.minimize(sess)
@@ -585,26 +586,31 @@ def main(flength=2500.):
             print("v_final is %f" % duration)
             camera = render.camera(cam_HR1[0], cam_HR1[1], cam_HR1[2], cam_HR1[3])
             _, vt = camera.generate_uv(v_final[0], HR_imgs[ind])
-            if ind == 0:
+            if ind == 4:
                 vt_HRview = vt
             if not os.path.exists(util.hmr_path + "output"):
                 os.makedirs(util.hmr_path + "output")
             if util.crop_texture is True:
-                img_result_texture = camera.render_texture(v_final[0], HR_imgs[0], vt_HRview)
+                if ind >= 4:
+                    img_result_texture = camera.render_texture(v_final[0], HR_imgs[4], vt_HRview)
+                    cv2.imwrite(util.hmr_path + "output/hmr_optimization_texture_%04d.png" % ind, img_result_texture)
+                    if util.video is True:
+                        videowriter.write(img_result_texture)
                 if ind == 4:
                     if not os.path.exists(util.texture_path):
                         os.makedirs(util.texture_path)
                     HR_mask_img = camera.save_texture_img(HR_imgs[ind], HR_masks[ind])
                     camera.write_texture_data(util.texture_path, HR_mask_img, vt)
             else:
-                img_result_texture = camera.render_texture(v_final[0], HR_imgs[0], vt_HRview)
+                if ind >= 4:
+                    img_result_texture = camera.render_texture(v_final[0], HR_imgs[4], vt_HRview)
+                    cv2.imwrite(util.hmr_path + "output/hmr_optimization_texture_%04d.png" % ind, img_result_texture)
+                    if util.video is True:
+                        videowriter.write(img_result_texture)
                 if ind == 4:
                     if not os.path.exists(util.texture_path):
                         os.makedirs(util.texture_path)
                     camera.write_texture_data(util.texture_path, HR_imgs[ind], vt)
-            cv2.imwrite(util.hmr_path + "output/hmr_optimization_texture_%04d.png" % ind, img_result_texture)
-            if util.video is True:
-                videowriter.write(img_result_texture)
             img_result_naked = camera.render_naked(v_final[0], HR_imgs[ind])
             cv2.imwrite(util.hmr_path + "output/hmr_optimization_%04d.png" % ind, img_result_naked)
             img_result_naked_rotation = camera.render_naked_rotation(v_final[0], 90, HR_imgs[ind])
@@ -665,13 +671,17 @@ def main(flength=2500.):
             if ind == 0:   ###first is confident in hmr
                 body_idx = np.array(body_parsing_idx[0]).squeeze()  ##body part
                 head_idx = np.array(body_parsing_idx[1]).squeeze()
-                verts_body = np.vstack([v_final_fixed[body_idx], v_final[1][head_idx]])
+                leg_idx = np.array(body_parsing_idx[2]).squeeze()
+                verts_body = np.vstack([v_final_fixed[body_idx],
+                                        v_final_fixed[leg_idx]])
                 verts_body_old = opt_pre.get_dense_correspondence(verts_body,
                                     HR_imgs[ind], HR_imgs[ind + 1])
             else:
                 body_idx = np.array(body_parsing_idx[0]).squeeze()  ##body part
                 head_idx = np.array(body_parsing_idx[1]).squeeze()
-                verts_body = np.vstack([v_final[1][body_idx], v_final[1][head_idx]])
+                leg_idx = np.array(body_parsing_idx[2]).squeeze()
+                verts_body = np.vstack([v_final[1][body_idx],
+                                        v_final[1][leg_idx]])
                 verts_body_old = opt_pre.get_dense_correspondence(verts_body,
                                         HR_imgs[ind], HR_imgs[ind + 1])
 
