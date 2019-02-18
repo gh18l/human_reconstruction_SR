@@ -3,9 +3,10 @@ import numpy as np
 import copy
 flow = np.array([])
 for i in range(100):
-    img1 = cv2.imread("/home/lgh/code/SMPLify_TF/test/test_hmr_init/HR_multi_crop_small2/optimization_data/%04d.jpg" % i)
-    img2 = cv2.imread("/home/lgh/code/SMPLify_TF/test/test_hmr_init/HR_multi_crop_small2/optimization_data/%04d.jpg" % (i+1))
+    img1 = cv2.imread("/home/lgh/code/SMPLify_TF/test/test_hmr_init/HR_multi_crop_origin3/optimization_data/%04d.jpg" % i)
+    img2 = cv2.imread("/home/lgh/code/SMPLify_TF/test/test_hmr_init/HR_multi_crop_origin3/optimization_data/%04d.jpg" % (i+1))
     retval = cv2.DISOpticalFlow_create(2)
+    #retval = cv2.optflow.createOptFlow_DeepFlow()
     img1 = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
     img2 = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)
     #flow = np.zeros((450, 600, 2), dtype=np.float)

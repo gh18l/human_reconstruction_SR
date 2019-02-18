@@ -78,7 +78,7 @@ def refine_optimization(poses, betas, trans, data_dict, hmr_dict, LR_cameras, te
         weights = tf.constant(weights, dtype=tf.float32)
         objs['J2D_Loss'] = tf.reduce_sum(weights * tf.reduce_sum(tf.square(j2ds_est[2:, :] - LR_j2ds[ind]), 1))
 
-        base_weights_face = 1.5 * np.array(
+        base_weights_face = 2.5 * np.array(
             [1.0, 1.0, 1.0, 1.0, 1.0])
         weights_face = LR_confs_face[ind] * base_weights_face
         weights_face = tf.constant(weights_face, dtype=tf.float32)
@@ -114,7 +114,7 @@ def refine_optimization(poses, betas, trans, data_dict, hmr_dict, LR_cameras, te
             weights_foot * tf.reduce_sum(tf.square(_LR_j2ds_foot - j2ds_est[0:2, :]), 1))
 
         param_complete_pose = tf.concat([param_rot, param_pose], axis=1)
-        objs['Prior_Loss'] = 200.0 * tf.reduce_sum(tf.square(param_complete_pose[0, :] - poses[ind, :]))
+        objs['Prior_Loss'] = 6000.0 * tf.reduce_sum(tf.square(param_complete_pose[0, :] - poses[ind, :]))
         objs['Prior_Shape'] = 5.0 * tf.reduce_sum(tf.square(param_shape))
         w1 = np.array([1.04 * 2.0, 1.04 * 2.0, 57.4 * 50, 57.4 * 50])
         w1 = tf.constant(w1, dtype=tf.float32)
@@ -123,12 +123,13 @@ def refine_optimization(poses, betas, trans, data_dict, hmr_dict, LR_cameras, te
             tf.exp(-param_pose[0, 9]), tf.exp(-param_pose[0, 12])])
         w_temporal = [0.5, 0.5, 1.0, 1.5, 2.5, 2.5, 1.5, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 7.0, 7.0]
         if ind != 0:
-            objs['temporal'] = 100.0 * tf.reduce_sum(
+            objs['temporal'] = 800.0 * tf.reduce_sum(
                 w_temporal * tf.reduce_sum(tf.square(j3ds - j3ds_old), 1))
             objs['temporal_pose'] = 0.0 * tf.reduce_sum(
                 tf.square(pose_final_old[0, 3:72] - param_pose[0, :]))
             ##optical flow constraint
-            body_idx = np.array(body_parsing_idx[0]).squeeze()
+            body_idx = np.array(np.hstack([body_parsing_idx[0],
+                                           body_parsing_idx[2]])).squeeze()
             body_idx = body_idx.reshape([-1, 1]).astype(np.int64)
             verts_est_body = tf.gather_nd(verts_est, body_idx)
             objs['dense_optflow'] = 0.0 * tf.reduce_sum(tf.square(
@@ -158,14 +159,8 @@ def refine_optimization(poses, betas, trans, data_dict, hmr_dict, LR_cameras, te
             img_result_naked_rotation = camera.render_naked_rotation(v_final[0], 90, LR_imgs[ind])
             cv2.imwrite(util.hmr_path + "output_after_refine/hmr_optimization_rotation_%04d.png" % ind, img_result_naked_rotation)
             _objs = sess.run(objs)
-            print("the refine j2d loss is %f" % _objs['J2D_Loss'])
-            print("the refine J2D_face loss is %f" % _objs['J2D_face_Loss'])
-            print("the refine J2D_head loss is %f" % _objs['J2D_head_Loss'])
-            print("the refine J2D_foot loss is %f" % _objs['J2D_foot_Loss'])
-            print("the refine prior loss is %f" % _objs['Prior_Loss'])
-            print("the refine Prior_Shape loss is %f" % _objs['Prior_Shape'])
-            print("the refine angle_elbow_knee loss is %f" % _objs["angle_elbow_knee"])
-
+            for name in _objs:
+                print("the %s loss is %f" % (name, _objs[name]))
             j3ds_old = v_final[2]
             pose_final_old = pose_final
 
@@ -174,12 +169,16 @@ def refine_optimization(poses, betas, trans, data_dict, hmr_dict, LR_cameras, te
                 if ind == 0:  ###first is confident in hmr
                     body_idx = np.array(body_parsing_idx[0]).squeeze()  ##body part
                     head_idx = np.array(body_parsing_idx[1]).squeeze()
-                    verts_body = v_final_fixed[body_idx]
+                    leg_idx = np.array(body_parsing_idx[2]).squeeze()
+                    verts_body = np.vstack([v_final_fixed[body_idx],
+                                        v_final_fixed[leg_idx]])
                     verts_body_old = opt_pre.get_dense_correspondence(verts_body,
                                                                       LR_imgs[ind], LR_imgs[ind + 1])
                 else:
                     body_idx = np.array(body_parsing_idx[0]).squeeze()  ##body part
                     head_idx = np.array(body_parsing_idx[1]).squeeze()
-                    verts_body = v_final[1][body_idx]
+                    leg_idx = np.array(body_parsing_idx[2]).squeeze()
+                    verts_body = np.vstack([v_final[1][body_idx],
+                                        v_final[1][leg_idx]])
                     verts_body_old = opt_pre.get_dense_correspondence(verts_body,
                                                                       LR_imgs[ind], LR_imgs[ind + 1])

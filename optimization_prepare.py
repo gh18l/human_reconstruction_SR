@@ -104,10 +104,10 @@ def load_body_parsing():
     dd = pickle.load(open(util.NORMAL_SMPL_PATH))
     weights = dd['weights']
     #leg_index = [1, 4, 7, 10, 2, 5, 8, 11]
-    leg_index = [1, 2]
+    leg_index = []
     arm_index = [17, 19, 21, 23, 16, 18, 20, 22, 14, 13]
     #body_index = [0, 3, 6, 9]
-    body_index = [6, 9]
+    body_index = []
     head_index = [12, 15]
     threshold = 0.6
     body_parsing_idx = []  ###body head
