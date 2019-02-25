@@ -90,7 +90,7 @@ class SMPL:
 		# #plt.savefig("/home/lgh/code/SMPLify_TF/test/temp0/1/LR/test_temp/dot.png")
 		# plt.show()
 
-		J = tf.matmul(tf.tile(tf.expand_dims(self.J_regressor, axis=0), [total, 1, 1]), v_posed)
+		J = tf.matmul(tf.tile(tf.expand_dims(self.J_regressor, axis=0), [total, 1, 1]), v_shaped)
 		#J: 1 * 24 * 3,相当于0 pose，参数beta下的3d joint点的三维坐标
 		#J = tf.einsum('ij,kjl->kil', self.J_regressor, v_posed)
 
@@ -99,7 +99,7 @@ class SMPL:
 		pose_mat = tf.reshape(pose_mat, [-1, 24, 3, 3])
 
                 def with_zeros(xs):
-						#相当于加最后一列
+		                #相当于加最后一列
                         '''Add [0,0,0,1] into xs
                         Args: 
                                 1), xs: Nx3x4, 
@@ -136,11 +136,14 @@ class SMPL:
 
                 rest_shape_h = tf.concat([tf.transpose(v_posed), tf.constant(np.ones([1, 6890, total]), dtype=tf.float32)], axis=0)
                 rest_shape_h = tf.transpose(rest_shape_h, [2, 0, 1])
-
-                v = tf.transpose(tf.multiply(T[:, :,0,:], tf.expand_dims(rest_shape_h[:, 0,:], axis=1)) \
-                                + tf.multiply(T[:, :,1,:], tf.expand_dims(rest_shape_h[:, 1,:],axis=1)) \
-                                + tf.multiply(T[:, :,2,:], tf.expand_dims(rest_shape_h[:, 2,:], axis=1)) \
-                                + tf.multiply(T[:, :,3,:], tf.expand_dims(rest_shape_h[:, 3,:], axis=1)))
+		### T 1,4,4,6890  rest_shape_h 1,4,6890
+        # 	b = T[:, :,0,:]
+    	# 	c = tf.expand_dims(rest_shape_h[:, 0,:], axis=1)
+		# a = tf.multiply(T[:, :,0,:], tf.expand_dims(rest_shape_h[:, 0,:], axis=1))
+		v = tf.transpose(tf.multiply(T[:, :,0,:], tf.expand_dims(rest_shape_h[:, 0,:], axis=1)) \
+                	+ tf.multiply(T[:, :,1,:], tf.expand_dims(rest_shape_h[:, 1,:],axis=1)) \
+                        + tf.multiply(T[:, :,2,:], tf.expand_dims(rest_shape_h[:, 2,:], axis=1)) \
+                        + tf.multiply(T[:, :,3,:], tf.expand_dims(rest_shape_h[:, 3,:], axis=1)))
                 v = tf.transpose(v, [2, 0, 1])
                 v = v[:, :, :3]
 

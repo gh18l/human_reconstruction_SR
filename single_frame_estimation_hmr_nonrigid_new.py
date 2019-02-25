@@ -8,7 +8,9 @@ import os
 import cv2
 from opendr_render import render
 import optimization_prepare as opt_pre
-ind = 22
+import pickle as pkl
+import smpl_np
+ind = 41
 
 ##point -- 1*2 points -- 6890*2
 def get_distance(point, points):
@@ -112,6 +114,28 @@ def nonrigid_estimation():
     j2dsplus_est = cam_HR.project(tf.squeeze(jointsplus))
     verts_est = cam_HR.project(tf.squeeze(v))
     j2ds_est = tf.convert_to_tensor(j2ds_est)
+
+    # sess = tf.Session()
+    # sess.run(tf.global_variables_initializer())
+    # v1 = sess.run(v)
+    # img_result_naked = camera.render_naked(v1)
+    # bg = np.zeros_like(HR_masks[ind])
+    # for i in range(len(verts_est1)):
+    #     x = np.rint(verts_est1[i, 0]).astype('int')
+    #     y = np.rint(verts_est1[i, 1]).astype('int')
+    #     bg[y, x] = 255
+    # kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (7, 7))
+    # smpl_mask = cv2.morphologyEx(bg, cv2.MORPH_CLOSE, kernel)
+    # for i in range(len(verts_est1)):
+    #     x = np.rint(verts_est1[i, 0]).astype('int')
+    #     y = np.rint(verts_est1[i, 1]).astype('int')
+    #     smpl_mask[y, x] = 127
+    # contours, hierarchy = cv2.findContours(smpl_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    # cv2.imshow("1", smpl_mask)
+    # # cv2.imshow("2", bg)
+    # cv2.waitKey()
+
+
     ####mask
     HR_mask = tf.convert_to_tensor(HR_masks[ind], dtype=tf.float32)
     verts2dsilhouette = opt_pre.get_tf_mask(verts_est, HR_masks[ind])
@@ -273,8 +297,8 @@ def nonrigid_estimation():
     weights_laplace = 4.0 * weights_laplace.reshape(-1, 1)
 
 
-    cam_nonrigid = Perspective_Camera(cam_HR1[0], cam_HR1[0], hmr_cam[1],
-                                      hmr_cam[2], cam_HR1[3], np.zeros(3))
+    cam_nonrigid = Perspective_Camera(cam_HR1[0], cam_HR1[0], cam_HR1[1],
+                                      cam_HR1[2], cam_HR1[3], np.zeros(3))
     verts_est = cam_nonrigid.project(tf.squeeze(v_tf))
     objs_nonrigid = {}
     contours_smpl_index = contours_smpl_index.reshape([-1, 1]).astype(np.int64)
@@ -293,9 +317,20 @@ def nonrigid_estimation():
         optimizer.minimize(sess)
         v_nonrigid_final = sess.run(v_tf)
         verts2d = sess.run(verts_est)
+        betas_final = sess.run(param_shape)
         _objs_nonrigid = sess.run(objs_nonrigid)
         for name in _objs_nonrigid:
             print("the %s loss is %f" % (name, _objs_nonrigid[name]))
+
+    # res = {'pose': pose_final, 'betas': betas_final, 'trans': trans_final, 'cam_HR': cam_HR1}
+    # with open(util.hmr_path + "output_nonrigid/hmr_optimization_pose_%04d.pkl" % ind, 'wb') as fout:
+    #     pkl.dump(res, fout)
+    # np.save(util.hmr_path + "output_nonrigid/hmr_optimization_pose_%04d.npy" % ind, v_nonrigid_final)
+    # smpl = smpl_np.SMPLModel('./smpl/models/basicmodel_m_lbs_10_207_0_v1.0.0.pkl')
+    # verts_template = smpl.get_nonrigid_smpl_template(v_nonrigid_final, pose_final.squeeze(),
+    #                                 betas_final.squeeze(), trans_final.squeeze())
+    # img_result_naked = camera.render_naked(v_nonrigid_final, HR_imgs[ind])
+    # cv2.imwrite(util.hmr_path + "output_nonrigid/test.png", verts_template)
 
     ### view data
     uv_real, vt = camera.generate_uv(v_nonrigid_final, HR_imgs[ind])

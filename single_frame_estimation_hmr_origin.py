@@ -496,7 +496,7 @@ def main(flength=2500.):
             [1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0])  #######
         weights = HR_confs[ind] * base_weights
         weights = tf.constant(weights, dtype=tf.float32)
-        objs['J2D_Loss'] = 1.0 * tf.reduce_sum(weights * tf.reduce_sum(tf.square(j2ds_est[2:, :] - HR_j2d), 1))
+        objs['J2D_Loss'] = 0.02 * tf.reduce_sum(weights * tf.reduce_sum(tf.square(j2ds_est[2:, :] - HR_j2d), 1))
 
         base_weights_face = 2.5 * np.array(
             [1.0, 1.0, 1.0, 1.0, 1.0])
@@ -507,7 +507,7 @@ def main(flength=2500.):
         #objs['J2D_face_Loss'] = 10000000.0 * tf.reduce_sum(
               #tf.square(j2dsplus_est[14, :] - HR_j2ds_face[ind][0, :]))
 
-        base_weights_head = 1.0 * np.array(
+        base_weights_head = 0.1 * np.array(
             [1.0, 1.0])
         weights_head = HR_confs_head[ind] * base_weights_head
         weights_head = tf.constant(weights_head, dtype=tf.float32)
@@ -552,7 +552,7 @@ def main(flength=2500.):
         ##############################################################
         ###################mask obj###################################
         ##############################################################
-        objs['mask'] = 0.1 * tf.reduce_sum(verts2dsilhouette / 255.0 * (255.0 - HR_mask) / 255.0
+        objs['mask'] = 0.01 * tf.reduce_sum(verts2dsilhouette / 255.0 * (255.0 - HR_mask) / 255.0
                                             + 0.0 * (255.0 - verts2dsilhouette) / 255.0 * HR_mask / 255.0)
 
         objs['face'] = 0.0 * tf.reduce_sum(tf.square(hmr_joint3d[14:19] - jointsplus[14:19]))
@@ -577,7 +577,7 @@ def main(flength=2500.):
                                            body_parsing_idx[2]])).squeeze()
             body_idx = body_idx.reshape([-1, 1]).astype(np.int64)
             verts_est_body = tf.gather_nd(verts_est, body_idx)
-            objs['dense_optflow'] = 0.05 * tf.reduce_sum(tf.square(
+            objs['dense_optflow'] = 0.0005 * tf.reduce_sum(tf.square(
                 verts_est_body - verts_body_old))
 
         loss = tf.reduce_mean(objs.values())

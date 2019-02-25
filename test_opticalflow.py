@@ -19,7 +19,10 @@ for i in range(100):
             _flow[i, j, 0] =  j + flow[i, j, 0]
             _flow[i, j, 1] =  i + flow[i, j, 1]
     dst = cv2.remap(img1, _flow, np.array([]), cv2.INTER_CUBIC)
+    dst = cv2.resize(dst, (1000, 750))
     cv2.imshow("dst", dst)
+    img1 = cv2.resize(img1, (1000, 750))
     cv2.imshow("img1", img1)
+    img2 = cv2.resize(img2, (1000, 750))
     cv2.imshow("img2", img2)
     cv2.waitKey()

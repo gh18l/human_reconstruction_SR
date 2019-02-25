@@ -148,6 +148,7 @@ def save_pkl_to_csv(pose_path):
 
 def refine_LR_pose(HR_pose_path, hr_points, lr_points, LR_cameras, texture_img,
                    texture_vt, data_dict):
+    smpl = smpl_np.SMPLModel('./smpl/models/basicmodel_m_lbs_10_207_0_v1.0.0.pkl')
     LR_path = util.hmr_path + "output"
     LR_pkl_files = os.listdir(LR_path)
     LR_pkl_files = sorted([filename for filename in LR_pkl_files if filename.endswith(".pkl")],
@@ -198,7 +199,7 @@ def refine_LR_pose(HR_pose_path, hr_points, lr_points, LR_cameras, texture_img,
         tran = param['trans']
         pose = output[ind, :]
 
-        verts = smpl_np.get_verts(pose, beta, tran)
+        verts = smpl.get_verts(pose, beta, tran)
 
         camera = render.camera(LR_cameras[ind][0], LR_cameras[ind][1], LR_cameras[ind][2], LR_cameras[ind][3])
         img_result_texture, _ = camera.render_texture(verts, texture_img, texture_vt)

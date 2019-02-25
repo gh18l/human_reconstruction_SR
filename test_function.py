@@ -369,15 +369,31 @@ def generate_video():
         HR_img = cv2.imread(img_file_path)
         videowriter.write(HR_img)
 
-W = np.array([1, 2]).squeeze()
-I = np.array([0, 1]).squeeze()
-J = np.array([0, 1]).squeeze()
-n = 4
-L = sp.csr_matrix((W, (I, J)), shape=(n, n))
-a = L * np.ones(n)
-
-L = L - sp.spdiags(L * np.ones(n), 0, n, n)
-b = 1
+img = cv2.imread("/home/lgh/code/SMPLify_TF/test/test_hmr_init/HR_multi_crop_origin3/optimization_data/label.png")
+img = cv2.resize(img, (1000, 750))
+cv2.imshow("1", img)
+cv2.waitKey()
+masks = np.zeros_like(img)
+for i in range(img.shape[0]):
+    for j in range(img.shape[1]):
+        if img[i, j, 0] == 0 and img[i, j, 1] == 0 and img[i, j, 2] == 0:
+            continue
+        masks[i, j, :] = 255
+mask = masks[:, :, 0]
+silh = np.zeros_like(mask)
+contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+color = img[275, 400]
+color = img[contours[0][0, :, 1], contours[0][0, :, 0]]
+aaa = 0
+for ind in range(len(contours)):
+    for i in range(len(contours[ind])):
+        x = contours[ind][i, :, 0]
+        y = contours[ind][i, :, 1]
+        silh[y, x] = 255
+print(aaa)
+#img = cv2.resize(silh, (1000, 750))
+cv2.imshow("1", silh)
+cv2.waitKey()
 #generate_video()
 #mask_texture()
 #HR_pose_prediction_full_replace_LR_pose()

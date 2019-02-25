@@ -20,6 +20,7 @@ class SMPLModel():
       self.weights = params['weights']
       self.posedirs = params['posedirs']
       self.v_template = params['v_template']
+      self.v_template_RT = params['v_template']
       self.shapedirs = params['shapedirs']
       self.faces = params['f']
       self.kintree_table = params['kintree_table']
@@ -82,9 +83,10 @@ class SMPLModel():
 
     """
     # how beta affect body shape
+    v_shaped_RT = self.shapedirs.dot(self.beta) + self.v_template_RT
     v_shaped = self.shapedirs.dot(self.beta) + self.v_template
     # joints location
-    self.J = self.J_regressor.dot(v_shaped)
+    self.J = self.J_regressor.dot(v_shaped_RT)
     pose_cube = self.pose.reshape((-1, 1, 3))
     # rotation matrix for each joint
     self.R = self.rodrigues(pose_cube)
@@ -116,6 +118,12 @@ class SMPLModel():
     # transformation of each vertex
     T = np.tensordot(self.weights, G, axes=[[1], [0]])
     rest_shape_h = np.hstack((v_posed, np.ones([v_posed.shape[0], 1])))
+
+    # b = []
+    # a = np.array([[1.0,0.0,0.], [0.,1.,0.], [0.,0.,1.]])
+    # for i in range(6890):
+    #   if abs(T[i,2,3]-0.0) > 0.005:
+    #     b.append(T[i,:,:])
     v = np.matmul(T, rest_shape_h.reshape([-1, 4, 1])).reshape([-1, 4])[:, :3]
     self.verts = v + self.trans.reshape([1, 3])
 
@@ -203,13 +211,69 @@ class SMPLModel():
   def output_verts(self):
     return self.verts
 
+  def get_verts(self, pose, beta, trans):
+    pose = pose.reshape((24, 3))
+    beta = beta.reshape(10, )
+    trans = trans.reshape(3, )
+    self.set_params(beta=beta, pose=pose, trans=trans)
+    return self.output_verts()
 
+  def get_nonrigid_smpl_template(self, verts, pose, beta, trans):
+    v_remove_trans = verts
 
-def get_verts(pose, beta, trans):
-  smpl = SMPLModel('./smpl/models/basicmodel_m_lbs_10_207_0_v1.0.0.pkl')
-  pose = pose.reshape((24, 3))
-  beta = beta.reshape(10,)
-  trans = trans.reshape(3,)
-  smpl.set_params(beta=beta, pose=pose, trans=trans)
-  return smpl.output_verts()
+    v_shaped = self.shapedirs.dot(beta) + self.v_template
+    self.J = self.J_regressor.dot(v_shaped)
+    pose_cube = pose.reshape((-1, 1, 3))
+    self.R = self.rodrigues(pose_cube)
+    I_cube = np.broadcast_to(
+      np.expand_dims(np.eye(3), axis=0),
+      (self.R.shape[0] - 1, 3, 3)
+    )
+    lrotmin = (self.R[1:] - I_cube).ravel()
+    v_posed = v_shaped + self.posedirs.dot(lrotmin)
+    G = np.empty((self.kintree_table.shape[1], 4, 4))
+    G[0] = self.with_zeros(np.hstack((self.R[0], self.J[0, :].reshape([3, 1]))))
+    for i in range(1, self.kintree_table.shape[1]):
+      G[i] = G[self.parent[i]].dot(
+        self.with_zeros(
+          np.hstack(
+            [self.R[i], ((self.J[i, :] - self.J[self.parent[i], :]).reshape([3, 1]))]
+          )
+        )
+      )
+    G = G - self.pack(
+      np.matmul(
+        G,
+        np.hstack([self.J, np.zeros([24, 1])]).reshape([24, 4, 1])
+      )
+    )
+    T = np.tensordot(self.weights, G, axes=[[1], [0]])
+    verts_t = np.copy(v_remove_trans)
+    for i in range(len(T)):
+      T_rotation1 = T[i, :3, :3].T
+      T_rotation = np.linalg.inv(T[i, :3, :3])
+      T_translation = np.matmul(-T_rotation, T[i, :3, 3])[:, np.newaxis]
+      T_new = np.concatenate([T_rotation, T_translation], axis=1)
+      rest_shape_h = np.hstack((verts_t[i, :], np.ones(1)))
+      #T_translation = T[i, :3, 3].T
+      #v = v_remove_trans[i, :] - T_translation
+      v = np.matmul(T_new, rest_shape_h)
+      verts_t[i, :] = v.T
+    # for i in range(len(T)):
+    #   rest_shape_h = np.hstack((verts_t[i, :], np.ones(1)))
+    #   #T_translation = T[i, :3, 3].T
+    #   #v = v_remove_trans[i, :] - T_translation
+    #   v = np.matmul(T[i, :, :], rest_shape_h)[:3]
+    #   verts_t[i, :] = v.T
+    v_shaped = verts_t - self.posedirs.dot(lrotmin)
+    verts_t = v_shaped - self.shapedirs.dot(beta)
+    return verts_t
+
+  def get_template(self, beta, trans):
+    v_shaped = self.shapedirs.dot(beta) + self.v_template
+    return np.array(v_shaped) + trans.reshape([1, 3])
+
+  def set_template(self, template):
+    self.v_template = template
+
 

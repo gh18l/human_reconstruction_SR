@@ -15,7 +15,7 @@ vert_sym_idxs = dd['vert_sym_idxs']
 v_template = dd['v_template']
 leg_index = [1, 4, 7, 10, 2, 5, 8, 11]
 arm_index = [17, 19, 21, 23, 16, 18, 20, 22, 14, 13]
-body_index = [6]
+body_index = [14]
 head_index = [12, 15]
 body_parsing_idx = []  ###body head
 _leg_idx = np.zeros(6890)
@@ -28,7 +28,7 @@ _test_idx = np.zeros(6890)
 for _, iii in enumerate(body_index):
     length = len(weights[:, iii])
     for ii in range(length):
-        if weights[ii, iii] > 0.6 and placeholder_idx[ii] == 0:
+        if weights[ii, iii] > 0.3 and placeholder_idx[ii] == 0:
             _body_idx[ii] = 1
             placeholder_idx[ii] = 1
             _test_idx[ii] = 1
@@ -58,7 +58,7 @@ body_parsing_idx.append(leg_idx)
 for _, iii in enumerate(arm_index):
     length = len(weights[:, iii])
     for ii in range(length):
-        if weights[ii, iii] > 0.3 and placeholder_idx[ii] == 0:
+        if weights[ii, iii] > 0.4 and placeholder_idx[ii] == 0:
             _arm_idx[ii] = 1
             placeholder_idx[ii] = 1
             _test_idx[ii] = 1
@@ -74,6 +74,8 @@ fig = plt.figure(1)
 #ax = plt.subplot(111)
 ax = fig.add_subplot(111, projection='3d')
 ax.scatter(v_template[body_parsing_idx[0], 0], v_template[body_parsing_idx[0], 1], v_template[body_parsing_idx[0], 2], c='b')
+#ax.scatter(v_template[body_parsing_idx[2], 0], v_template[body_parsing_idx[2], 1], v_template[body_parsing_idx[2], 2], c='b')
+#ax.scatter(v_template[body_parsing_idx[1], 0], v_template[body_parsing_idx[1], 1], v_template[body_parsing_idx[1], 2], c='b')
 #ax.scatter(v_template[v_ids['hand_l'], 0], v_template[v_ids['hand_l'], 1], v_template[v_ids['hand_l'], 2], c='g')
 #ax.scatter(v_template[v_ids['hand_r'], 0], v_template[v_ids['hand_r'], 1], v_template[v_ids['hand_r'], 2], c='y')
 #ax.scatter(v_template[v_ids['fingers_l'], 0], v_template[v_ids['fingers_l'], 1], v_template[v_ids['fingers_l'], 2], c='c')

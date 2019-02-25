@@ -46,15 +46,16 @@ class camera():
                     + " " + str(self.cx) + " " + str(self.cy))
         f.close()
 
-    def write_obj(self, path, verts, uv):
+    def write_obj(self, path, verts, uv=None):
         with open(path, 'w') as fp:
             fp.write("mtllib test.mtl\n")
             fp.write("\n")
             for v in verts:
                 fp.write('v %f %f %f\n' % (v[0], v[1], v[2]))
             fp.write("\n")
-            for uv in uv:
-                fp.write('vt %f %f %f\n' % (uv[0], uv[1], 0.))
+            if uv is not None:
+                for uv in uv:
+                    fp.write('vt %f %f %f\n' % (uv[0], uv[1], 0.))
             fp.write("\n")
             fp.write("o m_avg\n")
             fp.write("g m_avg\n")
@@ -101,3 +102,6 @@ def opencv2render(img):
     b, g, r = cv2.split(img)
     img_ = cv2.merge([r, g, b])
     return img_
+
+def save_nonrigid_data(texture_path, verts):
+    np.save(texture_path + "verts.npy", verts)
