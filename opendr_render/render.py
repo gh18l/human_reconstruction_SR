@@ -103,5 +103,5 @@ def opencv2render(img):
     img_ = cv2.merge([r, g, b])
     return img_
 
-def save_nonrigid_data(texture_path, verts):
-    np.save(texture_path + "verts.npy", verts)
+def save_nonrigid_template(texture_path, template):
+    np.save(texture_path + "template.npy", template)

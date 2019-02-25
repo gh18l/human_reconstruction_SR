@@ -21,6 +21,9 @@ class SMPL:
 		self.weights = tf.constant(data1['weights'], dtype=tf.float32)
 		self.joint_regressor = tf.constant(data['cocoplus_regressor'].T.todense(), dtype=tf.float32)
 
+	### no useful temporarily
+	def set_template(self, template):
+		self.v_template = tf.constant(template, dtype=tf.float32)
 
 	# N x 
 	def get_3d_joints(self, params, index_list):

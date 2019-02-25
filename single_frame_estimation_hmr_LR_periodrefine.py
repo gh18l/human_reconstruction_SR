@@ -8,6 +8,7 @@ from opendr_render import render
 import os
 import cv2
 import optimization_prepare as opt_pre
+import smpl_np
 
 def refine_optimization(poses, betas, trans, data_dict, hmr_dict, LR_cameras, texture_img, texture_vt):
     LR_j2ds = data_dict["j2ds"]
@@ -148,15 +149,22 @@ def refine_optimization(poses, betas, trans, data_dict, hmr_dict, LR_cameras, te
             v_final_fixed = sess.run(verts_est_fixed)
             cam_LR1 = sess.run([cam_LR.fl_x, cam_LR.cx, cam_LR.cy, cam_LR.trans])
             camera = render.camera(cam_LR1[0], cam_LR1[1], cam_LR1[2], cam_LR1[3])
-            img_result_texture = camera.render_texture(v_final[0], texture_img, texture_vt)
+
+            ### set nonrigid template
+            smpl = smpl_np.SMPLModel('./smpl/models/basicmodel_m_lbs_10_207_0_v1.0.0.pkl')
+            template = np.load(util.texture_path + "template.npy")
+            smpl.set_template(template)
+            v = smpl.get_verts(pose_final, betas_final, trans_final)
+
+            img_result_texture = camera.render_texture(v, texture_img, texture_vt)
             if not os.path.exists(util.hmr_path + "output_after_refine"):
                 os.makedirs(util.hmr_path + "output_after_refine")
             cv2.imwrite(util.hmr_path + "output_after_refine/hmr_optimization_texture_%04d.png" % ind, img_result_texture)
             if util.video is True:
                 videowriter.write(img_result_texture)
-            img_result_naked = camera.render_naked(v_final[0], LR_imgs[ind])
+            img_result_naked = camera.render_naked(v, LR_imgs[ind])
             cv2.imwrite(util.hmr_path + "output_after_refine/hmr_optimization_%04d.png" % ind, img_result_naked)
-            img_result_naked_rotation = camera.render_naked_rotation(v_final[0], 90, LR_imgs[ind])
+            img_result_naked_rotation = camera.render_naked_rotation(v, 90, LR_imgs[ind])
             cv2.imwrite(util.hmr_path + "output_after_refine/hmr_optimization_rotation_%04d.png" % ind, img_result_naked_rotation)
             _objs = sess.run(objs)
             for name in _objs:

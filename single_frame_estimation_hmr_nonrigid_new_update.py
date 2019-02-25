@@ -331,6 +331,8 @@ def nonrigid_estimation():
         v_nonrigid_final = sess.run(v_tf)
         verts2d = sess.run(verts_est)
         _objs_nonrigid = sess.run(objs_nonrigid)
+        pose_final, betas_final, trans_final = sess.run(
+            [tf.concat([param_rot, param_pose], axis=1), param_shape, param_trans])
         for name in _objs_nonrigid:
             print("the %s loss is %f" % (name, _objs_nonrigid[name]))
 
@@ -346,7 +348,8 @@ def nonrigid_estimation():
     cv2.imwrite(util.hmr_path + "output_nonrigid/hmr_optimization_rotation_nonrigid_%04d.png" % ind, img_result_naked_rotation)
     camera.write_obj(util.hmr_path + "output_nonrigid/hmr_optimization_rotation_nonrigid_%04d.obj" % ind, v_nonrigid_final, vt)
     camera.write_texture_data(util.texture_path, HR_imgs[ind], vt)
-    render.save_nonrigid_data(util.texture_path, v_nonrigid_final)
+    template = smpl.get_nonrigid_smpl_template(v_nonrigid_final, pose_final, betas_final, trans_final)
+    render.save_nonrigid_template(util.texture_path, template)
 
     for z in range(len(verts2d)):
         if int(verts2d[z][0]) > HR_masks[ind].shape[1] - 1:

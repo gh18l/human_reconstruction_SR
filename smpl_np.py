@@ -219,7 +219,9 @@ class SMPLModel():
     return self.output_verts()
 
   def get_nonrigid_smpl_template(self, verts, pose, beta, trans):
-    v_remove_trans = verts
+    v_remove_trans = verts - trans.reshape([1, 3])
+    pose = pose.squeeze()
+    beta = beta.squeeze()
 
     v_shaped = self.shapedirs.dot(beta) + self.v_template
     self.J = self.J_regressor.dot(v_shaped)
@@ -250,7 +252,6 @@ class SMPLModel():
     T = np.tensordot(self.weights, G, axes=[[1], [0]])
     verts_t = np.copy(v_remove_trans)
     for i in range(len(T)):
-      T_rotation1 = T[i, :3, :3].T
       T_rotation = np.linalg.inv(T[i, :3, :3])
       T_translation = np.matmul(-T_rotation, T[i, :3, 3])[:, np.newaxis]
       T_new = np.concatenate([T_rotation, T_translation], axis=1)

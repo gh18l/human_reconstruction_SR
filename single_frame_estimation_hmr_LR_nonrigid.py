@@ -8,7 +8,6 @@ import os
 import cv2
 import pickle as pkl
 import hmr
-
 try:
     from smpl.serialization import load_model as _load_model
 except:
@@ -17,6 +16,7 @@ from opendr_render import render
 import pickle
 import period_new
 import optimization_prepare as opt_pre
+import smpl_np
 def demo_point(x, y, img_path = None):
     import matplotlib.pyplot as plt
     if img_path != None:
@@ -531,20 +531,30 @@ def main(flength=2500.):
                         var_list=[param_rot, param_trans, param_pose, cam_LR.cx, cam_LR.cy],
                     options={'eps': 1e-12, 'ftol': 1e-12, 'maxiter': 500, 'disp': False})
             optimizer.minimize(sess)
+            pose_final, betas_final, trans_final = sess.run(
+                [tf.concat([param_rot, param_pose], axis=1), param_shape, param_trans])
             v_final = sess.run([v, verts_est, j3ds])
             v_final_fixed = sess.run(verts_est_fixed)
             cam_LR1 = sess.run([cam_LR.fl_x, cam_LR.cx, cam_LR.cy, cam_LR.trans])
             LR_cameras.append(cam_LR1)
             camera = render.camera(cam_LR1[0], cam_LR1[1], cam_LR1[2], cam_LR1[3])
-            img_result_texture = camera.render_texture(v_final[0], texture_img, texture_vt)
+
+            ### set nonrigid template
+            smpl = smpl_np.SMPLModel('./smpl/models/basicmodel_m_lbs_10_207_0_v1.0.0.pkl')
+            template = np.load(util.texture_path + "template.npy")
+            smpl.set_template(template)
+            v = smpl.get_verts(pose_final, betas_final, trans_final)
+
+
+            img_result_texture = camera.render_texture(v, texture_img, texture_vt)
             if not os.path.exists(util.hmr_path + "output"):
                 os.makedirs(util.hmr_path + "output")
             cv2.imwrite(util.hmr_path + "output/hmr_optimization_texture_%04d.png" % ind, img_result_texture)
             if util.video is True:
                 videowriter.write(img_result_texture)
-            img_result_naked = camera.render_naked(v_final[0], LR_imgs[ind])
+            img_result_naked = camera.render_naked(v, LR_imgs[ind])
             cv2.imwrite(util.hmr_path + "output/hmr_optimization_%04d.png" % ind, img_result_naked)
-            img_result_naked_rotation = camera.render_naked_rotation(v_final[0], 90, LR_imgs[ind])
+            img_result_naked_rotation = camera.render_naked_rotation(v, 90, LR_imgs[ind])
             cv2.imwrite(util.hmr_path + "output/hmr_optimization_rotation_%04d.png" % ind, img_result_naked_rotation)
             #model_f = sess.run(smpl_model.f)
             _objs = sess.run(objs)
@@ -564,8 +574,6 @@ def main(flength=2500.):
             #     print("the LR temporal_pose loss is %f" % _objs['temporal_pose'])
             #print("the arm_leg_direction loss is %f" % sess.run(objs["arm_leg_direction"]))
             #model_f = model_f.astype(int).tolist()
-            pose_final, betas_final, trans_final = sess.run(
-                [tf.concat([param_rot, param_pose], axis=1), param_shape, param_trans])
         # from psbody.meshlite import Mesh
         # m = Mesh(v=np.squeeze(v_final[0]), f=model_f)
 
