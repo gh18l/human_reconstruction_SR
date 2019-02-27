@@ -12,6 +12,14 @@ import pickle
 import smpl_np
 ind = 4
 
+def get_n_min_index(values, n):
+    mins = np.zeros(n, dtype=np.int)
+    for i in range(n):
+        min_index = np.argmin(values)
+        mins[i] = min_index
+        values[min_index] = 99999999.0
+    return mins
+
 ##point -- 1*2 points -- 6890*2
 def get_distance(point, points):
     distances = np.zeros([6890])
@@ -213,7 +221,9 @@ def smpl_to_boundary(camera, pose, beta, tran, verts2d):
     for ind in range(len(contours)):
         for i in range(len(contours[ind])):
             contour = contours[ind][i, :, :]
+            ### if it need faster, the search range can be limited in small district
             distances = get_distance(contour, verts2d)
+<<<<<<< HEAD
             min_smpl_index = np.argmin(distances)
             contours_smpl_index.append(min_smpl_index)
     ## view smpl contours result
@@ -225,6 +235,22 @@ def smpl_to_boundary(camera, pose, beta, tran, verts2d):
 
     cv2.imshow("1", mask)
     cv2.waitKey()
+=======
+            min_smpl_indexs = get_n_min_index(distances, 2)
+            #min_smpl_index = np.argmin(distances)
+            for n in range(len(min_smpl_indexs)):
+                contours_smpl_index.append(min_smpl_indexs[n])
+    contours_smpl_index = np.unique(np.array(contours_smpl_index))
+    # ## view smpl contours result
+    # for i in range(len(contours_smpl_index)):
+    #     smpl_index = contours_smpl_index[i]
+    #     x = np.rint(verts2d[smpl_index, 0]).astype("int")
+    #     y = np.rint(verts2d[smpl_index, 1]).astype("int")
+    #     mask[y, x] = 255
+    #
+    # cv2.imshow("1", mask)
+    # cv2.waitKey()
+>>>>>>> master
     return contours_smpl_index
 
 def get_parsing_smpl_contours(contours_smpl_index, body_parsing_idx):
@@ -269,6 +295,20 @@ def get_maskcontours_smpl_index(mask_parsing_index, mask_contours, contours_smpl
             maskcontours_smpl_index[mask_index] = min_smpl_index
     return maskcontours_smpl_index
 
+def get_smplcontours_mask_index(mask_parsing_index, mask_contours, contours_smpl_index, verts2d):
+    length = 0
+    for name in contours_smpl_index:
+        length = length + len(contours_smpl_index[name])
+
+    smplcontours_mask_index = np.zeros(length)
+    for name in contours_smpl_index:
+        mask_indexs = mask_parsing_index[name]
+        for i in range(len(contours_smpl_index[name])):
+            smpl_index = contours_smpl_index[name][i]
+            distances = get_distance_parsing(verts2d[smpl_index, :], mask_contours.squeeze(), mask_indexs)
+            min_mask_index = np.argmin(distances)
+            smplcontours_mask_index[smpl_index] = min_mask_index
+    return smplcontours_mask_index
 
 def nonrigid_estimation():
     hmr_dict, data_dict = util.load_hmr_data(util.hmr_path)
