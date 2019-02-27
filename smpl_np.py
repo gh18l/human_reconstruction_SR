@@ -19,7 +19,9 @@ class SMPLModel():
       self.J_regressor = params['J_regressor']
       self.weights = params['weights']
       self.posedirs = params['posedirs']
-      self.v_template = params['v_template']
+      v_template = params['v_template']
+      v_template = remove_template_handfoot(v_template, params['weights'])
+      self.v_template = v_template
       self.v_template_RT = params['v_template']
       self.shapedirs = params['shapedirs']
       self.faces = params['f']
@@ -46,6 +48,12 @@ class SMPLModel():
     self.R = None
 
     self.update()
+
+  def get_nohandfoot_faces(self):
+    with open("./smpl/models/bodyparts.pkl", 'rb') as f:
+      v_ids = pickle.load(f)
+    hands = np.concatenate((v_ids['hand_r'], v_ids['hand_l']))
+    return np.array(filter(lambda face: np.intersect1d(face, hands).size == 0, f))
 
   def set_params(self, pose=None, beta=None, trans=None):
     """
@@ -218,6 +226,7 @@ class SMPLModel():
     self.set_params(beta=beta, pose=pose, trans=trans)
     return self.output_verts()
 
+
   def get_nonrigid_smpl_template(self, verts, pose, beta, trans):
     v_remove_trans = verts - trans.reshape([1, 3])
     pose = pose.squeeze()
@@ -270,11 +279,134 @@ class SMPLModel():
     verts_t = v_shaped - self.shapedirs.dot(beta)
     return verts_t
 
-  def get_template(self, beta, trans):
-    v_shaped = self.shapedirs.dot(beta) + self.v_template
-    return np.array(v_shaped) + trans.reshape([1, 3])
+  def get_template(self):
+    return self.v_template
 
   def set_template(self, template):
     self.v_template = template
 
+def remove_template_handfoot(_template, weights):
+  template = np.copy(_template)
+  lefthands_index = [20, 22]
+  righthands_index = [21, 23]
+  lefttoes_index = [10]
+  righttoes_index = [11]
+  body_parsing_idx = []  ###body head
+  _lefthands_idx = np.zeros(6890)
+  _righthands_idx = np.zeros(6890)
+  _lefttoes_idx = np.zeros(6890)
+  _righttoes_idx = np.zeros(6890)
+  placeholder_idx = np.zeros(6890)
+  _test_idx = np.zeros(6890)
+  for _, iii in enumerate(lefthands_index):
+      length = len(weights[:, iii])
+      for ii in range(length):
+          if weights[ii, iii] > 0.3 and placeholder_idx[ii] == 0:
+            _lefthands_idx[ii] = 1
+            placeholder_idx[ii] = 1
+  lefthands_idx = np.where(_lefthands_idx == 1)
+  body_parsing_idx.append(lefthands_idx)
+
+  for _, iii in enumerate(righthands_index):
+      length = len(weights[:, iii])
+      for ii in range(length):
+          if weights[ii, iii] > 0.3 and placeholder_idx[ii] == 0:
+            _righthands_idx[ii] = 1
+            placeholder_idx[ii] = 1
+  righthands_idx = np.where(_righthands_idx == 1)
+  body_parsing_idx.append(righthands_idx)
+
+  for _, iii in enumerate(lefttoes_index):
+      length = len(weights[:, iii])
+      for ii in range(length):
+          if weights[ii, iii] > 0.3 and placeholder_idx[ii] == 0:
+            _lefttoes_idx[ii] = 1
+            placeholder_idx[ii] = 1
+  lefttoes_idx = np.where(_lefttoes_idx == 1)
+  body_parsing_idx.append(lefttoes_idx)
+
+  for _, iii in enumerate(righttoes_index):
+      length = len(weights[:, iii])
+      for ii in range(length):
+          if weights[ii, iii] > 0.4 and placeholder_idx[ii] == 0:
+            _righttoes_idx[ii] = 1
+            placeholder_idx[ii] = 1
+  righttoes_idx = np.where(_righttoes_idx == 1)
+  body_parsing_idx.append(righttoes_idx)
+
+  ##lefthand
+  a = body_parsing_idx[0]
+  min = 99999999
+  indexxx = 0
+  z_mm = []
+  for i in range(len(a[0])):
+    index = a[0][i]
+    if template[index, 0] > 0.7 and template[index, 0] < 0.72:
+      z_mm.append(template[index, 2])
+  z_mm = np.array(z_mm).squeeze()
+  z_min = np.min(z_mm)
+  z_max = np.max(z_mm)
+  for i in range(len(a[0])):
+    index = a[0][i]
+    z = template[index, 2]
+    if z > z_max:
+      template[index, 2] = z_max
+    if z < z_min:
+      template[index, 2] = z_min
+  for i in range(len(a[0])):
+    index = a[0][i]
+    x = template[index, 0]
+    if x < min:
+      min = x
+      indexxx = index
+  for i in range(len(a[0])):
+    index = a[0][i]
+    template[index, 0] = min
+
+  ##righthand
+  max = -99999999
+  a = body_parsing_idx[1]
+  for i in range(len(a[0])):
+    index = a[0][i]
+    z = template[index, 2]
+    if z > z_max:
+      template[index, 2] = z_max
+    if z < z_min:
+      template[index, 2] = z_min
+  for i in range(len(a[0])):
+    index = a[0][i]
+    x = template[index, 0]
+    if x > max:
+      max = x
+      indexxx = index
+  for i in range(len(a[0])):
+    index = a[0][i]
+    template[index, 0] = max
+
+  ### lefttoes
+  min = 99999999
+  a = body_parsing_idx[2]
+  for i in range(len(a[0])):
+    index = a[0][i]
+    z = template[index, 2]
+    if z < min:
+      min = z
+      indexxx = index
+  for i in range(len(a[0])):
+    index = a[0][i]
+    template[index, 2] = min
+
+  ### righttoes
+  min = 99999999
+  a = body_parsing_idx[3]
+  for i in range(len(a[0])):
+    index = a[0][i]
+    z = template[index, 2]
+    if z < min:
+      min = z
+      indexxx = index
+  for i in range(len(a[0])):
+    index = a[0][i]
+    template[index, 2] = min
+  return template
 

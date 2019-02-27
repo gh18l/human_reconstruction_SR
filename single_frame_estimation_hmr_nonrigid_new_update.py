@@ -216,15 +216,15 @@ def smpl_to_boundary(camera, pose, beta, tran, verts2d):
             distances = get_distance(contour, verts2d)
             min_smpl_index = np.argmin(distances)
             contours_smpl_index.append(min_smpl_index)
-    # ## view smpl contours result
-    # for i in range(len(contours_smpl_index)):
-    #     smpl_index = contours_smpl_index[i]
-    #     x = np.rint(verts2d[smpl_index, 0]).astype("int")
-    #     y = np.rint(verts2d[smpl_index, 1]).astype("int")
-    #     mask[y, x] = 255
-    #
-    # cv2.imshow("1", mask)
-    # cv2.waitKey()
+    ## view smpl contours result
+    for i in range(len(contours_smpl_index)):
+        smpl_index = contours_smpl_index[i]
+        x = np.rint(verts2d[smpl_index, 0]).astype("int")
+        y = np.rint(verts2d[smpl_index, 1]).astype("int")
+        mask[y, x] = 255
+
+    cv2.imshow("1", mask)
+    cv2.waitKey()
     return contours_smpl_index
 
 def get_parsing_smpl_contours(contours_smpl_index, body_parsing_idx):

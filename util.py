@@ -51,7 +51,7 @@ HR_pkl_base_path = base_path + "/HR/output"
 LR_j2d_dctsmooth_base_path = base_path + "/LRdctsmooth"
 LR_img_dctsmooth_base_path = base_path + "/LRdctsmooth"
 
-hmr_path = "/home/lgh/code/SMPLify_TF/test/test_hmr_init/jianing2/"
+hmr_path = "/home/lgh/code/SMPLify_TF/test/test_hmr_init/HR_multi_crop_small3/"
 texture_path = "/home/lgh/code/SMPLify_TF/test/test_hmr_init/HR_multi_crop_small3/output/texture_file/"
 HR_pose_path = "/home/lgh/code/SMPLify_TF/test/test_hmr_init/HR_multi_crop_small3/output/"
 crop_texture = True  ###only use in small texture
@@ -189,7 +189,7 @@ def load_hmr_data(path):
     MPI_j2d_files = sorted([filename for filename in MPI_j2d_files if filename.endswith(".json")],
                             key=lambda d: int((d.split('_')[0])))
     img_files = os.listdir(path)
-    img_files = sorted([filename for filename in img_files if filename.endswith(".png") and "mask" not in filename])
+    img_files = sorted([filename for filename in img_files if filename.endswith(".jpg") and "mask" not in filename])
     mask_files = os.listdir(path)
     mask_files = sorted([filename for filename in mask_files if filename.endswith(".png") and "mask" in filename],
                         key=lambda d: int((d.split('_')[1]).split('.')[0]))

@@ -6,13 +6,17 @@ import util
 import pickle as pkl
 from psbody.meshlite import Mesh
 from smpl.smpl_webuser.serialization import load_model
+import smpl_np
 
 class SMPL:
 	# Read model paramters
 	def __init__(self, smpl_model_path, normal_smpl_model_path):
 		data = pkl.load(open(smpl_model_path))
 		data1 = pkl.load(open(normal_smpl_model_path))
-		self.v_template = tf.constant(data1['v_template'], dtype=tf.float32)
+		template = data1['v_template']
+		v_template = smpl_np.remove_template_handfoot(template, data1['weights'])
+		self.v_template = tf.constant(v_template, dtype=tf.float32)
+		self.v_template_RT = tf.constant(data1['v_template'], dtype=tf.float32)
 		self.f = tf.constant(data1['f'], dtype=tf.float32)
 		self.shapedirs = tf.constant(data1['shapedirs'].r, dtype=tf.float32)
 		self.posedirs = tf.constant(data1['posedirs'], dtype=tf.float32)
@@ -74,10 +78,12 @@ class SMPL:
 		pose_matrix = pose_matrix_cur #现在的pose旋转矩阵减去0 pose旋转矩阵
 		
 
-		v_shaped = tf.expand_dims(self.v_template, axis=0) + \
+		v_shaped_v = tf.expand_dims(self.v_template, axis=0) + \
 			tf.einsum('ijk,lk->lij', self.shapedirs, betas)  # 10 x 6890 x 3
+		v_shaped = tf.expand_dims(self.v_template_RT, axis=0) + \
+				   tf.einsum('ijk,lk->lij', self.shapedirs, betas)  # 10 x 6890 x 3
 		#相当于生成一个关于beta的模
-		v_posed = v_shaped + tf.einsum('ijk,lk->lij', self.posedirs, pose_matrix)
+		v_posed = v_shaped_v + tf.einsum('ijk,lk->lij', self.posedirs, pose_matrix)
 
 		# sess = tf.Session()
 		# sess.run(tf.global_variables_initializer())
