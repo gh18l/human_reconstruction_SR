@@ -2,8 +2,24 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="f7d84f91-ca51-44e9-9207-a42c8622e72d" name="Default Changelist" comment="">
+<<<<<<< HEAD
       <change beforePath="$PROJECT_DIR$/opendr_render/core.py" beforeDir="false" afterPath="$PROJECT_DIR$/opendr_render/core.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/single_frame_estimation_hmr_nonrigid_new_update.py" beforeDir="false" afterPath="$PROJECT_DIR$/single_frame_estimation_hmr_nonrigid_new_update.py" afterDir="false" />
+=======
+<<<<<<< HEAD
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/opendr_render/core.py" beforeDir="false" afterPath="$PROJECT_DIR$/opendr_render/core.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/single_frame_estimation_hmr_nonrigid_new_update.py" beforeDir="false" afterPath="$PROJECT_DIR$/single_frame_estimation_hmr_nonrigid_new_update.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/single_frame_estimation_shape.py" beforeDir="false" afterPath="$PROJECT_DIR$/single_frame_estimation_shape.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smpl_batch.py" beforeDir="false" afterPath="$PROJECT_DIR$/smpl_batch.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smpl_np.py" beforeDir="false" afterPath="$PROJECT_DIR$/smpl_np.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test_smpl.py" beforeDir="false" afterPath="$PROJECT_DIR$/test_smpl.py" afterDir="false" />
+=======
+      <change beforePath="$PROJECT_DIR$/single_frame_estimation_hmr_nonrigid_new_update.py" beforeDir="false" afterPath="$PROJECT_DIR$/single_frame_estimation_hmr_nonrigid_new_update.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/single_frame_estimation_shape.py" beforeDir="false" afterPath="$PROJECT_DIR$/single_frame_estimation_shape.py" afterDir="false" />
+>>>>>>> master
+      <change beforePath="$PROJECT_DIR$/util.py" beforeDir="false" afterPath="$PROJECT_DIR$/util.py" afterDir="false" />
+>>>>>>> master
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -11,6 +27,10 @@
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> master
   <component name="DockManager">
     <window id="8">
       <content type="file-editors">
@@ -19,8 +39,13 @@
             <file pinned="false" current-in-tab="false">
               <entry file="file://$PROJECT_DIR$/test_smpl.py">
                 <provider selected="true" editor-type-id="text-editor">
+<<<<<<< HEAD
                   <state relative-caret-position="-1015">
                     <caret line="22" column="37" selection-start-line="22" selection-start-column="37" selection-end-line="22" selection-end-column="37" />
+=======
+                  <state relative-caret-position="420">
+                    <caret line="122" column="37" selection-start-line="122" selection-start-column="37" selection-end-line="122" selection-end-column="37" />
+>>>>>>> master
                     <folding>
                       <element signature="e#0#20#0" expanded="true" />
                     </folding>
@@ -28,11 +53,19 @@
                 </provider>
               </entry>
             </file>
+<<<<<<< HEAD
             <file pinned="false" current-in-tab="false">
               <entry file="file://$PROJECT_DIR$/opendr_render/render.py">
                 <provider selected="true" editor-type-id="text-editor">
                   <state relative-caret-position="197">
                     <caret line="11" column="38" selection-start-line="11" selection-start-column="38" selection-end-line="11" selection-end-column="38" />
+=======
+            <file pinned="false" current-in-tab="true">
+              <entry file="file://$PROJECT_DIR$/opendr_render/render.py">
+                <provider selected="true" editor-type-id="text-editor">
+                  <state relative-caret-position="287">
+                    <caret line="71" column="20" selection-start-line="71" selection-start-column="20" selection-end-line="71" selection-end-column="20" />
+>>>>>>> master
                     <folding>
                       <marker date="1551081882784" expanded="true" signature="3475:3481" ph="..." />
                       <marker date="1551081882784" expanded="true" signature="4068:4069" ph="..." />
@@ -42,11 +75,19 @@
                 </provider>
               </entry>
             </file>
+<<<<<<< HEAD
             <file pinned="false" current-in-tab="true">
               <entry file="file://$PROJECT_DIR$/opendr_render/core.py">
                 <provider selected="true" editor-type-id="text-editor">
                   <state relative-caret-position="270">
                     <caret line="33" column="36" selection-start-line="33" selection-start-column="34" selection-end-line="33" selection-end-column="36" />
+=======
+            <file pinned="false" current-in-tab="false">
+              <entry file="file://$PROJECT_DIR$/opendr_render/core.py">
+                <provider selected="true" editor-type-id="text-editor">
+                  <state relative-caret-position="377">
+                    <caret line="27" column="8" selection-start-line="27" selection-start-column="10" selection-end-line="28" selection-end-column="36" />
+>>>>>>> master
                     <folding>
                       <element signature="e#54#92#0" expanded="true" />
                     </folding>
@@ -59,6 +100,11 @@
       </content>
     </window>
   </component>
+<<<<<<< HEAD
+=======
+=======
+>>>>>>> master
+>>>>>>> master
   <component name="FUSProjectUsageTrigger">
     <session id="-1755614933">
       <usages-collector id="statistics.lifecycle.project">
@@ -74,26 +120,50 @@
         <counts>
           <entry key="gitignore" value="1" />
           <entry key="npy" value="1" />
+<<<<<<< HEAD
+          <entry key="py" value="348" />
+=======
           <entry key="py" value="340" />
+>>>>>>> master
           <entry key="txt" value="1" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
           <entry key="PLAIN_TEXT" value="3" />
+<<<<<<< HEAD
+          <entry key="Python" value="348" />
+=======
           <entry key="Python" value="340" />
+>>>>>>> master
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
           <entry key="dummy" value="21" />
+<<<<<<< HEAD
           <entry key="py" value="23553" />
+=======
+<<<<<<< HEAD
+          <entry key="py" value="23409" />
+=======
+          <entry key="py" value="22863" />
+>>>>>>> master
+>>>>>>> master
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="PLAIN_TEXT" value="21" />
+<<<<<<< HEAD
           <entry key="Python" value="23553" />
+=======
+<<<<<<< HEAD
+          <entry key="Python" value="23409" />
+=======
+          <entry key="Python" value="22863" />
+>>>>>>> master
+>>>>>>> master
         </counts>
       </usages-collector>
     </session>
@@ -112,6 +182,7 @@
           </provider>
         </entry>
       </file>
+<<<<<<< HEAD
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/single_frame_estimation_hmr_nonrigid_new_update.py">
           <provider selected="true" editor-type-id="text-editor">
@@ -120,6 +191,24 @@
               <folding>
                 <element signature="e#0#11#0" expanded="true" />
               </folding>
+=======
+<<<<<<< HEAD
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/single_frame_estimation_hmr_nonrigid_new_update.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="380">
+              <caret line="320" column="51" selection-start-line="320" selection-start-column="51" selection-end-line="320" selection-end-column="51" />
+              <folding>
+                <element signature="e#0#11#0" expanded="true" />
+              </folding>
+=======
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/single_frame_estimation_shape.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="60">
+              <caret line="8" column="35" selection-start-line="8" selection-start-column="29" selection-end-line="8" selection-end-column="35" />
+>>>>>>> master
+>>>>>>> master
             </state>
           </provider>
         </entry>
@@ -136,6 +225,11 @@
           </provider>
         </entry>
       </file>
+<<<<<<< HEAD
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/optimization_prepare.py">
+=======
+<<<<<<< HEAD
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/optimization_prepare.py">
           <provider selected="true" editor-type-id="text-editor">
@@ -147,6 +241,28 @@
                 <marker date="1551062712473" expanded="true" signature="1619:1620" ph="..." />
                 <marker date="1551062712473" expanded="true" signature="2157:2679" ph="..." />
                 <marker date="1551062712473" expanded="true" signature="3777:5812" ph="..." />
+=======
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/single_frame_estimation_hmr_nonrigid_new_update.py">
+>>>>>>> master
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="30">
+              <caret line="102" column="19" selection-start-line="102" selection-start-column="19" selection-end-line="102" selection-end-column="19" />
+              <folding>
+<<<<<<< HEAD
+                <element signature="e#0#23#0" expanded="true" />
+                <marker date="1551062712473" expanded="true" signature="180:181" ph="..." />
+                <marker date="1551062712473" expanded="true" signature="1619:1620" ph="..." />
+                <marker date="1551062712473" expanded="true" signature="2157:2679" ph="..." />
+                <marker date="1551062712473" expanded="true" signature="3777:5812" ph="..." />
+=======
+                <element signature="e#0#11#0" expanded="true" />
+                <marker date="1551101947950" expanded="true" signature="535:537" ph="..." />
+                <marker date="1551101947950" expanded="true" signature="6089:6951" ph="..." />
+                <marker date="1551101947950" expanded="true" signature="6990:7427" ph="..." />
+                <marker date="1551101947950" expanded="true" signature="12098:12708" ph="..." />
+>>>>>>> master
+>>>>>>> master
               </folding>
             </state>
           </provider>
@@ -155,11 +271,25 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/smpl_batch.py">
           <provider selected="true" editor-type-id="text-editor">
+<<<<<<< HEAD
             <state relative-caret-position="300">
               <caret line="79" column="15" selection-start-line="79" selection-start-column="15" selection-end-line="79" selection-end-column="15" />
               <folding>
                 <element signature="e#15#38#0" expanded="true" />
                 <marker date="1551272003360" expanded="true" signature="3988:3991" ph="..." />
+=======
+<<<<<<< HEAD
+            <state relative-caret-position="480">
+              <caret line="85" column="15" selection-start-line="85" selection-start-column="8" selection-end-line="85" selection-end-column="15" />
+=======
+            <state relative-caret-position="654">
+              <caret line="191" column="85" selection-start-line="191" selection-start-column="85" selection-end-line="191" selection-end-column="85" />
+>>>>>>> master
+              <folding>
+                <element signature="e#15#38#0" expanded="true" />
+                <marker date="1551269861807" expanded="true" signature="1182:1245" ph="..." />
+                <marker date="1551269861807" expanded="true" signature="4313:4316" ph="..." />
+>>>>>>> master
               </folding>
             </state>
           </provider>
@@ -168,10 +298,17 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/smpl_np.py">
           <provider selected="true" editor-type-id="text-editor">
+<<<<<<< HEAD
             <state relative-caret-position="-1526">
               <caret line="216" column="30" lean-forward="true" selection-start-line="216" selection-start-column="30" selection-end-line="216" selection-end-column="30" />
+=======
+            <state relative-caret-position="355">
+              <caret line="288" column="31" selection-start-line="288" selection-start-column="31" selection-end-line="288" selection-end-column="31" />
+>>>>>>> master
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
+                <marker date="1551270093813" expanded="true" signature="1544:1548" ph="..." />
+                <marker date="1551270093813" expanded="true" signature="6398:6402" ph="..." />
               </folding>
             </state>
           </provider>
@@ -183,10 +320,24 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
+<<<<<<< HEAD
         <entry file="file://$PROJECT_DIR$/util.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="4703">
               <caret line="191" column="85" selection-start-line="191" selection-start-column="85" selection-end-line="191" selection-end-column="85" />
+=======
+<<<<<<< HEAD
+        <entry file="file://$PROJECT_DIR$/util.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="4704">
+              <caret line="191" column="85" selection-start-line="191" selection-start-column="85" selection-end-line="191" selection-end-column="85" />
+=======
+        <entry file="file://$PROJECT_DIR$/single_frame_estimation_hmr_LR_periodrefine.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="259">
+              <caret line="159" column="26" lean-forward="true" selection-start-line="159" selection-start-column="26" selection-end-line="159" selection-end-column="26" />
+>>>>>>> master
+>>>>>>> master
               <folding>
                 <element signature="e#14#23#0" expanded="true" />
               </folding>
@@ -197,8 +348,13 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/single_frame_estimation_hmr_LR_nonrigid.py">
           <provider selected="true" editor-type-id="text-editor">
+<<<<<<< HEAD
             <state relative-caret-position="8998">
               <caret line="534" column="34" selection-start-line="534" selection-start-column="34" selection-end-line="534" selection-end-column="34" />
+=======
+            <state relative-caret-position="208">
+              <caret line="532" column="16" selection-start-line="532" selection-start-column="16" selection-end-line="532" selection-end-column="16" />
+>>>>>>> master
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
               </folding>
@@ -264,18 +420,25 @@
         <option value="$PROJECT_DIR$/smpl_batch_nonrigid.py" />
         <option value="$PROJECT_DIR$/period.py" />
         <option value="$PROJECT_DIR$/single_frame_estimation_hmr_nonrigid_new.py" />
-        <option value="$PROJECT_DIR$/test_smpl.py" />
         <option value="$PROJECT_DIR$/test_parsing_mask.py" />
         <option value="$PROJECT_DIR$/single_frame_estimation_hmr_origin.py" />
         <option value="$PROJECT_DIR$/optimization_prepare.py" />
-        <option value="$PROJECT_DIR$/smpl_batch.py" />
         <option value="$PROJECT_DIR$/opendr_render/render.py" />
         <option value="$PROJECT_DIR$/single_frame_estimation_hmr_LR_nonrigid.py" />
-        <option value="$PROJECT_DIR$/smpl_np.py" />
         <option value="$PROJECT_DIR$/single_frame_estimation_hmr_LR_periodrefine.py" />
         <option value="$PROJECT_DIR$/single_frame_estimation_shape.py" />
         <option value="$PROJECT_DIR$/util.py" />
+<<<<<<< HEAD
         <option value="$PROJECT_DIR$/opendr_render/core.py" />
+=======
+<<<<<<< HEAD
+        <option value="$PROJECT_DIR$/test_smpl.py" />
+        <option value="$PROJECT_DIR$/smpl_batch.py" />
+        <option value="$PROJECT_DIR$/smpl_np.py" />
+        <option value="$PROJECT_DIR$/opendr_render/core.py" />
+=======
+>>>>>>> master
+>>>>>>> master
         <option value="$PROJECT_DIR$/single_frame_estimation_hmr_nonrigid_new_update.py" />
       </list>
     </option>
@@ -369,27 +532,6 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="single_frame_estimation_hmr" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="human_reconstruction_SR" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/single_frame_estimation_hmr.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
     <configuration name="single_frame_estimation_hmr_LR_nonrigid" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="human_reconstruction_SR" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -453,20 +595,63 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+<<<<<<< HEAD
+    <configuration name="test_smpl" type="PythonConfigurationType" factoryName="Python" temporary="true">
+=======
+    <configuration name="single_frame_estimation_shape" type="PythonConfigurationType" factoryName="Python" temporary="true">
+>>>>>>> master
+      <module name="human_reconstruction_SR" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+<<<<<<< HEAD
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/test_smpl.py" />
+=======
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/single_frame_estimation_shape.py" />
+>>>>>>> master
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <list>
       <item itemvalue="Python.single_frame_estimation_hmr_nonrigid_new_update" />
+<<<<<<< HEAD
+      <item itemvalue="Python.single_frame_estimation_hmr_LR_nonrigid" />
+      <item itemvalue="Python.refine_run" />
+      <item itemvalue="Python.single_frame_estimation_shape" />
+      <item itemvalue="Python.test_smpl" />
+=======
       <item itemvalue="Python.single_frame_estimation_hmr" />
       <item itemvalue="Python.single_frame_estimation_hmr_LR_nonrigid" />
       <item itemvalue="Python.refine_run" />
       <item itemvalue="Python.single_frame_estimation_shape" />
+>>>>>>> master
     </list>
     <recent_temporary>
       <list>
         <item itemvalue="Python.single_frame_estimation_hmr_nonrigid_new_update" />
+<<<<<<< HEAD
+        <item itemvalue="Python.test_smpl" />
+        <item itemvalue="Python.single_frame_estimation_shape" />
+        <item itemvalue="Python.refine_run" />
+        <item itemvalue="Python.single_frame_estimation_hmr_LR_nonrigid" />
+=======
         <item itemvalue="Python.single_frame_estimation_shape" />
         <item itemvalue="Python.refine_run" />
         <item itemvalue="Python.single_frame_estimation_hmr_LR_nonrigid" />
         <item itemvalue="Python.single_frame_estimation_hmr" />
+>>>>>>> master
       </list>
     </recent_temporary>
   </component>
@@ -486,13 +671,27 @@
   <component name="ToolWindowManager">
     <frame x="65" y="-4" width="1855" height="1084" extended-state="6" />
     <layout>
+<<<<<<< HEAD
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.22816594" />
+=======
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.21779476" />
+>>>>>>> master
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.3298969" />
+<<<<<<< HEAD
       <window_info anchor="bottom" id="Run" order="2" weight="0.38598326" />
       <window_info active="true" anchor="bottom" id="Debug" order="3" sideWeight="0.49933863" visible="true" weight="0.5700837" />
+=======
+<<<<<<< HEAD
+      <window_info anchor="bottom" id="Run" order="2" visible="true" weight="0.0" />
+      <window_info anchor="bottom" id="Debug" order="3" sideWeight="0.49933863" weight="0.3870293" />
+=======
+      <window_info anchor="bottom" id="Run" order="2" weight="0.2248954" />
+      <window_info active="true" anchor="bottom" id="Debug" order="3" sideWeight="0.49933863" visible="true" weight="0.30857742" />
+>>>>>>> master
+>>>>>>> master
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
@@ -533,13 +732,34 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/test_smpl.py</url>
-          <line>30</line>
+          <line>137</line>
           <option name="timeStamp" value="177" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+<<<<<<< HEAD
+          <url>file://$PROJECT_DIR$/test_smpl.py</url>
+          <line>129</line>
+          <option name="timeStamp" value="215" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/test_smpl.py</url>
+          <line>99</line>
+          <option name="timeStamp" value="217" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/single_frame_estimation_hmr_nonrigid_new_update.py</url>
+          <line>227</line>
+          <option name="timeStamp" value="218" />
+=======
+          <url>file://$PROJECT_DIR$/single_frame_estimation_hmr_nonrigid_new_update.py</url>
+<<<<<<< HEAD
           <line>343</line>
           <option name="timeStamp" value="228" />
+=======
+          <line>269</line>
+          <option name="timeStamp" value="197" />
+>>>>>>> master
+>>>>>>> master
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
@@ -552,27 +772,6 @@
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/../watch_study_fun/MuVS/venv/local/lib/python2.7/site-packages/tensorflow/python/ops/gen_array_ops.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="218">
-          <caret line="2856" column="29" selection-start-line="2856" selection-start-column="22" selection-end-line="2856" selection-end-column="29" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../watch_study_fun/MuVS/venv/local/lib/python2.7/site-packages/tensorflow/python/framework/ops.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="144">
-          <caret line="1717" selection-start-line="1717" selection-end-line="1717" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../watch_study_fun/MuVS/venv/local/lib/python2.7/site-packages/tensorflow/python/ops/sparse_ops.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="114">
-          <caret line="964" column="43" selection-start-line="964" selection-start-column="27" selection-end-line="964" selection-end-column="43" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$USER_HOME$/.PyCharmCE2018.2/system/python_stubs/495512647/cv2/cv2/DenseOpticalFlow.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-461">
@@ -637,8 +836,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/garbage_but_saved_file/single_frame_estimation_keyong12_19.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="240">
-          <caret line="335" column="27" selection-start-line="335" selection-start-column="26" selection-end-line="335" selection-end-column="27" />
+        <state relative-caret-position="360">
+          <caret line="357" column="62" selection-start-line="357" selection-start-column="62" selection-end-line="357" selection-end-column="62" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
           </folding>
@@ -850,87 +1049,35 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/optimization_prepare.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="30">
-          <caret line="102" column="19" selection-start-line="102" selection-start-column="19" selection-end-line="102" selection-end-column="19" />
-          <folding>
-            <element signature="e#0#23#0" expanded="true" />
-            <marker date="1551062712473" expanded="true" signature="180:181" ph="..." />
-            <marker date="1551062712473" expanded="true" signature="1619:1620" ph="..." />
-            <marker date="1551062712473" expanded="true" signature="2157:2679" ph="..." />
-            <marker date="1551062712473" expanded="true" signature="3777:5812" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/single_frame_estimation_hmr_origin.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="674">
-          <caret line="554" column="43" selection-start-line="554" selection-start-column="33" selection-end-line="554" selection-end-column="43" />
-          <folding>
-            <element signature="e#0#18#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/single_frame_estimation_hmr_LR.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="174">
-          <caret line="252" column="33" selection-end-line="628" />
+        <state relative-caret-position="-5136">
+          <caret line="336" column="36" selection-start-line="336" selection-start-column="30" selection-end-line="336" selection-end-column="36" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/smpl_batch.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="300">
-          <caret line="79" column="15" selection-start-line="79" selection-start-column="15" selection-end-line="79" selection-end-column="15" />
-          <folding>
-            <element signature="e#15#38#0" expanded="true" />
-            <marker date="1551272003360" expanded="true" signature="3988:3991" ph="..." />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/single_frame_estimation_hmr.py">
       <provider selected="true" editor-type-id="text-editor">
+<<<<<<< HEAD
+        <state relative-caret-position="674">
+          <caret line="554" column="43" selection-start-line="554" selection-start-column="33" selection-end-line="554" selection-end-column="43" />
+=======
         <state relative-caret-position="1521">
           <caret line="567" column="28" selection-start-line="567" selection-start-column="28" selection-end-line="567" selection-end-column="28" />
+>>>>>>> master
           <folding>
             <element signature="e#0#18#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/opendr_render/render.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="197">
-          <caret line="11" column="38" selection-start-line="11" selection-start-column="38" selection-end-line="11" selection-end-column="38" />
-          <folding>
-            <marker date="1551081882784" expanded="true" signature="3475:3481" ph="..." />
-            <marker date="1551081882784" expanded="true" signature="4068:4069" ph="..." />
-            <marker date="1551081882784" expanded="true" signature="4068:4073" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test_smpl.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1015">
-          <caret line="22" column="37" selection-start-line="22" selection-start-column="37" selection-end-line="22" selection-end-column="37" />
-          <folding>
-            <element signature="e#0#20#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/single_frame_estimation_hmr_LR_nonrigid.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="8998">
-          <caret line="534" column="34" selection-start-line="534" selection-start-column="34" selection-end-line="534" selection-end-column="34" />
+        <state relative-caret-position="208">
+          <caret line="532" column="16" selection-start-line="532" selection-start-column="16" selection-end-line="532" selection-end-column="16" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
           </folding>
@@ -939,20 +1086,43 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/refine_run.py">
       <provider selected="true" editor-type-id="text-editor">
+<<<<<<< HEAD
+        <state relative-caret-position="300">
+          <caret line="79" column="15" selection-start-line="79" selection-start-column="15" selection-end-line="79" selection-end-column="15" />
+          <folding>
+            <element signature="e#15#38#0" expanded="true" />
+            <marker date="1551272003360" expanded="true" signature="3988:3991" ph="..." />
+=======
         <state relative-caret-position="90">
           <caret line="3" column="22" selection-start-line="3" selection-start-column="22" selection-end-line="3" selection-end-column="22" />
           <folding>
             <element signature="e#0#17#0" expanded="true" />
+>>>>>>> master
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/period_new.py">
       <provider selected="true" editor-type-id="text-editor">
+<<<<<<< HEAD
+        <state relative-caret-position="1521">
+          <caret line="567" column="28" selection-start-line="567" selection-start-column="28" selection-end-line="567" selection-end-column="28" />
+=======
         <state relative-caret-position="438">
           <caret line="230" column="33" selection-start-line="230" selection-start-column="33" selection-end-line="230" selection-end-column="33" />
           <folding>
             <element signature="e#14#32#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/single_frame_estimation_hmr_LR_periodrefine.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="139">
+          <caret line="155" column="38" selection-start-line="155" selection-start-column="30" selection-end-line="155" selection-end-column="38" />
+          <folding>
+            <element signature="e#0#23#0" expanded="true" />
+            <marker date="1551088471432" expanded="true" signature="404:405" ph="..." />
           </folding>
         </state>
       </provider>
@@ -967,17 +1137,179 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/single_frame_estimation_hmr_LR_periodrefine.py">
+    <entry file="file://$PROJECT_DIR$/garbage_but_saved_file/single_frame_estimation_keyong12_19_beifen.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="259">
-          <caret line="159" column="26" lean-forward="true" selection-start-line="159" selection-start-column="26" selection-end-line="159" selection-end-column="26" />
+        <state relative-caret-position="1590">
+          <caret line="362" column="63" selection-start-line="362" selection-start-column="46" selection-end-line="362" selection-end-column="63" />
+>>>>>>> master
           <folding>
-            <element signature="e#0#23#0" expanded="true" />
-            <marker date="1551088471432" expanded="true" signature="404:405" ph="..." />
+            <element signature="e#0#18#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/garbage_but_saved_file/single_frame_estimation_keyong12_19_beifen_ls.py">
+      <provider selected="true" editor-type-id="text-editor">
+<<<<<<< HEAD
+        <state relative-caret-position="197">
+          <caret line="11" column="38" selection-start-line="11" selection-start-column="38" selection-end-line="11" selection-end-column="38" />
+=======
+        <state relative-caret-position="150">
+          <caret line="338" column="48" selection-start-line="338" selection-start-column="48" selection-end-line="338" selection-end-column="48" />
+>>>>>>> master
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/util_beifen.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/optimization_prepare.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="30">
+          <caret line="102" column="19" selection-start-line="102" selection-start-column="19" selection-end-line="102" selection-end-column="19" />
+          <folding>
+            <element signature="e#0#23#0" expanded="true" />
+            <marker date="1551062712473" expanded="true" signature="180:181" ph="..." />
+            <marker date="1551062712473" expanded="true" signature="1619:1620" ph="..." />
+            <marker date="1551062712473" expanded="true" signature="2157:2679" ph="..." />
+            <marker date="1551062712473" expanded="true" signature="3777:5812" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test_smpl.py">
+      <provider selected="true" editor-type-id="text-editor">
+<<<<<<< HEAD
+        <state relative-caret-position="-1015">
+          <caret line="22" column="37" selection-start-line="22" selection-start-column="37" selection-end-line="22" selection-end-column="37" />
+=======
+        <state relative-caret-position="420">
+          <caret line="122" column="37" selection-start-line="122" selection-start-column="37" selection-end-line="122" selection-end-column="37" />
+>>>>>>> master
+          <folding>
+            <element signature="e#0#20#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+<<<<<<< HEAD
+=======
+    <entry file="file://$PROJECT_DIR$/single_frame_estimation_hmr_origin.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="674">
+          <caret line="554" column="43" selection-start-line="554" selection-start-column="33" selection-end-line="554" selection-end-column="43" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+<<<<<<< HEAD
+    <entry file="file://$PROJECT_DIR$/single_frame_estimation_shape.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="480">
+          <caret line="67" selection-start-line="67" selection-end-line="68" selection-end-column="23" />
+          <folding>
+            <element signature="e#0#13#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/smpl_batch.py">
+=======
+>>>>>>> master
+    <entry file="file://$PROJECT_DIR$/single_frame_estimation_hmr_LR_nonrigid.py">
+>>>>>>> master
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="480">
+          <caret line="85" column="15" selection-start-line="85" selection-start-column="8" selection-end-line="85" selection-end-column="15" />
+          <folding>
+            <element signature="e#15#38#0" expanded="true" />
+            <marker date="1551269861807" expanded="true" signature="1182:1245" ph="..." />
+            <marker date="1551269861807" expanded="true" signature="4313:4316" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+<<<<<<< HEAD
+    <entry file="file://$PROJECT_DIR$/smpl_np.py">
+      <provider selected="true" editor-type-id="text-editor">
+<<<<<<< HEAD
+        <state relative-caret-position="8998">
+          <caret line="534" column="34" selection-start-line="534" selection-start-column="34" selection-end-line="534" selection-end-column="34" />
+=======
+        <state relative-caret-position="355">
+          <caret line="288" column="31" selection-start-line="288" selection-start-column="31" selection-end-line="288" selection-end-column="31" />
+>>>>>>> master
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+            <marker date="1551270093813" expanded="true" signature="1544:1548" ph="..." />
+            <marker date="1551270093813" expanded="true" signature="6398:6402" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/opendr_render/core.py">
+=======
+    <entry file="file://$PROJECT_DIR$/refine_run.py">
+>>>>>>> master
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="377">
+          <caret line="27" column="8" selection-start-line="27" selection-start-column="10" selection-end-line="28" selection-end-column="36" />
+          <folding>
+            <element signature="e#54#92#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/util.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="4704">
+          <caret line="191" column="85" selection-start-line="191" selection-start-column="85" selection-end-line="191" selection-end-column="85" />
+          <folding>
+            <element signature="e#14#23#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+<<<<<<< HEAD
+    <entry file="file://$PROJECT_DIR$/opendr_render/render.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="287">
+          <caret line="71" column="20" selection-start-line="71" selection-start-column="20" selection-end-line="71" selection-end-column="20" />
+=======
+    <entry file="file://$PROJECT_DIR$/single_frame_estimation_hmr_nonrigid_new.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="37">
+          <caret line="147" column="50" selection-start-line="147" selection-start-column="43" selection-end-line="147" selection-end-column="50" />
+          <folding>
+            <element signature="e#0#11#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/single_frame_estimation_hmr_LR_periodrefine.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="259">
+          <caret line="159" column="26" lean-forward="true" selection-start-line="159" selection-start-column="26" selection-end-line="159" selection-end-column="26" />
+>>>>>>> master
+          <folding>
+            <marker date="1551081882784" expanded="true" signature="3475:3481" ph="..." />
+            <marker date="1551081882784" expanded="true" signature="4068:4069" ph="..." />
+            <marker date="1551081882784" expanded="true" signature="4068:4073" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+<<<<<<< HEAD
+    <entry file="file://$PROJECT_DIR$/single_frame_estimation_hmr_nonrigid_new_update.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="380">
+          <caret line="320" column="51" selection-start-line="320" selection-start-column="51" selection-end-line="320" selection-end-column="51" />
+=======
     <entry file="file://$PROJECT_DIR$/single_frame_estimation_shape.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="480">
@@ -1020,8 +1352,14 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/single_frame_estimation_hmr_nonrigid_new_update.py">
       <provider selected="true" editor-type-id="text-editor">
+<<<<<<< HEAD
         <state relative-caret-position="104">
           <caret line="325" column="53" selection-start-line="325" selection-start-column="30" selection-end-line="325" selection-end-column="53" />
+=======
+        <state relative-caret-position="533">
+          <caret line="296" column="34" selection-start-line="296" selection-start-column="34" selection-end-line="296" selection-end-column="34" />
+>>>>>>> master
+>>>>>>> master
           <folding>
             <element signature="e#0#11#0" expanded="true" />
           </folding>

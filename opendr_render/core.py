@@ -8,7 +8,7 @@ from __future__ import print_function
 
 import numpy as np
 import cv2
-
+import pickle
 from opendr.camera import ProjectPoints
 from opendr.renderer import ColoredRenderer, TexturedRenderer
 from opendr.lighting import LambertianPointLight
@@ -26,7 +26,10 @@ class SMPLRenderer(object):
                  img_size=224,
                  flength=500.,
                  face_path="tf_smpl/smpl_faces.npy"):
+        # with open("/home/lgh/code/SMPLify_TF/smpl/models/bodyparts.pkl", 'rb') as f:
+        #     v_ids = pickle.load(f)
         self.faces = np.load(face_path)
+<<<<<<< HEAD
         smpl = smpl_np.SMPLModel('/home/lgh/code/SMPLify_TF/smpl/models/basicmodel_m_lbs_10_207_0_v1.0.0.pkl')
         # body_parsing_idx = smpl.get_local_index()
         # body_parsing_idx1 = np.array(body_parsing_idx[0]).squeeze()
@@ -36,6 +39,10 @@ class SMPLRenderer(object):
         #hands = _cache['fingers_l']
         # hands = np.unique(hands)
         #self.faces = np.array(filter(lambda face: np.intersect1d(face, hands).size == 0, self.faces))
+=======
+        # hands = np.concatenate((v_ids['hand_r'], v_ids['hand_l']))
+        # self.faces = np.array(filter(lambda face: np.intersect1d(face, hands).size == 0, self.faces))
+>>>>>>> master
         self.w = img_size
         self.h = img_size
         self.flength = flength

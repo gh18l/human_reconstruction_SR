@@ -224,6 +224,19 @@ def smpl_to_boundary(camera, pose, beta, tran, verts2d):
             contour = contours[ind][i, :, :]
             ### if it need faster, the search range can be limited in small district
             distances = get_distance(contour, verts2d)
+<<<<<<< HEAD
+            min_smpl_index = np.argmin(distances)
+            contours_smpl_index.append(min_smpl_index)
+    ## view smpl contours result
+    for i in range(len(contours_smpl_index)):
+        smpl_index = contours_smpl_index[i]
+        x = np.rint(verts2d[smpl_index, 0]).astype("int")
+        y = np.rint(verts2d[smpl_index, 1]).astype("int")
+        mask[y, x] = 255
+
+    cv2.imshow("1", mask)
+    cv2.waitKey()
+=======
             min_smpl_indexs = get_n_min_index(distances, 2)
             #min_smpl_index = np.argmin(distances)
             for n in range(len(min_smpl_indexs)):
@@ -238,6 +251,7 @@ def smpl_to_boundary(camera, pose, beta, tran, verts2d):
     #
     # cv2.imshow("1", mask)
     # cv2.waitKey()
+<<<<<<< HEAD
     ## view verts2d result
     # bg1 = np.copy(img_result_naked)
     # for i in range(len(contours_smpl_index)):
@@ -247,6 +261,9 @@ def smpl_to_boundary(camera, pose, beta, tran, verts2d):
     #     bg1[y, x, :] = 255
     # cv2.imshow("1", bg1)
     # cv2.waitKey()
+=======
+>>>>>>> master
+>>>>>>> master
     return contours_smpl_index
 
 def get_parsing_smpl_contours(contours_smpl_index, body_parsing_idx):
