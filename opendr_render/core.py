@@ -12,7 +12,8 @@ import cv2
 from opendr.camera import ProjectPoints
 from opendr.renderer import ColoredRenderer, TexturedRenderer
 from opendr.lighting import LambertianPointLight
-
+import smpl_np
+import pickle
 colors = {
     # colorbline/print/copy safe:
     'light_blue': [0.65098039, 0.74117647, 0.85882353],
@@ -26,6 +27,15 @@ class SMPLRenderer(object):
                  flength=500.,
                  face_path="tf_smpl/smpl_faces.npy"):
         self.faces = np.load(face_path)
+        smpl = smpl_np.SMPLModel('/home/lgh/code/SMPLify_TF/smpl/models/basicmodel_m_lbs_10_207_0_v1.0.0.pkl')
+        # body_parsing_idx = smpl.get_local_index()
+        # body_parsing_idx1 = np.array(body_parsing_idx[0]).squeeze()
+        #with open('/home/lgh/code/SMPLify_TF/smpl/models/bodyparts.pkl', 'rb') as fp:
+            #_cache = pickle.load(fp)
+        #hands = np.concatenate((_cache['fingers_l']))
+        #hands = _cache['fingers_l']
+        # hands = np.unique(hands)
+        #self.faces = np.array(filter(lambda face: np.intersect1d(face, hands).size == 0, self.faces))
         self.w = img_size
         self.h = img_size
         self.flength = flength

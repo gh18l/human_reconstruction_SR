@@ -10,6 +10,7 @@ from opendr_render import render
 import optimization_prepare as opt_pre
 import pickle
 import smpl_np
+import random
 ind = 4
 
 def get_n_min_index(values, n):
@@ -210,7 +211,7 @@ def smpl_to_boundary(camera, pose, beta, tran, verts2d):
     bg = np.zeros([450, 600, 3], dtype=np.uint8)
     img_result_naked = camera.render_naked(verts, bg)
     mask = img_result_naked[:, :, 0]
-    contours, _ = cv2.findContours(mask, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
+    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
 
     ### find nearest 2d smpl point of each contour point to get boundary
     '''
@@ -236,6 +237,15 @@ def smpl_to_boundary(camera, pose, beta, tran, verts2d):
     #     mask[y, x] = 255
     #
     # cv2.imshow("1", mask)
+    # cv2.waitKey()
+    ## view verts2d result
+    # bg1 = np.copy(img_result_naked)
+    # for i in range(len(contours_smpl_index)):
+    #     index = contours_smpl_index[i]
+    #     x = np.rint(verts2d[index, 0]).astype("int")
+    #     y = np.rint(verts2d[index, 1]).astype("int")
+    #     bg1[y, x, :] = 255
+    # cv2.imshow("1", bg1)
     # cv2.waitKey()
     return contours_smpl_index
 
@@ -312,6 +322,24 @@ def nonrigid_estimation():
     smpl_parsing_index = get_parsing_smpl_contours(contours_smpl_index, body_parsing_idx)
     maskcontours_smpl_index = get_maskcontours_smpl_index(mask_parsing_index, contours, smpl_parsing_index, verts2d)
 
+    #### view correspondence
+    maskcontours_smpl_index = maskcontours_smpl_index.reshape([-1, 1]).astype(np.int64)
+    bg = np.zeros([450, 600, 3], dtype=np.uint8)
+    for i in range(len(maskcontours_smpl_index)):
+        b = random.random()*255
+        g = random.random()*255
+        r = random.random()*255
+        index = maskcontours_smpl_index[i]
+        x1 = np.rint(verts2d[index, 0]).astype("int")
+        y1 = np.rint(verts2d[index, 1]).astype("int")
+        x2 = np.rint(contours.squeeze()[i, 0]).astype("int")
+        y2 = np.rint(contours.squeeze()[i, 1]).astype("int")
+        img = cv2.line(bg, [x1, y1], [x2, y2], [b, g, r])
+    cv2.imshow("1", img)
+    cv2.waitKey()
+
+
+
     ##### generate smpl shape template
     param_shape = tf.Variable(betas[ind].reshape([1, -1]), dtype=tf.float32)
     param_rot = tf.constant(poses[ind][0:3].reshape([1, -1]), dtype=tf.float32)
@@ -342,10 +370,14 @@ def nonrigid_estimation():
     objs_nonrigid = {}
     maskcontours_smpl_index = maskcontours_smpl_index.reshape([-1, 1]).astype(np.int64)
     verts_est_contours = tf.gather_nd(verts_est, maskcontours_smpl_index)
-    objs_nonrigid['verts_loss'] = 0.08 * tf.reduce_sum(tf.square(verts_est_contours - contours.squeeze()))
+
+    objs_nonrigid['verts_loss'] = 0.5 * tf.reduce_sum(tf.square(verts_est_contours - contours.squeeze()))
     #### norm choose
+    ###0.05
     objs_nonrigid['laplace'] = 0.05 * tf.reduce_sum(weights_laplace * tf.reduce_sum(tf.square(tf.matmul(L, v_tf) - delta), 1))
-    objs_nonrigid['smooth_loss'] = 1.0 * tf.reduce_sum(tf.square(v_tf - v_shaped_tf))
+
+    ###1.0
+    objs_nonrigid['smooth_loss'] = 0.3 * tf.reduce_sum(tf.square(v_tf - v_shaped_tf))
 
     loss = tf.reduce_mean(objs_nonrigid.values())
     with tf.Session() as sess:
