@@ -160,6 +160,9 @@ def refine_optimization(poses, betas, trans, data_dict, hmr_dict, LR_cameras, te
             if not os.path.exists(util.hmr_path + "output_after_refine"):
                 os.makedirs(util.hmr_path + "output_after_refine")
             cv2.imwrite(util.hmr_path + "output_after_refine/hmr_optimization_texture_%04d.png" % ind, img_result_texture)
+            img_result_texture_bg = camera.render_texture_imgbg(v, texture_img, texture_vt, LR_imgs[ind])
+            cv2.imwrite(util.hmr_path + "output_after_refine/texture_bg_%04d.png" % ind,
+                        img_result_texture_bg)
             if util.video is True:
                 videowriter.write(img_result_texture)
             img_result_naked = camera.render_naked(v, LR_imgs[ind])

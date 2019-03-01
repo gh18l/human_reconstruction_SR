@@ -71,7 +71,7 @@ video = True
 # hr_points = [11, 27, 43, 59]
 ###jianing2
 lr_points = [0, 16, 32, 48, 64, 80]    ###[0, 18, 36, 54, 72]
-hr_points = [14, 30, 46, 62]
+hr_points = [14, 30]
 ###jianing2copy
 #lr_points = [0, 16]    ###[0, 18, 36, 54, 72]
 #hr_points = [14, 30]

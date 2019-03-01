@@ -75,6 +75,20 @@ class camera():
         cpp_render(img.shape[1])
         render_result = cv2.imread("./render_temp/result.png")
         return render_result
+
+    def render_texture_imgbg(self, verts, img, vt, bg):
+        self.write_camera("./render_temp/camera.txt")
+        self.write_obj("./render_temp/model.obj", verts, vt)
+        cv2.imwrite("./render_temp/HR.png", img)
+        cpp_render(img.shape[1])
+        render_result = cv2.imread("./render_temp/result.png")
+        bg_img = np.copy(bg)
+        for i in range(render_result.shape[0]):
+            for j in range(render_result.shape[1]):
+                if render_result[i, j, 0] == 0 and render_result[i, j, 1] == 0 and render_result[i, j, 2] == 0:
+                    continue
+                bg_img[i, j, :] = render_result[i, j, :]
+        return bg_img
     '''
     save cropped texture
     '''

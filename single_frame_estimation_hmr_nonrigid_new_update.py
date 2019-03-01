@@ -32,11 +32,126 @@ def get_distance_parsing(point, points, smpl_index):
     distances = np.ones([6890]) * 99999999.0
     for i in range(len(points)):
         if i in smpl_index:
+            distance = np.square(point[0] - points[i, 0]) + np.square(point[1] - points[i, 1])
+            distances[i] = distance
+    return distances
+
+def get_distance_parsing1(point, points, smpl_index):
+    distances = np.ones([6890]) * 99999999.0
+    for i in range(len(points)):
+        if i in smpl_index:
             distance = np.square(point[0, 0] - points[i, 0]) + np.square(point[0, 1] - points[i, 1])
             distances[i] = distance
     return distances
 
+def smplindex_to_smplcontoursindex(smpl_index, _contours_smpl_index):
+    smpl_index_converted = []
+    for i in range(len(_contours_smpl_index)):
+        if smpl_index == _contours_smpl_index[i]:
+            smpl_index_converted = i
+            break
+    return smpl_index_converted
+
 def load_body_parsing():
+    ### head+leftarm+rightarm   head+leftarm   head+rightarm   body+leftleg+rightleg
+    ### body+leftleg   body+rightleg
+
+    '''
+    TODO
+    make parsing similar to public datasets more
+    '''
+    dd = pickle.load(open(util.NORMAL_SMPL_PATH))
+    weights = dd['weights']
+    leg_index = np.array([1, 4, 7, 10, 2, 5, 8, 11])[:, np.newaxis]
+    leftleg_index = np.array([1, 4, 7, 10])[:, np.newaxis]
+    rightleg_index = np.array([2, 5, 8, 11])[:, np.newaxis]
+    arm_index = np.array([17, 19, 21, 23, 16, 18, 20, 22, 14, 13])[:, np.newaxis]
+    leftarm_index = np.array([16, 18, 20, 22, 13])[:, np.newaxis]
+    rightarm_index = np.array([17, 19, 21, 23, 14])[:, np.newaxis]
+    body_index = np.array([0, 3, 6, 9])[:, np.newaxis]
+    head_index = np.array([12, 15])[:, np.newaxis]
+
+    head_leftarm_rightarm_index = head_index
+    head_leftarm_index = np.concatenate([head_index, leftarm_index], axis=0)
+    head_rightarm_index = np.concatenate([head_index, rightarm_index], axis=0)
+    body_leftleg_rightleg_index = np.concatenate([body_index, leftleg_index, rightleg_index],
+                                                 axis=0)
+    body_leftleg_index = np.concatenate([body_index, leftleg_index], axis=0)
+    body_rightleg_index = np.concatenate([body_index, rightleg_index], axis=0)
+
+    threshold = 0.3
+    body_parsing_idx = []  ###body head
+    _head_leftarm_rightarm_idx = np.zeros(6890)
+    _head_leftarm_idx = np.zeros(6890)
+    _head_rightarm_idx = np.zeros(6890)
+    _body_leftleg_rightleg_idx = np.zeros(6890)
+    _body_leftleg_idx = np.zeros(6890)
+    _body_rightleg_idx = np.zeros(6890)
+    placeholder_idx = np.zeros(6890)
+    _test_idx = np.zeros(6890)
+
+    for _, iii in enumerate(head_index):  ##head
+        length = len(weights[:, iii])
+        for ii in range(length):
+            if weights[ii, iii] > threshold and placeholder_idx[ii] == 0:
+                _head_leftarm_rightarm_idx[ii] = 1
+                placeholder_idx[ii] = 1
+                _test_idx[ii] = 1
+    head_leftarm_rightarm_idx = np.where(_head_leftarm_rightarm_idx == 1)
+    body_parsing_idx.append(head_leftarm_rightarm_idx)
+
+    for _, iii in enumerate(leftarm_index):
+        length = len(weights[:, iii])
+        for ii in range(length):
+            if weights[ii, iii] > threshold and placeholder_idx[ii] == 0:
+                _head_leftarm_idx[ii] = 1
+                placeholder_idx[ii] = 1
+                _test_idx[ii] = 1
+    head_leftarm_idx = np.where(_head_leftarm_idx == 1)
+    body_parsing_idx.append(head_leftarm_idx)
+
+    for _, iii in enumerate(rightarm_index):
+        length = len(weights[:, iii])
+        for ii in range(length):
+            if weights[ii, iii] > threshold and placeholder_idx[ii] == 0:
+                _head_rightarm_idx[ii] = 1
+                placeholder_idx[ii] = 1
+                _test_idx[ii] = 1
+    head_rightarm_idx = np.where(_head_rightarm_idx == 1)
+    body_parsing_idx.append(head_rightarm_idx)
+
+    for _, iii in enumerate(body_index):
+        length = len(weights[:, iii])
+        for ii in range(length):
+            if weights[ii, iii] > threshold and placeholder_idx[ii] == 0:
+                _body_leftleg_rightleg_idx[ii] = 1
+                placeholder_idx[ii] = 1
+                _test_idx[ii] = 1
+    body_leftleg_rightleg_idx = np.where(_body_leftleg_rightleg_idx == 1)
+    body_parsing_idx.append(body_leftleg_rightleg_idx)
+
+    for _, iii in enumerate(leftleg_index):
+        length = len(weights[:, iii])
+        for ii in range(length):
+            if weights[ii, iii] > threshold and placeholder_idx[ii] == 0:
+                _body_leftleg_idx[ii] = 1
+                placeholder_idx[ii] = 1
+                _test_idx[ii] = 1
+    body_leftleg_idx = np.where(_body_leftleg_idx == 1)
+    body_parsing_idx.append(body_leftleg_idx)
+
+    for _, iii in enumerate(rightleg_index):
+        length = len(weights[:, iii])
+        for ii in range(length):
+            if weights[ii, iii] > threshold and placeholder_idx[ii] == 0:
+                _body_rightleg_idx[ii] = 1
+                placeholder_idx[ii] = 1
+                _test_idx[ii] = 1
+    body_rightleg_idx = np.where(_body_rightleg_idx == 1)
+    body_parsing_idx.append(body_rightleg_idx)
+    return body_parsing_idx
+
+def load_body_parsing1():
     ### head+leftarm+rightarm   head+leftarm   head+rightarm   body+leftleg+rightleg
     ### body+leftleg   body+rightleg
 
@@ -131,6 +246,7 @@ def load_body_parsing():
     return body_parsing_idx
 
 
+
 def load_nonrigid_data():
     base_path = util.hmr_path + "output"
     pkl_files = os.listdir(base_path)
@@ -192,6 +308,43 @@ def get_parsing_contours(parsing_mask):
         color = parsing_mask[contours[0][i, :, 1], contours[0][i, :, 0]].squeeze()
         if color[0] == 0 and color[1] == 128 and color[2] == 0: ##green head
             mask_parsing_index['head'].append(i)
+            mask_parsing_index['left_arm'].append(i)
+            mask_parsing_index['right_arm'].append(i)
+        if color[0] == 128 and color[1] == 0 and color[2] == 128:
+            mask_parsing_index['right_arm'].append(i)
+            mask_parsing_index['head'].append(i)
+        if color[0] == 0 and color[1] == 128 and color[2] == 128:  ## yellow
+            mask_parsing_index['left_arm'].append(i)
+            mask_parsing_index['head'].append(i)
+        if color[0] == 0 and color[1] == 0 and color[2] == 128: ##red
+            mask_parsing_index['body'].append(i)
+            mask_parsing_index['right_leg'].append(i)
+            mask_parsing_index['left_leg'].append(i)
+        if color[0] == 128 and color[1] == 128 and color[2] == 0:
+            mask_parsing_index['right_leg'].append(i)
+            mask_parsing_index['body'].append(i)
+        if color[0] == 128 and color[1] == 0 and color[2] == 0: ##red
+            mask_parsing_index['left_leg'].append(i)
+            mask_parsing_index['body'].append(i)
+    return mask_parsing_index, contours
+
+def get_parsing_contours1(parsing_mask):
+    masks = np.zeros_like(parsing_mask)
+    for i in range(parsing_mask.shape[0]):
+        for j in range(parsing_mask.shape[1]):
+            if parsing_mask[i, j, 0] == 0 and parsing_mask[i, j, 1] == 0 and parsing_mask[i, j, 2] == 0:
+                continue
+            masks[i, j, :] = 255
+    mask = masks[:, :, 0]
+    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    contours = np.array(contours)
+    ## split contours into parsing
+    mask_parsing_index = {'head': [], 'left_arm': [], 'right_arm': [],
+                    'left_leg': [], 'right_leg': [], 'body': []}
+    for i in range(len(contours[0])):
+        color = parsing_mask[contours[0][i, :, 1], contours[0][i, :, 0]].squeeze()
+        if color[0] == 0 and color[1] == 128 and color[2] == 0: ##green head
+            mask_parsing_index['head'].append(i)
         if color[0] == 128 and color[1] == 0 and color[2] == 128:
             mask_parsing_index['right_arm'].append(i)
         if color[0] == 0 and color[1] == 128 and color[2] == 128:  ## yellow
@@ -219,11 +372,13 @@ def smpl_to_boundary(camera, pose, beta, tran, verts2d):
     '''
     contours_smpl_index = []
     for ind in range(len(contours)):
+        if len(contours[ind]) < 100:
+            continue
         for i in range(len(contours[ind])):
             contour = contours[ind][i, :, :]
             ### if it need faster, the search range can be limited in small district
             distances = get_distance(contour, verts2d)
-            min_smpl_indexs = get_n_min_index(distances, 2)
+            min_smpl_indexs = get_n_min_index(distances, 1)
             #min_smpl_index = np.argmin(distances)
             for n in range(len(min_smpl_indexs)):
                 contours_smpl_index.append(min_smpl_indexs[n])
@@ -276,24 +431,25 @@ def get_maskcontours_smpl_index(mask_parsing_index, mask_contours, contours_smpl
         smpl_indexs = contours_smpl_index[name]
         for i in range(len(mask_parsing_index[name])):
             mask_index = mask_parsing_index[name][i]
-            distances = get_distance_parsing(mask_contours[0][mask_index, :, :], verts2d, smpl_indexs)
+            distances = get_distance_parsing1(mask_contours[0][mask_index, :, :], verts2d, smpl_indexs)
             min_smpl_index = np.argmin(distances)
             maskcontours_smpl_index[mask_index] = min_smpl_index
     return maskcontours_smpl_index
 
-def get_smplcontours_mask_index(mask_parsing_index, mask_contours, contours_smpl_index, verts2d):
+def get_smplcontours_mask_index(mask_parsing_index, mask_contours, contours_smpl_index, verts2d, _contours_smpl_index):
     length = 0
     for name in contours_smpl_index:
         length = length + len(contours_smpl_index[name])
 
-    smplcontours_mask_index = np.zeros(length)
+    smplcontours_mask_index = np.zeros(length, dtype=np.int64)
     for name in contours_smpl_index:
         mask_indexs = mask_parsing_index[name]
         for i in range(len(contours_smpl_index[name])):
             smpl_index = contours_smpl_index[name][i]
+            smpl_index_converted = smplindex_to_smplcontoursindex(smpl_index, _contours_smpl_index)
             distances = get_distance_parsing(verts2d[smpl_index, :], mask_contours.squeeze(), mask_indexs)
             min_mask_index = np.argmin(distances)
-            smplcontours_mask_index[smpl_index] = min_mask_index
+            smplcontours_mask_index[smpl_index_converted] = min_mask_index
     return smplcontours_mask_index
 
 def nonrigid_estimation():
@@ -302,15 +458,19 @@ def nonrigid_estimation():
     HR_masks = data_dict["masks"]
     poses, betas, trans, cams = load_nonrigid_data()
     body_parsing_idx = load_body_parsing()
+    body_parsing_idx1 = load_body_parsing1()
     parsing_mask = load_parsing_mask()
 
     camera = render.camera(cams[ind][0], cams[ind][1], cams[ind][2], cams[ind][3])
     ## get parsing img contours index
     verts2d = get_verts2d(cams[ind], poses[ind], betas[ind], trans[ind])
     mask_parsing_index, contours = get_parsing_contours(parsing_mask)
+    mask_parsing_index1, contours1 = get_parsing_contours1(parsing_mask)
     contours_smpl_index = smpl_to_boundary(camera, poses[ind], betas[ind], trans[ind], verts2d)
     smpl_parsing_index = get_parsing_smpl_contours(contours_smpl_index, body_parsing_idx)
-    maskcontours_smpl_index = get_maskcontours_smpl_index(mask_parsing_index, contours, smpl_parsing_index, verts2d)
+    smpl_parsing_index1 = get_parsing_smpl_contours(contours_smpl_index, body_parsing_idx1)
+    smplcontours_mask_index = get_smplcontours_mask_index(mask_parsing_index, contours, smpl_parsing_index, verts2d, contours_smpl_index)
+    maskcontours_smpl_index = get_maskcontours_smpl_index(mask_parsing_index1, contours, smpl_parsing_index1, verts2d)
 
     ##### generate smpl shape template
     param_shape = tf.Variable(betas[ind].reshape([1, -1]), dtype=tf.float32)
@@ -340,11 +500,23 @@ def nonrigid_estimation():
                                       cams[ind][2], cams[ind][3], np.zeros(3))
     verts_est = cam_nonrigid.project(tf.squeeze(v_tf))
     objs_nonrigid = {}
+    contours_tf = tf.convert_to_tensor(contours.squeeze(), dtype=tf.float32)
+
+    contours_smpl_index = contours_smpl_index.reshape([-1, 1]).astype(np.int64)
+    smplcontours_mask_index = smplcontours_mask_index.reshape([-1, 1]).astype(np.int64)
+
+    verts_est1 = tf.gather_nd(verts_est, contours_smpl_index)
+    contours1_tf = tf.gather_nd(contours_tf, smplcontours_mask_index)
+    objs_nonrigid['verts_loss'] = 0.0 * tf.reduce_sum(tf.square(verts_est1 - contours1_tf))
+
+    #### verts_loss1
     maskcontours_smpl_index = maskcontours_smpl_index.reshape([-1, 1]).astype(np.int64)
     verts_est_contours = tf.gather_nd(verts_est, maskcontours_smpl_index)
-    objs_nonrigid['verts_loss'] = 0.08 * tf.reduce_sum(tf.square(verts_est_contours - contours.squeeze()))
+    objs_nonrigid['verts_loss1'] = 0.08 * tf.reduce_sum(tf.square(verts_est_contours - contours.squeeze()))
+
+
     #### norm choose
-    objs_nonrigid['laplace'] = 0.05 * tf.reduce_sum(weights_laplace * tf.reduce_sum(tf.square(tf.matmul(L, v_tf) - delta), 1))
+    objs_nonrigid['laplace'] = 0.01 * tf.reduce_sum(weights_laplace * tf.reduce_sum(tf.square(tf.matmul(L, v_tf) - delta), 1))
     objs_nonrigid['smooth_loss'] = 1.0 * tf.reduce_sum(tf.square(v_tf - v_shaped_tf))
 
     loss = tf.reduce_mean(objs_nonrigid.values())
@@ -363,6 +535,13 @@ def nonrigid_estimation():
             print("the %s loss is %f" % (name, _objs_nonrigid[name]))
 
     ### view data
+    ## dont render fingers
+    # with open("/home/lgh/code/SMPLify_TF/smpl/models/bodyparts.pkl", 'rb') as f:
+    #     v_ids = pickle.load(f)
+    # fingers = np.concatenate((v_ids['fingers_r'], v_ids['fingers_l']))
+    # faces = camera.renderer.faces
+    # camera.renderer.faces = np.array(filter(lambda face: np.intersect1d(face, fingers).size == 0, faces))
+
     _, vt = camera.generate_uv(v_nonrigid_final, HR_imgs[ind])
     if not os.path.exists(util.hmr_path + "output_nonrigid"):
         os.makedirs(util.hmr_path + "output_nonrigid")

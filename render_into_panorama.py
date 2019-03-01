@@ -4,12 +4,14 @@ import numpy as np
 
 base_path = "/home/lgh/code/SMPLify_TF/test/test_hmr_init"
 pano_path = "/home/lgh/code/result.jpg"
-output_path = "/home/lgh/code/SMPLify_TF/test/test_hmr_init/output"
-render_people_list = ["dingjian", "xiongfei"]
+output_path = "/home/lgh/code/SMPLify_TF/test/test_hmr_init/jianing2/final"
+render_people_list = ["jianing2"]
     #["dingjian", "xiongfei", "jianing", "zhicheng"]
-start_time = [342, 647, 0, 0]
-end_time = [410, 727, 0, 0]
-max_timestamp = 730
+# start_time = [342, 647, 0, 0]
+# end_time = [410, 727, 0, 0]
+start_time = [0, 0, 1113, 0]
+end_time = [0, 0, 1192, 0]
+max_timestamp = 1200
 
 pano_to_ref_scale = 0.585
 local_to_ref_scale = 0.15
@@ -27,10 +29,10 @@ dict_coordination = {}
 for ind, render_people in enumerate(render_people_list):
     coordination_file = os.path.join(base_path, render_people, "coordination.npy")
     coordination = np.load(coordination_file)
-    render_img_path = os.path.join(base_path, render_people, "output")
+    render_img_path = os.path.join(base_path, render_people, "output_after_refine")
     render_img_files = os.listdir(render_img_path)
     render_img_files = sorted(
-        [filename for filename in render_img_files if filename.endswith(".png") and "texture" in filename],
+        [filename for filename in render_img_files if filename.endswith(".png") and "hmr_optimization_texture" in filename],
         key=lambda d: int((d.split('_')[3]).split('.')[0]))
     dict_prefix[render_people] = render_img_path
     dict_suffix[render_people] = render_img_files
@@ -78,8 +80,8 @@ for t in range(max_timestamp):
         os.makedirs(output_origin_path)
     # if not os.path.exists(output_small_path):
     # os.makedirs(output_small_path)
-    pano_temp = cv2.resize(pano_temp, (pano_temp.shape[1] / 5,
-                                       pano_temp.shape[0] / 5))
+    #pano_temp = cv2.resize(pano_temp, (pano_temp.shape[1] / 5,
+                                       #pano_temp.shape[0] / 5))
     cv2.imwrite(os.path.join(output_origin_path, "pano_%04d.jpg" % t), pano_temp)
 
 
