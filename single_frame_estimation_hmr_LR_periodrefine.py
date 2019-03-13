@@ -9,7 +9,7 @@ import os
 import cv2
 import optimization_prepare as opt_pre
 import smpl_np
-
+import correct_final_texture as tex
 def refine_optimization(poses, betas, trans, data_dict, hmr_dict, LR_cameras, texture_img, texture_vt):
     LR_j2ds = data_dict["j2ds"]
     LR_confs = data_dict["confs"]
@@ -115,7 +115,8 @@ def refine_optimization(poses, betas, trans, data_dict, hmr_dict, LR_cameras, te
             weights_foot * tf.reduce_sum(tf.square(_LR_j2ds_foot - j2ds_est[0:2, :]), 1))
 
         param_complete_pose = tf.concat([param_rot, param_pose], axis=1)
-        objs['Prior_Loss'] = 6000.0 * tf.reduce_sum(tf.square(param_complete_pose[0, :] - poses[ind, :]))
+        ### 6000.0
+        objs['Prior_Loss'] = 500.0 * tf.reduce_sum(tf.square(param_complete_pose[0, :] - poses[ind, :]))
         objs['Prior_Shape'] = 5.0 * tf.reduce_sum(tf.square(param_shape))
         w1 = np.array([1.04 * 2.0, 1.04 * 2.0, 57.4 * 50, 57.4 * 50])
         w1 = tf.constant(w1, dtype=tf.float32)
@@ -123,6 +124,18 @@ def refine_optimization(poses, betas, trans, data_dict, hmr_dict, LR_cameras, te
             tf.exp(param_pose[0, 52]), tf.exp(-param_pose[0, 55]),
             tf.exp(-param_pose[0, 9]), tf.exp(-param_pose[0, 12])])
         w_temporal = [0.5, 0.5, 1.0, 1.5, 2.5, 2.5, 1.5, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 7.0, 7.0]
+
+        param_pose_full = tf.concat([param_rot, param_pose], axis=1)
+        objs['hmr_constraint'] = 500.0 * tf.reduce_sum(tf.square(tf.squeeze(param_pose_full) - hmr_theta))
+        ### 8000.0
+        objs['hmr_hands_constraint'] = 100000.0 * tf.reduce_sum(
+            tf.square(tf.squeeze(param_pose_full)[21] - hmr_theta[21])
+            + tf.square(tf.squeeze(param_pose_full)[23] - hmr_theta[23])
+            + tf.square(tf.squeeze(param_pose_full)[20] - hmr_theta[20])
+            + tf.square(tf.squeeze(param_pose_full)[22] - hmr_theta[22]))
+
+        #param_pose_full = tf.concat([param_rot, param_pose], axis=1)
+        #objs['hmr_constraint'] = 30.0 * tf.reduce_sum(tf.square(tf.squeeze(param_pose_full) - hmr_theta))
         if ind != 0:
             objs['temporal'] = 800.0 * tf.reduce_sum(
                 w_temporal * tf.reduce_sum(tf.square(j3ds - j3ds_old), 1))
@@ -145,6 +158,7 @@ def refine_optimization(poses, betas, trans, data_dict, hmr_dict, LR_cameras, te
             optimizer.minimize(sess)
             pose_final, betas_final, trans_final = sess.run(
                 [tf.concat([param_rot, param_pose], axis=1), param_shape, param_trans])
+            #betas_final = betas_final * 0.05
             v_final = sess.run([v, verts_est, j3ds])
             v_final_fixed = sess.run(verts_est_fixed)
             cam_LR1 = sess.run([cam_LR.fl_x, cam_LR.cx, cam_LR.cy, cam_LR.trans])
@@ -157,10 +171,12 @@ def refine_optimization(poses, betas, trans, data_dict, hmr_dict, LR_cameras, te
             v = smpl.get_verts(pose_final, betas_final, trans_final)
 
             img_result_texture = camera.render_texture(v, texture_img, texture_vt)
+            img_result_texture = tex.correct_render_small(img_result_texture)
             if not os.path.exists(util.hmr_path + "output_after_refine"):
                 os.makedirs(util.hmr_path + "output_after_refine")
             cv2.imwrite(util.hmr_path + "output_after_refine/hmr_optimization_texture_%04d.png" % ind, img_result_texture)
-            img_result_texture_bg = camera.render_texture_imgbg(v, texture_img, texture_vt, LR_imgs[ind])
+            #bg_new = cv2.resize(LR_imgs[ind], (2442, 1832))
+            img_result_texture_bg = camera.render_texture_imgbg(img_result_texture, LR_imgs[ind])
             cv2.imwrite(util.hmr_path + "output_after_refine/texture_bg_%04d.png" % ind,
                         img_result_texture_bg)
             if util.video is True:

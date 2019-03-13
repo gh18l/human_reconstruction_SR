@@ -63,7 +63,7 @@ for t in range(max_timestamp):
         render_in_pano_x = render_x_scaled + calibration_delta[0]
         render_in_pano_y = render_y_scaled + calibration_delta[1]
 
-        ### rezize image into pano size, compatible with ref and origin texture
+        ### resize image into pano size, compatible with ref and origin texture
         render_img_w = int(600.0 / pano_to_ref_scale)
         render_img_h = int(450.0 / pano_to_ref_scale)
         render_img_scaled = cv2.resize(render_img, (render_img_w,

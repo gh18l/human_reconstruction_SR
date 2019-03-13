@@ -46,12 +46,12 @@ def get_laplace_weights():
     weights[v_ids['face']] = 12.
     weights[v_ids['hand_l']] = 5.
     weights[v_ids['hand_r']] = 5.
-    weights[v_ids['fingers_l']] = 8.
-    weights[v_ids['fingers_r']] = 8.
+    weights[v_ids['fingers_l']] = 8.  ##8.
+    weights[v_ids['fingers_r']] = 8.  ##8.
     weights[v_ids['foot_l']] = 5.
     weights[v_ids['foot_r']] = 5.
-    weights[v_ids['toes_l']] = 8.
-    weights[v_ids['toes_r']] = 8.
+    weights[v_ids['toes_l']] = 8.  ##8.
+    weights[v_ids['toes_r']] = 8.  ##8.
     weights[v_ids['ear_l']] = 10.
     weights[v_ids['ear_r']] = 10.
     return weights
@@ -178,5 +178,10 @@ def get_dense_correspondence(verts, img1, img2):
         verts_new[i][1] = position_y + flow[y, x, 1]  ##y
     return verts_new
 
-
+def get_hands_feet_index():
+    with open('./smpl/models/bodyparts.pkl', 'rb') as fp:
+        v_ids = pkl.load(fp)
+    hands_feet = np.concatenate((v_ids['fingers_r'], v_ids['fingers_l']))
+    #hands_feet = []
+    return hands_feet
 

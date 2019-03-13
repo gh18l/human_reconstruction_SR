@@ -17,6 +17,7 @@ import pickle
 import period_new
 import optimization_prepare as opt_pre
 import smpl_np
+import correct_final_texture as tex
 def demo_point(x, y, img_path = None):
     import matplotlib.pyplot as plt
     if img_path != None:
@@ -499,13 +500,22 @@ def main(flength=2500.):
         ##############################################################
         ###################mask obj###################################
         ##############################################################
-        objs['mask'] = 0.1 * tf.reduce_sum(verts2dsilhouette / 255.0 * (255.0 - LR_mask) / 255.0
-                                            + 0.0 * (255.0 - verts2dsilhouette) / 255.0 * LR_mask / 255.0)
+        objs['mask'] = 0.05 * tf.reduce_sum(verts2dsilhouette / 255.0 * (255.0 - LR_mask) / 255.0
+                                            + (255.0 - verts2dsilhouette) / 255.0 * LR_mask / 255.0)
 
         objs['face'] = 0.0 * tf.reduce_sum(tf.square(hmr_joint3d[14:19] - jointsplus[14:19]))
 
         objs['face_pose'] = 0.0 * tf.reduce_sum(tf.square(param_pose[0, 33:36] - hmr_theta[36:39])
                                           + tf.square(param_pose[0, 42:45] - hmr_theta[45:48]))
+
+        param_pose_full = tf.concat([param_rot, param_pose], axis=1)
+        objs['hmr_constraint'] = 500.0 * tf.reduce_sum(tf.square(tf.squeeze(param_pose_full) - hmr_theta))
+        ### 8000.0
+        objs['hmr_hands_constraint'] = 100000.0 * tf.reduce_sum(
+            tf.square(tf.squeeze(param_pose_full)[21] - hmr_theta[21])
+            + tf.square(tf.squeeze(param_pose_full)[23] - hmr_theta[23])
+            + tf.square(tf.squeeze(param_pose_full)[20] - hmr_theta[20])
+            + tf.square(tf.squeeze(param_pose_full)[22] - hmr_theta[22]))
 
         w_temporal = [0.5, 0.5, 1.0, 1.5, 2.5, 2.5, 1.5, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 7.0, 7.0]
         if ind != 0:

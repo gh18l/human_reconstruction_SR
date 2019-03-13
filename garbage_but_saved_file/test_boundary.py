@@ -34,7 +34,7 @@ def gradient():
     #
     # fig.tight_layout()
 
-gradient()
+#gradient()
 img = cv2.imread("/home/lgh/code/SMPLify_TF/test/temp0/1/HR/aa1small.jpg")
 roi = cv2.selectROI("1", img)
 roi = np.array(roi)

@@ -72,16 +72,11 @@ class camera():
         self.write_camera("./render_temp/camera.txt")
         self.write_obj("./render_temp/model.obj", verts, vt)
         cv2.imwrite("./render_temp/HR.png", img)
-        cpp_render(img.shape[1])
+        cpp_render(600)
         render_result = cv2.imread("./render_temp/result.png")
         return render_result
 
-    def render_texture_imgbg(self, verts, img, vt, bg):
-        self.write_camera("./render_temp/camera.txt")
-        self.write_obj("./render_temp/model.obj", verts, vt)
-        cv2.imwrite("./render_temp/HR.png", img)
-        cpp_render(img.shape[1])
-        render_result = cv2.imread("./render_temp/result.png")
+    def render_texture_imgbg(self, render_result, bg):
         bg_img = np.copy(bg)
         for i in range(render_result.shape[0]):
             for j in range(render_result.shape[1]):

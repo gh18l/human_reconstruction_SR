@@ -369,31 +369,18 @@ def generate_video():
         HR_img = cv2.imread(img_file_path)
         videowriter.write(HR_img)
 
-img = cv2.imread("/home/lgh/code/SMPLify_TF/test/test_hmr_init/HR_multi_crop_origin3/optimization_data/label.png")
-img = cv2.resize(img, (1000, 750))
-cv2.imshow("1", img)
-cv2.waitKey()
-masks = np.zeros_like(img)
-for i in range(img.shape[0]):
-    for j in range(img.shape[1]):
-        if img[i, j, 0] == 0 and img[i, j, 1] == 0 and img[i, j, 2] == 0:
-            continue
-        masks[i, j, :] = 255
-mask = masks[:, :, 0]
-silh = np.zeros_like(mask)
-contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-color = img[275, 400]
-color = img[contours[0][0, :, 1], contours[0][0, :, 0]]
-aaa = 0
-for ind in range(len(contours)):
-    for i in range(len(contours[ind])):
-        x = contours[ind][i, :, 0]
-        y = contours[ind][i, :, 1]
-        silh[y, x] = 255
-print(aaa)
-#img = cv2.resize(silh, (1000, 750))
-cv2.imshow("1", silh)
-cv2.waitKey()
+def generate_coordination():
+    path = "/home/lgh/code/SMPLify_TF/test/temp0/4/LR/img_data"
+    img_files = os.listdir(path)
+    img_files = sorted([filename for filename in img_files if filename.endswith(".jpg") and "mask" not in filename],
+                       key=lambda d: int((d.split('_')[0])))
+    f1 = open(path + '/coordination.txt', 'w')
+    for i in range(230, 320):
+        img_file = img_files[i]
+        x = int(img_file.split('_')[1])
+        y = int(img_file.split('_')[2])
+        f1.write(str(x)+' '+str(y)+'\n')
+generate_coordination()
 #generate_video()
 #mask_texture()
 #HR_pose_prediction_full_replace_LR_pose()

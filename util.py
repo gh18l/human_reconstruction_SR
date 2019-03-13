@@ -51,13 +51,16 @@ HR_pkl_base_path = base_path + "/HR/output"
 LR_j2d_dctsmooth_base_path = base_path + "/LRdctsmooth"
 LR_img_dctsmooth_base_path = base_path + "/LRdctsmooth"
 
-hmr_path = "/home/lgh/code/SMPLify_TF/test/test_hmr_init/HR_multi_crop_small3/"
-texture_path = "/home/lgh/code/SMPLify_TF/test/test_hmr_init/HR_multi_crop_small3/output/texture_file/"
-HR_pose_path = "/home/lgh/code/SMPLify_TF/test/test_hmr_init/HR_multi_crop_small3/output/"
+# hmr_path = "/home/lgh/code/SMPLify_TF/test/test_hmr_init/jianing2/"
+# texture_path = "/home/lgh/code/SMPLify_TF/test/test_hmr_init/HR_multi_crop_small3/output/texture_file/"
+# HR_pose_path = "/home/lgh/code/SMPLify_TF/test/test_hmr_init/HR_multi_crop_small3/output/"
+hmr_path = "/home/lgh/code/SMPLify_TF/test/test_phone3/"
+texture_path = "/home/lgh/code/SMPLify_TF/test/test_phone_HR/output/texture_file/"
+HR_pose_path = "/home/lgh/code/SMPLify_TF/test/test_phone_HR/output/"
 crop_texture = True  ###only use in small texture
 index_data = 0
 video = True
-
+pedestrian_constraint = True
 ###dingjianLR100
 #lr_points = [0, 16, 31, 47, 64, 80, 96]    ###[0, 18, 36, 54, 72]
 #hr_points = [4, 20, 36]
@@ -71,11 +74,22 @@ video = True
 # hr_points = [11, 27, 43, 59]
 ###jianing2
 lr_points = [0, 16, 32, 48, 64, 80]    ###[0, 18, 36, 54, 72]
-hr_points = [14, 30]
+hr_points = [14, 30, 46, 62]
 ###jianing2copy
 #lr_points = [0, 16]    ###[0, 18, 36, 54, 72]
 #hr_points = [14, 30]
-
+### zhicheng
+# lr_points = [0, 16, 31, 47, 63, 79, 95]    ###[0, 18, 36, 54, 72]
+# hr_points = [6, 23, 39, 55, 71]
+### zhicheng2
+# lr_points = [0, 16, 32, 48, 64, 80, 96]    ###[0, 18, 36, 54, 72]
+# hr_points = [6, 22, 38, 54, 70]
+### zhicheng3
+# lr_points = [0, 16, 32, 48, 64, 80]    ###[0, 18, 36, 54, 72]
+# hr_points = [11, 27, 44, 60, 76]
+### dingjian
+# lr_points = [0, 16, 32, 49, 65, 81, 98]    ###[0, 18, 36, 54, 72]
+# hr_points = [1, 17, 33]
 
 which_people = "tianyi_LR"
 code_params = {"tianyi_LR": {"Prior_Loss":10.0, "Prior_Shape":5.0, "angle_elbow_knee":0.1, "angle_head":100.0,
@@ -189,7 +203,9 @@ def load_hmr_data(path):
     MPI_j2d_files = sorted([filename for filename in MPI_j2d_files if filename.endswith(".json")],
                             key=lambda d: int((d.split('_')[0])))
     img_files = os.listdir(path)
-    img_files = sorted([filename for filename in img_files if filename.endswith(".jpg") and "mask" not in filename])
+    img_files = sorted([filename for filename in img_files if (filename.endswith(".png") or filename.endswith(".jpg")) and "mask" not in filename])
+                       # key=lambda d: int((d.split('_')[0])))
+
     mask_files = os.listdir(path)
     mask_files = sorted([filename for filename in mask_files if filename.endswith(".png") and "mask" in filename],
                         key=lambda d: int((d.split('_')[1]).split('.')[0]))
@@ -258,3 +274,4 @@ def left_hand_to_right_hand(input):
     result = tf.matmul(_input, coe_tf)
     result = tf.expand_dims(result, 0)
     return result
+
