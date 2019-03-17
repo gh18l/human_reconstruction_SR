@@ -3,6 +3,7 @@ import cv2
 import core
 from libcpp_render import cpp_render
 import os
+import util
 class camera():
     def __init__(self, focal_length, center_x, center_y, trans):
         self.focal = focal_length.astype(np.float32)
@@ -72,7 +73,7 @@ class camera():
         self.write_camera("./render_temp/camera.txt")
         self.write_obj("./render_temp/model.obj", verts, vt)
         cv2.imwrite("./render_temp/HR.png", img)
-        cpp_render(600)
+        cpp_render(util.img_widthheight)
         render_result = cv2.imread("./render_temp/result.png")
         return render_result
 

@@ -26,7 +26,7 @@ VIS_OR_NOT = False
 # TODO
 LOG_OR_NOT = 1
 # TODO
-BATCH_FRAME_NUM = 30   ###################
+BATCH_FRAME_NUM = 25   ###################
 # TODO
 DCT_NUM = 10
 DCT_MAT_PATH = 'Data/DCT_Basis/%d.mat' % BATCH_FRAME_NUM
@@ -54,13 +54,16 @@ LR_img_dctsmooth_base_path = base_path + "/LRdctsmooth"
 # hmr_path = "/home/lgh/code/SMPLify_TF/test/test_hmr_init/jianing2/"
 # texture_path = "/home/lgh/code/SMPLify_TF/test/test_hmr_init/HR_multi_crop_small3/output/texture_file/"
 # HR_pose_path = "/home/lgh/code/SMPLify_TF/test/test_hmr_init/HR_multi_crop_small3/output/"
-hmr_path = "/home/lgh/code/SMPLify_TF/test/test_phone3/"
+hmr_path = "/home/lgh/MOTdatasets/MOT17-11-SDP/texture1/"
 texture_path = "/home/lgh/code/SMPLify_TF/test/test_phone_HR/output/texture_file/"
-HR_pose_path = "/home/lgh/code/SMPLify_TF/test/test_phone_HR/output/"
+HR_pose_path = "/home/lgh/MOTdatasets/MOT17-11-SDP/texture1/output/"
 crop_texture = True  ###only use in small texture
 index_data = 0
 video = True
 pedestrian_constraint = True
+img_widthheight = 02500600
+img_width = 250
+img_height = 600
 ###dingjianLR100
 #lr_points = [0, 16, 31, 47, 64, 80, 96]    ###[0, 18, 36, 54, 72]
 #hr_points = [4, 20, 36]
@@ -73,8 +76,8 @@ pedestrian_constraint = True
 # lr_points = [0, 16, 32, 48, 64, 80]    ###[0, 18, 36, 54, 72]
 # hr_points = [11, 27, 43, 59]
 ###jianing2
-lr_points = [0, 16, 32, 48, 64, 80]    ###[0, 18, 36, 54, 72]
-hr_points = [14, 30, 46, 62]
+# lr_points = [0, 16, 32, 48, 64, 80]    ###[0, 18, 36, 54, 72]
+# hr_points = [14, 30, 46, 62]
 ###jianing2copy
 #lr_points = [0, 16]    ###[0, 18, 36, 54, 72]
 #hr_points = [14, 30]
@@ -90,6 +93,13 @@ hr_points = [14, 30, 46, 62]
 ### dingjian
 # lr_points = [0, 16, 32, 49, 65, 81, 98]    ###[0, 18, 36, 54, 72]
 # hr_points = [1, 17, 33]
+
+###xueyang
+#lr_points = [0, 17, 34, 52, 68, 85, 102, 119, 136, 153, 171]
+# lr_points = [0, 17, 34, 52, 69, 86, 104]#    ###[0, 18, 36, 54, 72]
+# hr_points = [6, 23]
+lr_points = [0, 36, 72]#    ###[0, 18, 36, 54, 72]
+hr_points = [0, 36]
 
 which_people = "tianyi_LR"
 code_params = {"tianyi_LR": {"Prior_Loss":10.0, "Prior_Shape":5.0, "angle_elbow_knee":0.1, "angle_head":100.0,
@@ -146,6 +156,10 @@ def load_openposeCOCO(file):
     deepcut_index = np.array([14, 13, 9, 8, 7, 10, 11, 12, 3, 2, 1, 4, 5, 6]) - 1 #openpose index 123456...
 
     data = json.load(open(file))
+    if len(data["people"]) == 0:
+        joints = np.zeros([50, 2])
+        conf = np.zeros(50)
+        return joints, conf
     _data = data["people"][0]["pose_keypoints_2d"]
     joints = []
     conf = []
@@ -275,3 +289,9 @@ def left_hand_to_right_hand(input):
     result = tf.expand_dims(result, 0)
     return result
 
+def load_dct_base():
+	mtx = sio.loadmat(DCT_MAT_PATH, squeeze_me=True, struct_as_record=False)
+	mtx = mtx['D']
+	mtx = mtx[:DCT_NUM]
+
+	return np.array(mtx)

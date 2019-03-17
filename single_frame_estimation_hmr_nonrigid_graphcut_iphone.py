@@ -11,15 +11,16 @@ import optimization_prepare as opt_pre
 import pickle
 import smpl_np
 import scipy.io as sio
+import matlab.engine
+import correct_final_texture as tex
 ind = 0
 
-def write_file(contours, verts2d, smpl_contours_index):
-    contours = contours.squeeze()
-    smpl_contours = verts2d[smpl_contours_index, :]
-
-    sio.savemat(util.hmr_path + "output_nonrigid/contours.mat",
-                {"contours": contours, "smpl_contours": smpl_contours})
-    a = 1
+def get_nohandsfeet_weights(contours_smpl_correspondence, hands_feet_index):
+    weights = np.ones_like(contours_smpl_correspondence)
+    for i in range(len(contours_smpl_correspondence)):
+        if contours_smpl_correspondence[i] in hands_feet_index:
+            weights[i] = 0.0
+    return weights
 
 
 def get_n_min_index(values, n):
@@ -37,12 +38,6 @@ def get_distance(point, points):
         distance = np.square(point[0, 0] - points[i, 0]) + np.square(point[0, 1] - points[i, 1])
         distances[i] = distance
     return distances
-
-def closest_node(node, nodes):
-    nodes = np.asarray(nodes)
-    deltas = nodes - node
-    dist_2 = np.einsum('ij,ij->i', deltas, deltas)
-    return np.argmin(dist_2)
 
 def find_maskcontours_smplcontours_correspondence(distances, min_smpl_index_old, _contours_smpl_index, i):
     old_index = smplindex_to_smplcontoursindex(min_smpl_index_old, _contours_smpl_index)
@@ -379,24 +374,7 @@ def get_parsing_contours1(parsing_mask):
     mask = masks[:, :, 0]
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     contours = np.array(contours)
-    ## split contours into parsing
-    mask_parsing_index = {'head': [], 'left_arm': [], 'right_arm': [],
-                    'left_leg': [], 'right_leg': [], 'body': []}
-    for i in range(len(contours[0])):
-        color = parsing_mask[contours[0][i, :, 1], contours[0][i, :, 0]].squeeze()
-        if color[0] == 0 and color[1] == 128 and color[2] == 0: ##green head
-            mask_parsing_index['head'].append(i)
-        if color[0] == 128 and color[1] == 0 and color[2] == 128:
-            mask_parsing_index['right_arm'].append(i)
-        if color[0] == 0 and color[1] == 128 and color[2] == 128:  ## yellow
-            mask_parsing_index['left_arm'].append(i)
-        if color[0] == 0 and color[1] == 0 and color[2] == 128: ##red
-            mask_parsing_index['body'].append(i)
-        if color[0] == 128 and color[1] == 128 and color[2] == 0:
-            mask_parsing_index['right_leg'].append(i)
-        if color[0] == 128 and color[1] == 0 and color[2] == 0: ##red
-            mask_parsing_index['left_leg'].append(i)
-    return mask_parsing_index, contours
+    return contours
 
 def smpl_to_boundary(camera, pose, beta, tran, verts2d):
     smpl = smpl_np.SMPLModel('./smpl/models/basicmodel_m_lbs_10_207_0_v1.0.0.pkl')
@@ -438,7 +416,7 @@ def smpl_to_boundary(camera, pose, beta, tran, verts2d):
 def smpl_to_boundary1(camera, pose, beta, tran, verts2d):
     smpl = smpl_np.SMPLModel('./smpl/models/basicmodel_m_lbs_10_207_0_v1.0.0.pkl')
     verts = smpl.get_verts(pose, beta, tran)
-    bg = np.zeros([util.img_width, util.img_height, 3], dtype=np.uint8)
+    bg = np.zeros([1920, 1080, 3], dtype=np.uint8)
     img_result_naked = camera.render_naked(verts, bg)
     mask = img_result_naked[:, :, 0]
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
@@ -464,14 +442,11 @@ def smpl_to_boundary1(camera, pose, beta, tran, verts2d):
         for i in range(len(contours[ind])):
             contour = contours[ind][i, :, :]
             ### if it need faster, the search range can be limited in small district
-
-            #distances = get_distance(contour, verts2d)
-            #min_smpl_indexs = get_n_min_index(distances, 1)
-            min_smpl_indexs = closest_node(contour, verts2d)
-
+            distances = get_distance(contour, verts2d)
+            min_smpl_indexs = get_n_min_index(distances, 1)
             #min_smpl_index = np.argmin(distances)
-            #for n in range(len(min_smpl_indexs)):
-            contours_smpl_index.append(min_smpl_indexs)
+            for n in range(len(min_smpl_indexs)):
+                contours_smpl_index.append(min_smpl_indexs[n])
     contours_smpl_index1 = list(set(contours_smpl_index))
     contours_smpl_index1.sort(key=contours_smpl_index.index)
     contours_smpl_index = contours_smpl_index1
@@ -604,11 +579,18 @@ def get_smplcontours_mask_index(mask_parsing_index, mask_contours, contours_smpl
                 smpl_weights[smpl_index_converted] = 1.0
     return smplcontours_mask_index, smpl_weights
 
+def write_file(contours, verts2d, smpl_contours_index):
+    contours = contours.squeeze()
+    smpl_contours = verts2d[smpl_contours_index, :]
+
+    sio.savemat(util.hmr_path + "output_nonrigid/contours.mat",
+                {"contours": contours, "smpl_contours": smpl_contours})
+
 def nonrigid_estimation():
     hmr_dict, data_dict = util.load_hmr_data(util.hmr_path)
     HR_imgs = data_dict["imgs"]
     HR_masks = data_dict["masks"]
-    #hands_feet_index = opt_pre.get_hands_feet_index()
+    hands_feet_index = opt_pre.get_hands_feet_index()
     poses, betas, trans, cams = load_nonrigid_data()
     body_parsing_idx = load_body_parsing()
     body_parsing_idx1 = load_body_parsing1()
@@ -618,18 +600,14 @@ def nonrigid_estimation():
     ## get parsing img contours index
     ## 1 is normal, no 1 is hands and feet
     verts2d = get_verts2d(cams[ind], poses[ind], betas[ind], trans[ind])
-    #mask_parsing_index, contours = get_parsing_contours(parsing_mask)
-    mask_parsing_index1, contours1 = get_parsing_contours1(parsing_mask)
-    #contours_smpl_index = smpl_to_boundary(camera, poses[ind], betas[ind], trans[ind], verts2d)
+    # mask_parsing_index, contours = get_parsing_contours(parsing_mask)
+    contours1 = get_parsing_contours1(parsing_mask)
+    # contours_smpl_index = smpl_to_boundary(camera, poses[ind], betas[ind], trans[ind], verts2d)
     contours_smpl_index1 = smpl_to_boundary1(camera, poses[ind], betas[ind], trans[ind], verts2d)
-
-    write_file(contours1, verts2d, contours_smpl_index1)
-
-    smpl_parsing_index = get_parsing_smpl_contours(contours_smpl_index, body_parsing_idx)
-    smpl_parsing_index1 = get_parsing_smpl_contours(contours_smpl_index1, body_parsing_idx1)
-    smplcontours_mask_index, smpl_weights = get_smplcontours_mask_index(mask_parsing_index, contours, smpl_parsing_index, verts2d, contours_smpl_index, hands_feet_index)
-    maskcontours_smpl_index, mask_weights = get_maskcontours_smpl_index(mask_parsing_index1, contours, smpl_parsing_index1, verts2d, contours_smpl_index1, hands_feet_index)
-
+    contours_smpl_index1 = np.array(contours_smpl_index1)
+    # write_file(contours1, verts2d, contours_smpl_index1)
+    label_result = sio.loadmat(util.hmr_path + "optimization_data/label_result.mat")
+    label_result = label_result["label_result"].astype("int").squeeze()
     ##### generate smpl shape template
     param_shape = tf.Variable(betas[ind].reshape([1, -1]), dtype=tf.float32)
     param_rot = tf.constant(poses[ind][0:3].reshape([1, -1]), dtype=tf.float32)
@@ -658,23 +636,38 @@ def nonrigid_estimation():
                                       cams[ind][2], cams[ind][3], np.zeros(3))
     verts_est = cam_nonrigid.project(tf.squeeze(v_tf))
     objs_nonrigid = {}
-    contours_tf = tf.convert_to_tensor(contours.squeeze(), dtype=tf.float32)
 
-    contours_smpl_index = contours_smpl_index.reshape([-1, 1]).astype(np.int64)
-    smplcontours_mask_index = smplcontours_mask_index.reshape([-1, 1]).astype(np.int64)
+    contours_smpl_correspondence = contours_smpl_index1[label_result-1]
+    weights = get_nohandsfeet_weights(contours_smpl_correspondence, hands_feet_index)
 
-    verts_est1 = tf.gather_nd(verts_est, contours_smpl_index)
-    contours1_tf = tf.gather_nd(contours_tf, smplcontours_mask_index)
-    objs_nonrigid['verts_loss'] = 0.0 * tf.reduce_sum(smpl_weights * tf.reduce_sum(tf.square(verts_est1 - contours1_tf), 1))
+    ### view
+    # for i in range(len(contours_smpl_correspondence)):
+    #     if weights[i] == 0.0:
+    #         index = contours_smpl_correspondence[i]
+    #         x = verts2d[index, 0].astype("int")
+    #         y = verts2d[index, 1].astype("int")
+    #         HR_imgs[ind][y, x, 0] = 255
+    #     else:
+    #         index = contours_smpl_correspondence[i]
+    #         x = verts2d[index, 0].astype("int")
+    #         y = verts2d[index, 1].astype("int")
+    #         HR_imgs[ind][y, x, 2] = 255
+    # cv2.imshow("1", HR_imgs[ind])
+    # cv2.waitKey()
+
+    contours_smpl_correspondence = contours_smpl_correspondence.reshape([-1, 1]).astype(np.int64)
+
+    verts_est1 = tf.gather_nd(verts_est, contours_smpl_correspondence)
+    objs_nonrigid['verts_loss'] = 0.08 * tf.reduce_sum(weights * tf.reduce_sum(tf.square(verts_est1 - contours1.squeeze()), 1))
 
     #### verts_loss1
-    maskcontours_smpl_index = maskcontours_smpl_index.reshape([-1, 1]).astype(np.int64)
-    verts_est_contours = tf.gather_nd(verts_est, maskcontours_smpl_index)
-    objs_nonrigid['verts_loss1'] = 0.08 * tf.reduce_sum(tf.reduce_sum(tf.square(verts_est_contours - contours.squeeze()), 1))
+    #maskcontours_smpl_index = maskcontours_smpl_index.reshape([-1, 1]).astype(np.int64)
+    #verts_est_contours = tf.gather_nd(verts_est, maskcontours_smpl_index)
+    #objs_nonrigid['verts_loss1'] = 0.08 * tf.reduce_sum(tf.reduce_sum(tf.square(verts_est_contours - contours.squeeze()), 1))
 
 
     #### norm choose   weights_laplace
-    objs_nonrigid['laplace'] = 0.05 * tf.reduce_sum(weights_laplace * tf.reduce_sum(tf.square(tf.matmul(L, v_tf) - delta), 1))
+    objs_nonrigid['laplace'] = 0.1 * tf.reduce_sum(weights_laplace * tf.reduce_sum(tf.square(tf.matmul(L, v_tf) - delta), 1))
     objs_nonrigid['smooth_loss'] = 1.0 * tf.reduce_sum(tf.square(v_tf - v_shaped_tf))
 
     loss = tf.reduce_mean(objs_nonrigid.values())
@@ -694,23 +687,24 @@ def nonrigid_estimation():
 
     ### view data
     ## dont render fingers
-    # with open("/home/lgh/code/SMPLify_TF/smpl/models/bodyparts.pkl", 'rb') as f:
-    #     v_ids = pickle.load(f)
-    # fingers = np.concatenate((v_ids['fingers_r'], v_ids['fingers_l']))
-    # faces = camera.renderer.faces
-    # camera.renderer.faces = np.array(filter(lambda face: np.intersect1d(face, fingers).size == 0, faces))
+    with open("/home/lgh/code/SMPLify_TF/smpl/models/bodyparts.pkl", 'rb') as f:
+        v_ids = pickle.load(f)
+    fingers = np.concatenate((v_ids['fingers_r'], v_ids['fingers_l']))
+    faces = camera.renderer.faces
+    camera.renderer.faces = np.array(filter(lambda face: np.intersect1d(face, fingers).size == 0, faces))
 
     _, vt = camera.generate_uv(v_nonrigid_final, HR_imgs[ind])
     if not os.path.exists(util.hmr_path + "output_nonrigid"):
         os.makedirs(util.hmr_path + "output_nonrigid")
     img_result_texture = camera.render_texture(v_nonrigid_final, HR_imgs[ind], vt)
+    img_result_texture = tex.correct_render_big(img_result_texture)
     cv2.imwrite(util.hmr_path + "output_nonrigid/hmr_optimization_texture_nonrigid%04d.png" % ind, img_result_texture)
     img_result_naked = camera.render_naked(v_nonrigid_final, HR_imgs[ind])
     cv2.imwrite(util.hmr_path + "output_nonrigid/hmr_optimization_nonrigid_%04d.png" % ind, img_result_naked)
     img_result_naked_rotation = camera.render_naked_rotation(v_nonrigid_final, 90, HR_imgs[ind])
     cv2.imwrite(util.hmr_path + "output_nonrigid/hmr_optimization_rotation_nonrigid_%04d.png" % ind, img_result_naked_rotation)
     camera.write_obj(util.hmr_path + "output_nonrigid/hmr_optimization_rotation_nonrigid_%04d.obj" % ind, v_nonrigid_final, vt)
-    camera.write_texture_data(util.texture_path, HR_imgs[ind], vt)
+    camera.write_texture_data(util.texture_path, img_result_texture, vt)
     template = smpl.get_nonrigid_smpl_template(v_nonrigid_final, pose_final, betas_final, trans_final)
     render.save_nonrigid_template(util.texture_path, template)
 

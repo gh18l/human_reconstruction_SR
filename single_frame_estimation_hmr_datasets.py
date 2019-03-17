@@ -300,51 +300,63 @@ def main(flength=2500.):
         hmr_joint3d = hmr_joint3ds[ind, :, :]
         # if ind != 0:
         #     continue
-        # print(hmr_joint3d[6, 2])
-        # print(hmr_joint3d[7, 2])
-        # print(hmr_joint3d[10, 2])
-        # print(hmr_joint3d[11, 2])
+        print(hmr_joint3d[0, 2])
+        print(hmr_joint3d[1, 2])
+        print(hmr_joint3d[4, 2])
+        print(hmr_joint3d[5, 2])
+        print(hmr_joint3d[6, 2])
+        print(hmr_joint3d[7, 2])
+        print(hmr_joint3d[10, 2])
+        print(hmr_joint3d[11, 2])
         arm_error = np.fabs((hmr_joint3d[6, 2] + hmr_joint3d[7, 2]) - (hmr_joint3d[10, 2] + hmr_joint3d[11, 2]))
         leg_error = np.fabs((hmr_joint3d[0, 2] + hmr_joint3d[1, 2]) - (hmr_joint3d[5, 2] + hmr_joint3d[4, 2]))
         # v("the %d leg error is %f" % (ind, leg_error))
         # continue
         ####leg
-        if leg_error > 0.1:
-            if hmr_joint3d[0, 2] + hmr_joint3d[1, 2] < hmr_joint3d[5, 2] + hmr_joint3d[4, 2]:
-                hmr_theta[51] = 0.8
-                hmr_theta[52] = 1e-8
-                hmr_theta[53] = 1.0
-                hmr_theta[58] = 1e-8
-                forward_arm = "left"
-            else:
-                hmr_theta[48] = 0.8
-                hmr_theta[49] = 1e-8
-                hmr_theta[50] = -1.0
-                hmr_theta[55] = 1e-8
-                forward_arm = "right"
-        #####arm
-        else:
-            if hmr_joint3d[6, 2] + hmr_joint3d[7, 2] < hmr_joint3d[10, 2] + hmr_joint3d[11, 2]:
-                hmr_theta[48] = 0.8
-                hmr_theta[49] = 1e-8
-                hmr_theta[50] = -1.0
-                hmr_theta[55] = 1e-8
-                forward_arm = "right"
-            else:
-                hmr_theta[51] = 0.8
-                hmr_theta[52] = 1e-8
-                hmr_theta[53] = 1.0
-                hmr_theta[58] = 1e-8
-                forward_arm = "left"
-        print(forward_arm)
+        # if leg_error > 0.0:
+        #     print("leg_error>0.1")
+        #     if hmr_joint3d[0, 2] < hmr_joint3d[5, 2]:
+        #         hmr_theta[51] = 0.8
+        #         hmr_theta[52] = 1e-8
+        #         hmr_theta[53] = 1.0
+        #         hmr_theta[58] = 1e-8
+        #         forward_arm = "left"
+        #     else:
+        #         hmr_theta[48] = 0.8
+        #         hmr_theta[49] = 1e-8
+        #         hmr_theta[50] = -1.0
+        #         hmr_theta[55] = 1e-8
+        #         forward_arm = "right"
+        # #####arm
+        # else:
+        #     print("leg_error<=0.1")
+        #     if hmr_joint3d[6, 2] + hmr_joint3d[7, 2] < hmr_joint3d[10, 2] + hmr_joint3d[11, 2]:
+        #         hmr_theta[48] = 0.8
+        #         hmr_theta[49] = 1e-8
+        #         hmr_theta[50] = -1.0
+        #         hmr_theta[55] = 1e-8
+        #         forward_arm = "right"
+        #     else:
+        #         hmr_theta[51] = 0.8
+        #         hmr_theta[52] = 1e-8
+        #         hmr_theta[53] = 1.0
+        #         hmr_theta[58] = 1e-8
+        #         forward_arm = "left"
+        # print(forward_arm)
         ####numpy array initial_param
         initial_param_np = np.concatenate([hmr_shape.reshape([1, -1]), hmr_theta.reshape([1, -1]), hmr_tran.reshape([1, -1])], axis=1)
-
-
-        param_shape = tf.Variable(hmr_shape.reshape([1, -1]), dtype=tf.float32)
-        param_rot = tf.Variable(hmr_theta[0:3].reshape([1, -1]), dtype=tf.float32)
-        param_pose = tf.Variable(hmr_theta[3:72].reshape([1, -1]), dtype=tf.float32)
-        param_trans = tf.Variable(hmr_tran.reshape([1, -1]), dtype=tf.float32)
+        if ind == 0:
+            param_shape = tf.Variable(hmr_shape.reshape([1, -1]), dtype=tf.float32)
+            param_rot = tf.Variable(hmr_theta[0:3].reshape([1, -1]), dtype=tf.float32)
+            param_pose = tf.Variable(hmr_theta[3:72].reshape([1, -1]), dtype=tf.float32)
+            param_trans = tf.Variable(hmr_tran.reshape([1, -1]), dtype=tf.float32)
+        else:
+            pose_final_old_rot = pose_final_old[:, 0:3]
+            pose_final_old_pose = pose_final_old[:, 3:72]
+            param_shape = tf.Variable(hmr_shape.reshape([1, -1]), dtype=tf.float32)
+            param_rot = tf.Variable(pose_final_old_rot.reshape([1, -1]), dtype=tf.float32)
+            param_pose = tf.Variable(pose_final_old_pose.reshape([1, -1]), dtype=tf.float32)
+            param_trans = tf.Variable(hmr_tran.reshape([1, -1]), dtype=tf.float32)
 
         ###to get hmr 2d verts
         param_shape_fixed = tf.constant(hmr_shape.reshape([1, -1]), dtype=tf.float32)
@@ -442,7 +454,7 @@ def main(flength=2500.):
         weights = tf.constant(weights, dtype=tf.float32)
         objs['J2D_Loss'] = tf.reduce_sum(weights * tf.reduce_sum(tf.square(j2ds_est[2:, :] - LR_j2d), 1))
 
-        base_weights_face = 1.5 * np.array(
+        base_weights_face = 2.5 * np.array(
             [1.0, 1.0, 1.0, 1.0, 1.0])
         weights_face = LR_confs_face[ind] * base_weights_face
         weights_face = tf.constant(weights_face, dtype=tf.float32)
@@ -478,7 +490,7 @@ def main(flength=2500.):
             weights_foot * tf.reduce_sum(tf.square(_LR_j2ds_foot - j2ds_est[0:2, :]), 1))
 
         pose_diff = tf.reshape(param_pose - pose_mean, [1, -1])
-        objs['Prior_Loss'] = 1.0 * tf.squeeze(tf.matmul(tf.matmul(pose_diff, pose_covariance), tf.transpose(pose_diff)))
+        objs['Prior_Loss'] = 10.0 * tf.squeeze(tf.matmul(tf.matmul(pose_diff, pose_covariance), tf.transpose(pose_diff)))
         objs['Prior_Shape'] = 5.0 * tf.reduce_sum(tf.square(param_shape))
         ##############################################################
         ##########control the angle of the elbow and knee#############
@@ -509,7 +521,17 @@ def main(flength=2500.):
                                           + tf.square(param_pose[0, 42:45] - hmr_theta[45:48]))
 
         param_pose_full = tf.concat([param_rot, param_pose], axis=1)
-        objs['hmr_constraint'] = 500.0 * tf.reduce_sum(tf.square(tf.squeeze(param_pose_full) - hmr_theta))
+        #objs['hmr_constraint'] = 5000.0 * tf.reduce_sum(tf.square(tf.squeeze(param_pose_full) - hmr_theta))
+        pose_index = np.array(range(72)).reshape([-1, 1])
+        delete_ = [42, 43, 44, 51, 52, 53, 57, 58, 59, 63, 64, 65, 69, 70, 71,
+                   39, 40, 41, 48, 49, 50, 54, 55, 56, 60, 61, 62, 66, 67, 68]
+        delete_ = []
+        pose_index = np.delete(pose_index, delete_, axis=0)
+
+        pose_index = pose_index.reshape([-1, 1]).astype(np.int64)
+        hmr_theta_refine = hmr_theta[pose_index]
+        param_pose_refine = tf.gather_nd(tf.squeeze(param_pose_full), pose_index)
+        objs['hmr_constraint'] = 0.0 * tf.reduce_sum(tf.square(tf.squeeze(param_pose_refine) - hmr_theta_refine.squeeze()))
         ### 8000.0
         objs['hmr_hands_constraint'] = 100000.0 * tf.reduce_sum(
             tf.square(tf.squeeze(param_pose_full)[21] - hmr_theta[21])
@@ -517,9 +539,10 @@ def main(flength=2500.):
             + tf.square(tf.squeeze(param_pose_full)[20] - hmr_theta[20])
             + tf.square(tf.squeeze(param_pose_full)[22] - hmr_theta[22]))
 
-        w_temporal = [0.5, 0.5, 1.0, 1.5, 2.5, 2.5, 1.5, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 7.0, 7.0]
+        #w_temporal = [0.5, 0.5, 1.0, 1.5, 2.5, 2.5, 1.5, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 7.0, 7.0]
+        w_temporal = [0.5, 0.5, 1.0, 1.5, 2.5, 2.5, 1.5, 1.0, 1.0, 1.5, 2.5, 2.5, 1.5, 1.0, 7.0, 7.0]
         if ind != 0:
-            objs['temporal'] = 800.0 * tf.reduce_sum(
+            objs['temporal'] = 2500.0 * tf.reduce_sum(
                 w_temporal * tf.reduce_sum(tf.square(j3ds - j3ds_old), 1))
             objs['temporal_pose'] = 0.0 * tf.reduce_sum(
                 tf.square(pose_final_old[0, 3:72] - param_pose[0,:]))
@@ -527,7 +550,7 @@ def main(flength=2500.):
             body_idx = np.array(body_parsing_idx[0]).squeeze()
             body_idx = body_idx.reshape([-1, 1]).astype(np.int64)
             verts_est_body = tf.gather_nd(verts_est, body_idx)
-            objs['dense_optflow'] = 0.0 * tf.reduce_sum(tf.square(
+            objs['dense_optflow'] = 0.0* tf.reduce_sum(tf.square(
                 verts_est_body - verts_body_old))
         # pose1 = param_pose[0, 52]
         # pose2 = param_pose[0, 55]
@@ -552,13 +575,20 @@ def main(flength=2500.):
             ### set nonrigid template
             smpl = smpl_np.SMPLModel('./smpl/models/basicmodel_m_lbs_10_207_0_v1.0.0.pkl')
             template = np.load(util.texture_path + "template.npy")
-            smpl.set_template(template)
+            #smpl.set_template(template)
             v = smpl.get_verts(pose_final, betas_final, trans_final)
 
+
+            texture_img = cv2.resize(texture_img, (util.img_width, util.img_height))
             img_result_texture = camera.render_texture(v, texture_img, texture_vt)
+            #img_result_texture = tex.correct_render_small(img_result_texture)
             if not os.path.exists(util.hmr_path + "output"):
                 os.makedirs(util.hmr_path + "output")
             cv2.imwrite(util.hmr_path + "output/hmr_optimization_texture_%04d.png" % ind, img_result_texture)
+            img_bg = cv2.resize(LR_imgs[ind], (util.img_width, util.img_height))
+            img_result_texture_bg = camera.render_texture_imgbg(img_result_texture, img_bg)
+            cv2.imwrite(util.hmr_path + "output/texture_bg_%04d.png" % ind,
+                        img_result_texture_bg)
             if util.video is True:
                 videowriter.write(img_result_texture)
             img_result_naked = camera.render_naked(v, LR_imgs[ind])
@@ -594,7 +624,7 @@ def main(flength=2500.):
         # out_ply_path = os.path.join(out_ply_path, "%04d.ply" % ind)
         # m.write_ply(out_ply_path)
         #
-        res = {'pose': pose_final, 'betas': betas_final, 'trans': trans_final}
+        res = {'pose': pose_final, 'betas': betas_final, 'trans': trans_final, 'cam_LR1': cam_LR1, 'j3ds': v_final[2]}
         # out_pkl_path = out_ply_path.replace('.ply', '.pkl')
         with open(util.hmr_path + "output/hmr_optimization_pose_%04d.pkl" % ind, 'wb') as fout:
             pkl.dump(res, fout)
@@ -604,10 +634,8 @@ def main(flength=2500.):
         verts2d = v_final[1]
         for z in range(len(verts2d)):
             if int(verts2d[z][0]) > LR_masks[ind].shape[0] - 1:
-                print(int(verts2d[z][0]))
                 verts2d[z][0] = LR_masks[ind].shape[0] - 1
             if int(verts2d[z][1]) > LR_masks[ind].shape[1] - 1:
-                print(int(verts2d[z][1]))
                 verts2d[z][1] = LR_masks[ind].shape[1] - 1
             (LR_masks[ind])[int(verts2d[z][0]), int(verts2d[z][1])] = 127
         if not os.path.exists(util.hmr_path + "output_mask"):

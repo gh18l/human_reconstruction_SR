@@ -17,6 +17,7 @@ import time
 import pickle
 import period_new
 import optimization_prepare as opt_pre
+import configuration as config
 def demo_point(x, y, img_path = None):
     import matplotlib.pyplot as plt
     if img_path != None:
@@ -561,7 +562,7 @@ def main(flength=2500.):
         #objs['face_pose'] = 0.0 * tf.reduce_sum(tf.square(param_pose[0, 0:69] - hmr_theta[3:72])
                                           #+ tf.square(param_rot[0, 0:3] - hmr_theta[0:3]))
         param_pose_full = tf.concat([param_rot, param_pose], axis=1)
-        objs['hmr_constraint'] = 1000.0 * tf.reduce_sum(tf.square(tf.squeeze(param_pose_full) - hmr_theta))
+        objs['hmr_constraint'] = config.iphone_param["hmr_constraint_hr"] * tf.reduce_sum(tf.square(tf.squeeze(param_pose_full) - hmr_theta))
         ### 8000.0
         objs['hmr_hands_constraint'] = 100000.0 * tf.reduce_sum(tf.square(tf.squeeze(param_pose_full)[21] - hmr_theta[21])
                                                     + tf.square(tf.squeeze(param_pose_full)[23] - hmr_theta[23])
@@ -569,7 +570,7 @@ def main(flength=2500.):
                                                             + tf.square(tf.squeeze(param_pose_full)[22] - hmr_theta[22]))
         w_temporal = [0.5, 0.5, 1.0, 1.5, 2.5, 2.5, 1.5, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 5.0, 5.0]
         if ind != 0:
-            objs['temporal'] = 800.0 * tf.reduce_sum(
+            objs['temporal'] = config.iphone_param["temporal_hr"] * tf.reduce_sum(
                 w_temporal * tf.reduce_sum(tf.square(j3ds - j3ds_old), 1))
             objs['temporal_pose'] = 0.0 * tf.reduce_sum(
                 tf.square(pose_final_old[0, 3:72] - param_pose[0, :]))
@@ -582,7 +583,7 @@ def main(flength=2500.):
             body_idx = body_idx.reshape([-1, 1]).astype(np.int64)
             verts_est_body = tf.gather_nd(verts_est, body_idx)
             ### 0.05
-            objs['dense_optflow'] = 0.02 * tf.reduce_sum(tf.square(
+            objs['dense_optflow'] = config.iphone_param["dense_optflow_hr"] * tf.reduce_sum(tf.square(
                 verts_est_body - verts_body_old))
 
         loss = tf.reduce_mean(objs.values())

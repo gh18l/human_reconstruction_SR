@@ -15,6 +15,7 @@ vert_sym_idxs = dd['vert_sym_idxs']
 v_template = dd['v_template']
 leg_index = [1, 4, 7, 10, 2, 5, 8, 11]
 arm_index = [17, 19, 21, 23, 16, 18, 20, 22, 14, 13]
+body_index = [11]
 body_index = [21]
 head_index = [12, 15]
 body_parsing_idx = []  ###body head
@@ -68,19 +69,19 @@ body_parsing_idx.append(arm_idx)
 with open("./smpl/models/bodyparts.pkl",'rb') as f:
     v_ids = pkl.load(f)
 #test
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-fig = plt.figure(1)
-#ax = plt.subplot(111)
-ax = fig.add_subplot(111, projection='3d')
-ax.scatter(v_template[body_parsing_idx[0], 0], v_template[body_parsing_idx[0], 1], v_template[body_parsing_idx[0], 2], c='b')
-#ax.scatter(v_template[body_parsing_idx[2], 0], v_template[body_parsing_idx[2], 1], v_template[body_parsing_idx[2], 2], c='b')
-#ax.scatter(v_template[body_parsing_idx[1], 0], v_template[body_parsing_idx[1], 1], v_template[body_parsing_idx[1], 2], c='b')
-#ax.scatter(v_template[v_ids['hand_l'], 0], v_template[v_ids['hand_l'], 1], v_template[v_ids['hand_l'], 2], c='g')
-#ax.scatter(v_template[v_ids['hand_r'], 0], v_template[v_ids['hand_r'], 1], v_template[v_ids['hand_r'], 2], c='y')
-#ax.scatter(v_template[v_ids['fingers_l'], 0], v_template[v_ids['fingers_l'], 1], v_template[v_ids['fingers_l'], 2], c='c')
-ax.scatter(v_template[:, 0], v_template[:, 1], v_template[:, 2], c='r', s=1)
-plt.show()
+# import matplotlib.pyplot as plt
+# from mpl_toolkits.mplot3d import Axes3D
+# fig = plt.figure(1)
+# #ax = plt.subplot(111)
+# ax = fig.add_subplot(111, projection='3d')
+# ax.scatter(v_template[body_parsing_idx[0], 0], v_template[body_parsing_idx[0], 1], v_template[body_parsing_idx[0], 2], c='b')
+# #ax.scatter(v_template[body_parsing_idx[2], 0], v_template[body_parsing_idx[2], 1], v_template[body_parsing_idx[2], 2], c='b')
+# #ax.scatter(v_template[body_parsing_idx[1], 0], v_template[body_parsing_idx[1], 1], v_template[body_parsing_idx[1], 2], c='b')
+# #ax.scatter(v_template[v_ids['hand_l'], 0], v_template[v_ids['hand_l'], 1], v_template[v_ids['hand_l'], 2], c='g')
+# #ax.scatter(v_template[v_ids['hand_r'], 0], v_template[v_ids['hand_r'], 1], v_template[v_ids['hand_r'], 2], c='y')
+# #ax.scatter(v_template[v_ids['fingers_l'], 0], v_template[v_ids['fingers_l'], 1], v_template[v_ids['fingers_l'], 2], c='c')
+# ax.scatter(v_template[:, 0], v_template[:, 1], v_template[:, 2], c='r', s=1)
+# plt.show()
 
 hmr_dict, data_dict = util.load_hmr_data(util.hmr_path)
 hmr_thetas = hmr_dict["hmr_thetas"]
@@ -211,7 +212,7 @@ for ind, HR_j2d in enumerate(HR_j2ds):
         sess.run(tf.global_variables_initializer())
         # L-BFGS-B
         optimizer = scipy_pt(loss=loss,
-                             var_list=[param_trans, param_shape],
+                             var_list=[param_shape, param_rot, param_trans, param_pose, cam_HR.cx, cam_HR.cy],
                              options={'eps': 1e-12, 'ftol': 1e-12, 'maxiter': 1000, 'disp': False}, method='L-BFGS-B')
         optimizer.minimize(sess)
         cam_HR1 = sess.run([cam_HR.fl_x, cam_HR.cx, cam_HR.cy, cam_HR.trans])
@@ -221,13 +222,13 @@ for ind, HR_j2d in enumerate(HR_j2ds):
         if not os.path.exists(util.hmr_path + "output_shape"):
             os.makedirs(util.hmr_path + "output_shape")
         if util.crop_texture is True:
-            img_result_texture, HR_mask_img = camera.render_texture(v_final[0], HR_imgs[ind], vt, HR_masks[ind])
+            img_result_texture = camera.render_texture(v_final[0], HR_imgs[ind], vt)
             #if ind == 4:
                 #if not os.path.exists(util.texture_path):
                     #os.makedirs(util.texture_path)
                 #camera.write_texture_data(util.texture_path, HR_mask_img, vt)
         else:
-            img_result_texture, _ = camera.render_texture(v_final[0], HR_imgs[ind], vt)
+            img_result_texture = camera.render_texture(v_final[0], HR_imgs[ind], vt)
             #if ind == 4:
                 #if not os.path.exists(util.texture_path):
                     #os.makedirs(util.texture_path)

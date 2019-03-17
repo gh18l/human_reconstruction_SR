@@ -300,43 +300,49 @@ def main(flength=2500.):
         hmr_joint3d = hmr_joint3ds[ind, :, :]
         # if ind != 0:
         #     continue
-        # print(hmr_joint3d[6, 2])
-        # print(hmr_joint3d[7, 2])
-        # print(hmr_joint3d[10, 2])
-        # print(hmr_joint3d[11, 2])
+        print(hmr_joint3d[0, 2])
+        print(hmr_joint3d[1, 2])
+        print(hmr_joint3d[4, 2])
+        print(hmr_joint3d[5, 2])
+        print(hmr_joint3d[6, 2])
+        print(hmr_joint3d[7, 2])
+        print(hmr_joint3d[10, 2])
+        print(hmr_joint3d[11, 2])
         arm_error = np.fabs((hmr_joint3d[6, 2] + hmr_joint3d[7, 2]) - (hmr_joint3d[10, 2] + hmr_joint3d[11, 2]))
         leg_error = np.fabs((hmr_joint3d[0, 2] + hmr_joint3d[1, 2]) - (hmr_joint3d[5, 2] + hmr_joint3d[4, 2]))
         # v("the %d leg error is %f" % (ind, leg_error))
         # continue
         ####leg
-        if leg_error > 0.1:
-            if hmr_joint3d[0, 2] + hmr_joint3d[1, 2] < hmr_joint3d[5, 2] + hmr_joint3d[4, 2]:
-                hmr_theta[51] = 0.8
-                hmr_theta[52] = 1e-8
-                hmr_theta[53] = 1.0
-                hmr_theta[58] = 1e-8
-                forward_arm = "left"
-            else:
-                hmr_theta[48] = 0.8
-                hmr_theta[49] = 1e-8
-                hmr_theta[50] = -1.0
-                hmr_theta[55] = 1e-8
-                forward_arm = "right"
-        #####arm
-        else:
-            if hmr_joint3d[6, 2] + hmr_joint3d[7, 2] < hmr_joint3d[10, 2] + hmr_joint3d[11, 2]:
-                hmr_theta[48] = 0.8
-                hmr_theta[49] = 1e-8
-                hmr_theta[50] = -1.0
-                hmr_theta[55] = 1e-8
-                forward_arm = "right"
-            else:
-                hmr_theta[51] = 0.8
-                hmr_theta[52] = 1e-8
-                hmr_theta[53] = 1.0
-                hmr_theta[58] = 1e-8
-                forward_arm = "left"
-        print(forward_arm)
+        # if leg_error > 0.1:
+        #     print("leg_error>0.1")
+        #     if hmr_joint3d[0, 2] + hmr_joint3d[1, 2] < hmr_joint3d[5, 2] + hmr_joint3d[4, 2]:
+        #         hmr_theta[51] = 0.8
+        #         hmr_theta[52] = 1e-8
+        #         hmr_theta[53] = 1.0
+        #         hmr_theta[58] = 1e-8
+        #         forward_arm = "left"
+        #     else:
+        #         hmr_theta[48] = 0.8
+        #         hmr_theta[49] = 1e-8
+        #         hmr_theta[50] = -1.0
+        #         hmr_theta[55] = 1e-8
+        #         forward_arm = "right"
+        # #####arm
+        # else:
+        #     print("leg_error<=0.1")
+        #     if hmr_joint3d[6, 2] + hmr_joint3d[7, 2] < hmr_joint3d[10, 2] + hmr_joint3d[11, 2]:
+        #         hmr_theta[48] = 0.8
+        #         hmr_theta[49] = 1e-8
+        #         hmr_theta[50] = -1.0
+        #         hmr_theta[55] = 1e-8
+        #         forward_arm = "right"
+        #     else:
+        #         hmr_theta[51] = 0.8
+        #         hmr_theta[52] = 1e-8
+        #         hmr_theta[53] = 1.0
+        #         hmr_theta[58] = 1e-8
+        #         forward_arm = "left"
+        # print(forward_arm)
         ####numpy array initial_param
         initial_param_np = np.concatenate([hmr_shape.reshape([1, -1]), hmr_theta.reshape([1, -1]), hmr_tran.reshape([1, -1])], axis=1)
 
@@ -556,12 +562,13 @@ def main(flength=2500.):
             v = smpl.get_verts(pose_final, betas_final, trans_final)
 
 
+            texture_img = cv2.resize(texture_img, (util.img_width, util.img_height))
             img_result_texture = camera.render_texture(v, texture_img, texture_vt)
-            img_result_texture = tex.correct_render_big(img_result_texture)
+            img_result_texture = tex.correct_render_small(img_result_texture)
             if not os.path.exists(util.hmr_path + "output"):
                 os.makedirs(util.hmr_path + "output")
             cv2.imwrite(util.hmr_path + "output/hmr_optimization_texture_%04d.png" % ind, img_result_texture)
-            img_bg = cv2.resize(LR_imgs[ind], (1080, 1920))
+            img_bg = cv2.resize(LR_imgs[ind], (util.img_width, util.img_height))
             img_result_texture_bg = camera.render_texture_imgbg(img_result_texture, img_bg)
             cv2.imwrite(util.hmr_path + "output/texture_bg_%04d.png" % ind,
                         img_result_texture_bg)
@@ -610,10 +617,8 @@ def main(flength=2500.):
         verts2d = v_final[1]
         for z in range(len(verts2d)):
             if int(verts2d[z][0]) > LR_masks[ind].shape[0] - 1:
-                print(int(verts2d[z][0]))
                 verts2d[z][0] = LR_masks[ind].shape[0] - 1
             if int(verts2d[z][1]) > LR_masks[ind].shape[1] - 1:
-                print(int(verts2d[z][1]))
                 verts2d[z][1] = LR_masks[ind].shape[1] - 1
             (LR_masks[ind])[int(verts2d[z][0]), int(verts2d[z][1])] = 127
         if not os.path.exists(util.hmr_path + "output_mask"):

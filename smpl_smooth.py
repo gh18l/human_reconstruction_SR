@@ -11,7 +11,7 @@ import json
 import pickle as pkl
 import tensorflow as tf
 from camera import Perspective_Camera
-
+from opendr_render import render
 # TODO
 '''
 TAKE precedence::fix the position of head
@@ -19,12 +19,6 @@ TAKE precedence::fix the position of head
 warn:2.model is only controlled by cam[t], parameter "trans" doesn't contribute, it need to be corrected.	
 '''
 
-
-avi_path = "/home/lgh/code/SMPLify/smplify_public/code/temp/aa1.avi"
-json_path = "/home/lgh/code/SMPLify/smplify_public/code/temp"
-pkl_path = "/home/lgh/code/SMPLify/smplify_public/code/temp/output"
-output_path = "/home/lgh/code/SMPLify/smplify_public/code/temp/DCToutput"
-HR_path = "/home/lgh/code/SMPLify/smplify_public/code/temp/HRtemp/output"
 def load_openposeCOCO(file):
     #file = "/home/lgh/Documents/2d_3d_con/aa_000000000000_keypoints.json"
     openpose_index = np.array([11, 10, 9, 12, 13, 14, 4, 3, 2, 5, 6, 7, 1, 0, 0, 16, 15, 18, 17, 22, 23, 24, 20, 19, 21])
@@ -100,8 +94,8 @@ def load_pose(path):
     params = []
 
     data_path = path + "/optimization_data"
-    COCO_path = path + "/COCO"
-    MPI_path = path + "/MPI"
+    COCO_path = data_path + "/COCO"
+    MPI_path = data_path + "/MPI"
     output_path = path + "/output"
 
     COCO_j2d_files = os.listdir(COCO_path)
@@ -132,30 +126,30 @@ def load_pose(path):
         j2ds_foot.append(coco_j2d[19:25, :])
         confs_foot.append(coco_conf[19:25])
 
+        ## concatenate
+        full_j2d = np.concatenate([coco_j2d[0:14, :], mpi_j2d[1::-1, :]])
 
         img_file_path = os.path.join(data_path, img_files[ind])
         img = cv2.imread(img_file_path)
         imgs.append(img)
-        with open(os.path.join(pkl_path, pkl_files[ind])) as f:
+        with open(os.path.join(output_path, pkl_files[ind])) as f:
             param = pkl.load(f)
         params.append(param)
 
         _pose = np.array(param['pose'])
-        _pose = _pose[np.newaxis, :]
+        #_pose = _pose[np.newaxis, :]
         poses.append(_pose)
         _beta = np.array(param['betas'])
-        _beta = _beta[np.newaxis, :]
+        #_beta = _beta[np.newaxis, :]
         betas.append(_beta)
         _tran = np.array(param['trans'])
-        _tran = _tran[np.newaxis, :]
+        #_tran = _tran[np.newaxis, :]
         trans.append(_tran)
         _cam = np.array(param['cam_LR1'])
 
 
         #####下面这个不确定参数的尺度，等之后debug看下
-        cam = Perspective_Camera(_cam.fl_x, _cam.fl_x, _cam.cx,
-                                 _cam.cy, _cam.trans, np.zeros(3))
-        cams.append(cam)
+        cams.append(_cam)
 
         data_dict = {"j2ds": j2ds, "confs": confs, "imgs": imgs,
                      "j2ds_face": j2ds_face,"confs_face": confs_face, "j2ds_head": j2ds_head,
@@ -201,76 +195,96 @@ def fix_head_pose(final_pose):
 
 def main():
     cams, poses, betas, trans, data_dict = load_pose(util.hmr_path)
-    j2ds = np.array(data_dict['j2ds']).reshape([-1, 2])
-    j2ds_face = np.array(data_dict['j2ds_face']).reshape([-1, 2])
-    j2ds_head = np.array(data_dict['j2ds_head']).reshape([-1, 2])
-    j2ds_foot = np.array(data_dict['j2ds_foot']).reshape([-1, 2])
+    LR_j2ds = data_dict["j2ds"]
+    LR_confs = data_dict["confs"]
+    LR_j2ds_face = data_dict["j2ds_face"]
+    LR_confs_face = data_dict["confs_face"]
+    LR_j2ds_head = data_dict["j2ds_head"]
+    LR_confs_head = data_dict["confs_head"]
+    LR_j2ds_foot = data_dict["j2ds_foot"]
+    LR_confs_foot = data_dict["confs_foot"]
+    LR_imgs = data_dict["imgs"]
     dct_mtx = util.load_dct_base()
     dct_mtx = tf.constant(dct_mtx.T, dtype=tf.float32)
 
     # For SMPL parameters
     params_tem = []
     params_pose_tem = []
-    for idx in range(0, util.BATCH_FRAME_NUM):
-        param_pose = tf.Variable(poses[idx], dtype=tf.float32, name='Pose_%d' % idx)
-        param_trans = tf.constant(trans[idx], dtype=tf.float32)
-        param_shape = tf.constant(betas[idx], dtype=tf.float32)
-        param = tf.concat([param_shape, param_pose, param_trans], axis=1)
-
-        params_tem.append(param)
-        params_pose_tem.append(param_pose)
-    params_tem = tf.concat(params_tem, axis=0)
+    smpl_model = SMPL(util.SMPL_PATH, util.NORMAL_SMPL_PATH)
 
     # For DCT prior params
     c_dct = tf.Variable(np.zeros([len(util.TEM_SMPL_JOINT_IDS), 3, util.DCT_NUM]), dtype=tf.float32, name='C_DCT')
-    smpl_model = SMPL(util.SMPL_PATH, util.NORMAL_SMPL_PATH)
-
-    j3ds, vs, jointsplus = smpl_model.get_3d_joints(params_tem, util.TEM_SMPL_JOINT_IDS)  # N x M x 3
-
-    # j3ds, vs = smpl_model.get_3d_joints(params_tem, util.SMPL_JOINT_ALL)
-    # sess = tf.Session()
-    # sess.run(tf.global_variables_initializer())
-    # j3ds_estimation = sess.run(j3ds)
-    # vs_estimation = sess.run(vs)
-    # for i in range(0, 100):
-    #     draw_3D_vertex_joints(vs_estimation[i, :, 0], vs_estimation[i, :, 1], vs_estimation[i, :, 2],
-    #         j3ds_estimation[i, :, 0], j3ds_estimation[i, :, 1], j3ds_estimation[i, :, 2])
-
-    j3ds = j3ds[:, :-1]
-    j3ds_flatten = tf.reshape(j3ds, [-1, 3])
-    j2ds_est = []
-
-    for idx in range(0, util.BATCH_FRAME_NUM):
-        tmp = cams[idx].project(j3ds_flatten[idx * 13 : (idx + 1) * 13, :])
-        j2ds_est.append(tmp)
-    # for idx in range(0, util.NUM_VIEW):
-    #     tmp = cam.project(j3ds_flatten)
-    #     j2ds_est.append(tmp)
-    j2ds_est = tf.concat(j2ds_est, axis=0)
-    j2ds_est = tf.reshape(j2ds_est, [util.NUM_VIEW, util.BATCH_FRAME_NUM, len(util.TEM_SMPL_JOINT_IDS), 2])
-    j2ds_est = tf.transpose(j2ds_est, [1, 0, 2, 3])
-    j2ds_est = tf.reshape(j2ds_est, [-1, 2])
-
-    # sess = tf.Session()
-    # sess.run(tf.global_variables_initializer())
-    # j2ds_estimation = sess.run(j2ds_est)
-    # draw_2D_dot_in_img(imgs[0], j2ds_estimation[0:13, 0], j2ds_estimation[0:13, 1])
-
     _, pose_mean, pose_covariance = util.load_initial_param()
     pose_mean = tf.constant(pose_mean, dtype=tf.float32)
     pose_covariance = tf.constant(pose_covariance, dtype=tf.float32)
 
     objs = {}
-    objs['J2D_Loss'] = tf.reduce_sum(tf.square(j2ds_est - j2ds))
-    for i in range(0, util.BATCH_FRAME_NUM):
-        pose_diff = params_pose_tem[i][:, -69:] - pose_mean
-        objs['Prior_Loss_%d' % i] = 5 * tf.squeeze(
-            tf.matmul(tf.matmul(pose_diff, pose_covariance), tf.transpose(pose_diff)))
+    for idx in range(0, util.BATCH_FRAME_NUM):
+        param_pose = tf.Variable(poses[idx], dtype=tf.float32, name='Pose_%d' % idx)
+        param_trans = tf.constant(trans[idx], dtype=tf.float32)
+        param_shape = tf.constant(betas[idx], dtype=tf.float32)
+        param = tf.concat([param_shape, param_pose, param_trans], axis=1)
+        params_tem.append(param)
+        params_pose_tem.append(param_pose)
+        j3ds, vs, jointsplus = smpl_model.get_3d_joints(param, util.TEM_SMPL_JOINT_IDS)  # N x M x 3
+        j3ds = tf.reshape(j3ds, [-1, 3])
+        jointsplus = tf.reshape(jointsplus, [-1, 3])
 
+        cam = Perspective_Camera(cams[idx][0], cams[idx][0], cams[idx][1],
+                                 cams[idx][2], cams[idx][3], np.zeros(3))
+
+        j2ds_est = cam.project(tf.squeeze(j3ds))
+        j2dsplus_est = cam.project(tf.squeeze(jointsplus))
+        base_weights = 1.0 * np.array(
+            [1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0])
+        weights = LR_confs[idx] * base_weights
+        weights = tf.constant(weights, dtype=tf.float32)
+        objs['J2D_Loss_%d' % idx] = tf.reduce_sum(weights * tf.reduce_sum(tf.square(j2ds_est[2:, :] - LR_j2ds[idx]), 1))
+
+        base_weights_face = 0.0 * np.array(
+            [1.0, 1.0, 1.0, 1.0, 1.0])
+        weights_face = LR_confs_face[idx] * base_weights_face
+        weights_face = tf.constant(weights_face, dtype=tf.float32)
+        objs['J2D_face_Loss_%d' % idx] = tf.reduce_sum(
+            weights_face * tf.reduce_sum(tf.square(j2dsplus_est[14:19, :] - LR_j2ds_face[idx]), 1))
+
+        base_weights_head = 0.0 * np.array(
+            [1.0, 1.0])
+        weights_head = LR_confs_head[idx] * base_weights_head
+        weights_head = tf.constant(weights_head, dtype=tf.float32)
+        objs['J2D_head_Loss_%d' % idx] = tf.reduce_sum(
+            weights_head * tf.reduce_sum(tf.square(LR_j2ds_head[idx] - j2ds_est[14:16, :]), 1))
+
+        base_weights_foot = 0.0 * np.array(
+            [1.0, 1.0])
+        _LR_confs_foot = np.zeros(2)
+        if LR_confs_foot[idx][0] != 0 and LR_confs_foot[idx][1] != 0:
+            _LR_confs_foot[0] = (LR_confs_foot[idx][0] + LR_confs_foot[idx][1]) / 2.0
+        else:
+            _LR_confs_foot[0] = 0.0
+        if LR_confs_foot[idx][3] != 0 and LR_confs_foot[idx][4] != 0:
+            _LR_confs_foot[1] = (LR_confs_foot[idx][3] + LR_confs_foot[idx][4]) / 2.0
+        else:
+            _LR_confs_foot[1] = 0.0
+        weights_foot = _LR_confs_foot * base_weights_foot
+        weights_foot = tf.constant(weights_foot, dtype=tf.float32)
+        _LR_j2ds_foot = np.zeros([2, 2])
+        _LR_j2ds_foot[0, 0] = (LR_j2ds_foot[idx][0, 0] + LR_j2ds_foot[idx][1, 0]) / 2.0
+        _LR_j2ds_foot[0, 1] = (LR_j2ds_foot[idx][0, 1] + LR_j2ds_foot[idx][1, 1]) / 2.0
+        _LR_j2ds_foot[1, 0] = (LR_j2ds_foot[idx][3, 0] + LR_j2ds_foot[idx][4, 0]) / 2.0
+        _LR_j2ds_foot[1, 1] = (LR_j2ds_foot[idx][3, 1] + LR_j2ds_foot[idx][4, 1]) / 2.0
+        objs['J2D_foot_Loss_%d' % idx] = tf.reduce_sum(
+            weights_foot * tf.reduce_sum(tf.square(_LR_j2ds_foot - j2ds_est[0:2, :]), 1))
+        pose_diff = param_pose[:, -69:] - pose_mean
+        objs['Prior_Loss_%d' % idx] = 5 * tf.squeeze(
+            tf.matmul(tf.matmul(pose_diff, pose_covariance), tf.transpose(pose_diff)))
+    params_tem = tf.concat(params_tem, axis=0)
+    j3ds_full, vs_full, jointsplus_full = smpl_model.get_3d_joints(params_tem, util.TEM_SMPL_JOINT_IDS)  # N x M x 3
+    jointsplus_full = jointsplus_full[:, 14:19]
     for i, jid in enumerate(util.TEM_SMPL_JOINT_IDS):
         for j, aid in enumerate([0, 1, 2]):
             # for j, aid in enumerate([0, 2]):
-            trajectory = j3ds[:, i, aid]
+            trajectory = j3ds_full[:, i, aid]
             '''
             c_dct_initial = tf.matmul(tf.expand_dims(trajectory, axis=0), dct_mtx)
             c_dct_initial = tf.squeeze(c_dct_initial)
@@ -281,34 +295,26 @@ def main():
             trajectory_dct = tf.matmul(dct_mtx, tf.expand_dims(c_dct[i, j], axis=-1))
             trajectory_dct = tf.squeeze(trajectory_dct)
 
-            objs['DCT_%d_%d' % (i, j)] = 2000 * tf.reduce_sum(tf.square(trajectory - trajectory_dct))
+            objs['DCT_%d_%d' % (i, j)] = 0.0 * tf.reduce_sum(tf.square(trajectory - trajectory_dct))
+    # for i in range(5):
+    #     for j, aid in enumerate([0, 1, 2]):
+    #         # for j, aid in enumerate([0, 2]):
+    #         trajectory = jointsplus_full[:, i, aid]
+    #         '''
+    #         c_dct_initial = tf.matmul(tf.expand_dims(trajectory, axis=0), dct_mtx)
+    #         c_dct_initial = tf.squeeze(c_dct_initial)
+    #         '''
+    #
+    #         # import ipdb; ipdb.set_trace()
+    #         # with tf.control_dependencies( [tf.assign(c_dct[i, j], c_dct_initial)] ):
+    #         trajectory_dct = tf.matmul(dct_mtx, tf.expand_dims(c_dct[i, j], axis=-1))
+    #         trajectory_dct = tf.squeeze(trajectory_dct)
+    #
+    #         objs['DCT_face_%d_%d' % (i, j)] = 0 * tf.reduce_sum(tf.square(trajectory - trajectory_dct))
     loss = tf.reduce_mean(objs.values())
 
     sess = tf.Session()
     sess.run(tf.global_variables_initializer())
-
-    def lc(j2d_est):
-        _, ax = plt.subplots(1, 3)
-        for idx in range(0, util.NUM_VIEW):
-            import copy
-            tmp = copy.copy(imgs[idx])
-            for j2d in j2ds[idx]:
-                x = int(j2d[1])
-                y = int(j2d[0])
-
-                if x > imgs[0].shape[0] or x > imgs[0].shape[1]:
-                    continue
-                tmp[x:x + 5, y:y + 5, :] = np.array([0, 0, 255])
-
-            for j2d in j2d_est[idx]:
-                x = int(j2d[1])
-                y = int(j2d[0])
-
-                if x > imgs[0].shape[0] or x > imgs[0].shape[1]:
-                    continue
-                tmp[x:x + 5, y:y + 5, :] = np.array([255, 0, 0])
-            ax[idx].imshow(tmp)
-        plt.show()
 
     if util.VIS_OR_NOT:
         func_lc = None
@@ -320,33 +326,36 @@ def main():
         # optimizer.minimize(sess, fetches = [objs], loss_callback=func_lc)
         optimizer.minimize(sess, loss_callback=func_lc)
 
-    print sess.run(c_dct)
-
-    vs_final = sess.run(vs)
+    v_final = sess.run(vs_full)
     pose_final = sess.run(params_pose_tem)
-    pose_final = fix_head_pose(pose_final)
 
-    betas = sess.run(param_shape)
+    for fid in range(util.BATCH_FRAME_NUM):
+        camera = render.camera(cams[fid][0], cams[fid][1], cams[fid][2], cams[fid][3])
+        #texture_img = cv2.resize(texture_img, (util.img_width, util.img_height))
 
-    model_f = sess.run(smpl_model.f)
-    model_f = model_f.astype(int).tolist()
+    ### set nonrigid template
+    #smpl = smpl_np.SMPLModel('./smpl/models/basicmodel_m_lbs_10_207_0_v1.0.0.pkl')
+    #template = np.load(util.texture_path + "template.npy")
+    # smpl.set_template(template)
+    #v = smpl.get_verts(pose_final, betas_final, trans_final)
 
-    if not os.path.exists(output_path):
-        os.makedirs(output_path)
+    #texture_img = cv2.resize(texture_img, (util.img_width, util.img_height))
+    #img_result_texture = camera.render_texture(v, texture_img, texture_vt)
+    # img_result_texture = tex.correct_render_small(img_result_texture)
+        if not os.path.exists(util.hmr_path + "output_dct"):
+            os.makedirs(util.hmr_path + "output_dct")
+        #cv2.imwrite(util.hmr_path + "output/hmr_optimization_texture_%04d.png" % ind, img_result_texture)
+        #img_bg = cv2.resize(LR_imgs[fid], (util.img_width, util.img_height))
+        #img_result_texture_bg = camera.render_texture_imgbg(img_result_texture, img_bg)
+        #cv2.imwrite(util.hmr_path + "output/texture_bg_%04d.png" % ind,
+                #img_result_texture_bg)
+    #if util.video is True:
+        #videowriter.write(img_result_texture)
+        img_result_naked = camera.render_naked(v_final[fid], LR_imgs[fid])
+        cv2.imwrite(util.hmr_path + "output_dct/hmr_optimization_%04d.png" % fid, img_result_naked)
+        img_result_naked_rotation = camera.render_naked_rotation(v_final[fid], 90, LR_imgs[fid])
+        cv2.imwrite(util.hmr_path + "output_dct/hmr_optimization_rotation_%04d.png" % fid, img_result_naked_rotation)
 
-    for fid in range(0, util.BATCH_FRAME_NUM):
-        from psbody.meshlite import Mesh
-        m = Mesh(v=vs_final[fid], f=model_f)
-        out_ply_path = "%s/%04d.ply" % (output_path, fid)
-
-        m.write_ply(out_ply_path)
-
-        res = {'pose': pose_final[fid], 'betas': betas, 'trans': trans[fid], 't': params[fid]['t'],
-               'rt': params[fid]['rt'], 'f': params[fid]['f']}
-        out_pkl_path = out_ply_path.replace('.ply', '.pkl')
-
-        with open(out_pkl_path, 'wb') as fout:
-            pkl.dump(res, fout)
 
 if __name__ == '__main__':
     main()

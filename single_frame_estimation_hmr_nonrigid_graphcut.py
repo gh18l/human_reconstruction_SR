@@ -11,6 +11,7 @@ import optimization_prepare as opt_pre
 import pickle
 import smpl_np
 import scipy.io as sio
+import matlab.engine
 ind = 0
 
 def get_nohandsfeet_weights(contours_smpl_correspondence, hands_feet_index):
@@ -577,6 +578,13 @@ def get_smplcontours_mask_index(mask_parsing_index, mask_contours, contours_smpl
                 smpl_weights[smpl_index_converted] = 1.0
     return smplcontours_mask_index, smpl_weights
 
+def write_file(contours, verts2d, smpl_contours_index):
+    contours = contours.squeeze()
+    smpl_contours = verts2d[smpl_contours_index, :]
+
+    sio.savemat(util.hmr_path + "output_nonrigid/contours.mat",
+                {"contours": contours, "smpl_contours": smpl_contours})
+
 def nonrigid_estimation():
     hmr_dict, data_dict = util.load_hmr_data(util.hmr_path)
     HR_imgs = data_dict["imgs"]
@@ -596,7 +604,7 @@ def nonrigid_estimation():
     # contours_smpl_index = smpl_to_boundary(camera, poses[ind], betas[ind], trans[ind], verts2d)
     contours_smpl_index1 = smpl_to_boundary1(camera, poses[ind], betas[ind], trans[ind], verts2d)
     contours_smpl_index1 = np.array(contours_smpl_index1)
-    #write_file(contours1, verts2d, contours_smpl_index1)
+    # write_file(contours1, verts2d, contours_smpl_index1)
     label_result = sio.loadmat(util.hmr_path + "optimization_data/label_result.mat")
     label_result = label_result["label_result"].astype("int").squeeze()
     ##### generate smpl shape template

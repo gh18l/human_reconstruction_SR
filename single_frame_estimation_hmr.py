@@ -17,6 +17,7 @@ import time
 import pickle
 import period_new
 import optimization_prepare as opt_pre
+import configuration as config
 def demo_point(x, y, img_path = None):
     import matplotlib.pyplot as plt
     if img_path != None:
@@ -335,13 +336,57 @@ def main(flength=2500.):
         hmr_cam = hmr_cams[0, :].squeeze()
 
         hmr_joint3d = hmr_joint3ds[ind, :, :]
+        print(hmr_joint3d[0, 2])
+        print(hmr_joint3d[1, 2])
+        print(hmr_joint3d[4, 2])
+        print(hmr_joint3d[5, 2])
+        print(hmr_joint3d[6, 2])
+        print(hmr_joint3d[7, 2])
+        print(hmr_joint3d[10, 2])
+        print(hmr_joint3d[11, 2])
+        # if util.pedestrian_constraint is True:
+        #     arm_error = np.fabs((hmr_joint3d[6, 2] + hmr_joint3d[7, 2]) - (hmr_joint3d[10, 2] + hmr_joint3d[11, 2]))
+        #     leg_error = np.fabs((hmr_joint3d[0, 2] + hmr_joint3d[1, 2]) - (hmr_joint3d[5, 2] + hmr_joint3d[4, 2]))
+        #     ####arm
+        #     ####leg
+        #     if leg_error > 0.1:
+        #         print("leg_error>0.1")
+        #         if hmr_joint3d[0, 2] + hmr_joint3d[1, 2] < hmr_joint3d[5, 2] + hmr_joint3d[4, 2]:
+        #             hmr_theta[51] = 0.8
+        #             hmr_theta[52] = 1e-8
+        #             hmr_theta[53] = 1.0
+        #             hmr_theta[58] = 1e-8
+        #             forward_arm = "left"
+        #         else:
+        #             hmr_theta[48] = 0.8
+        #             hmr_theta[49] = 1e-8
+        #             hmr_theta[50] = -1.0
+        #             hmr_theta[55] = 1e-8
+        #             forward_arm = "right"
+        #     #####arm
+        #     else:
+        #         print("leg_error<=0.1")
+        #         if hmr_joint3d[6, 2] + hmr_joint3d[7, 2] < hmr_joint3d[10, 2] + hmr_joint3d[11, 2]:
+        #             hmr_theta[48] = 0.8
+        #             hmr_theta[49] = 1e-8
+        #             hmr_theta[50] = -1.0
+        #             hmr_theta[55] = 1e-8
+        #             forward_arm = "right"
+        #         else:
+        #             hmr_theta[51] = 0.8
+        #             hmr_theta[52] = 1e-8
+        #             hmr_theta[53] = 1.0
+        #             hmr_theta[58] = 1e-8
+        #             forward_arm = "left"
+        #     print(forward_arm)
         if util.pedestrian_constraint is True:
             arm_error = np.fabs((hmr_joint3d[6, 2] + hmr_joint3d[7, 2]) - (hmr_joint3d[10, 2] + hmr_joint3d[11, 2]))
             leg_error = np.fabs((hmr_joint3d[0, 2] + hmr_joint3d[1, 2]) - (hmr_joint3d[5, 2] + hmr_joint3d[4, 2]))
             ####arm
             ####leg
-            if leg_error > 0.1:
-                if hmr_joint3d[0, 2] + hmr_joint3d[1, 2] < hmr_joint3d[5, 2] + hmr_joint3d[4, 2]:
+            if leg_error > 0.0:
+                print("leg_error>0.1")
+                if hmr_joint3d[0, 2] < hmr_joint3d[5, 2]:
                     hmr_theta[51] = 0.8
                     hmr_theta[52] = 1e-8
                     hmr_theta[53] = 1.0
@@ -355,6 +400,7 @@ def main(flength=2500.):
                     forward_arm = "right"
             #####arm
             else:
+                print("leg_error<=0.1")
                 if hmr_joint3d[6, 2] + hmr_joint3d[7, 2] < hmr_joint3d[10, 2] + hmr_joint3d[11, 2]:
                     hmr_theta[48] = 0.8
                     hmr_theta[49] = 1e-8

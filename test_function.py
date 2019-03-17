@@ -357,13 +357,13 @@ def mask_texture():
 
 def generate_video():
     fps = 15
-    size = (600, 450)
-    path = "/home/lgh/code/SMPLify_TF/test/temp0/1/LR"
-    video_path = "/home/lgh/code/SMPLify_TF/test/temp0/1/LR/LR.avi"
+    size = (1920, 1080)
+    path = "/home/lgh/MOTdatasets/MOT17-08/img1/optimization_data"
+    video_path = "/home/lgh/MOTdatasets/MOT17-08/img1/optimization_data/1.mp4"
     videowriter = cv2.VideoWriter(video_path, cv2.VideoWriter_fourcc('D', 'I', 'V', 'X'), fps, size)
     imgs_files = os.listdir(path)
     imgs_files = sorted([filename for filename in imgs_files if filename.endswith(".jpg")],
-                        key=lambda d: int((d.split('_')[0])))
+                        key=lambda d: int((d.split('.')[0])))
     for ind, imgs_file in enumerate(imgs_files):
         img_file_path = os.path.join(path, imgs_file)
         HR_img = cv2.imread(img_file_path)
@@ -380,8 +380,32 @@ def generate_coordination():
         x = int(img_file.split('_')[1])
         y = int(img_file.split('_')[2])
         f1.write(str(x)+' '+str(y)+'\n')
-generate_coordination()
-#generate_video()
+
+def crop_img():
+    path = "/home/lgh/MOTdatasets/MOT17-08/img1/optimization_data"
+    f1 = open(path + '/coordination.txt', 'w')
+    for i in range(71):
+        img1 = cv2.imread("/home/lgh/MOTdatasets/MOT17-08/img1/optimization_data/%06d.jpg" % (i+290))
+        roi = cv2.selectROI("1", img1)
+        roi = np.array(roi)
+        roi[3] = 600
+        roi[2] = 450
+        imCrop = img1[int(roi[1]): int(roi[1] + roi[3]), int(roi[0]): int(roi[0] + roi[2])]
+        f1.write(str(int(roi[1])) + ' ' + str(int(roi[1] + roi[3])) + str(int(roi[0])) + ' ' + str(int(roi[0] + roi[2])) + '\n')
+        cv2.imwrite("/home/lgh/MOTdatasets/MOT17-08/img1/optimization_data/%06d.jpg" % i, imCrop)
+#generate_coordination()
+# for i in range(6):
+#     img = cv2.imread("/home/lgh/code/SMPLify_TF/test/test_suzhuo/optimization_data/%04d.png" % (i+51))
+#     img = cv2.resize(img, (1000, 750))
+#     cv2.imwrite("/home/lgh/code/SMPLify_TF/test/test_suzhuo/optimization_data/%04d.png" % i, img)
+crop_img()
+
+
+# for i in range(900):
+#     img = cv2.imread("/home/lgh/MOTdatasets/MOT17-11-SDP/img1/optimization_data/%06d.jpg" % (i+1))
+#     img_crop = img[:, 0:img.shape[1] / 2, :]
+#     cv2.imwrite("/home/lgh/MOTdatasets/MOT17-11-SDP/img1/optimization_data/%06d.jpg" % i, img_crop)
+
 #mask_texture()
 #HR_pose_prediction_full_replace_LR_pose()
 #preprocessHR()
