@@ -10,7 +10,24 @@ import cv2
 import optimization_prepare as opt_pre
 import smpl_np
 import correct_final_texture as tex
+import pickle
+
+def load_pose_pkl():
+    LR_path = util.hmr_path + "output"
+    LR_pkl_files = os.listdir(LR_path)
+    LR_pkl_files = sorted([filename for filename in LR_pkl_files if filename.endswith(".pkl")],
+                          key=lambda d: int((d.split('_')[3]).split('.')[0]))
+    j3dss = []
+    for ind, LR_pkl_file in enumerate(LR_pkl_files):
+        LR_pkl_path = os.path.join(LR_path, LR_pkl_file)
+        with open(LR_pkl_path) as f:
+            param = pickle.load(f)
+        j3ds = param['j3ds']
+        j3dss.append(j3ds)
+    return j3dss
+
 def refine_optimization(poses, betas, trans, data_dict, hmr_dict, LR_cameras, texture_img, texture_vt):
+    j3dss = load_pose_pkl()
     LR_j2ds = data_dict["j2ds"]
     LR_confs = data_dict["confs"]
     LR_j2ds_face = data_dict["j2ds_face"]
@@ -44,6 +61,21 @@ def refine_optimization(poses, betas, trans, data_dict, hmr_dict, LR_cameras, te
         hmr_shape = hmr_betas[ind, :].squeeze()
         hmr_tran = hmr_trans[ind, :].squeeze()
         hmr_cam = hmr_cams[ind, :].squeeze()
+
+        posepre_joint3d = j3dss[ind]
+        if posepre_joint3d[2, 2] < posepre_joint3d[7, 2]:
+            poses[ind, 51] = 0.8
+            poses[ind, 52] = 1e-8
+            poses[ind, 53] = 1.0
+            poses[ind, 58] = 1e-8
+            forward_arm = "left"
+        else:
+            poses[ind, 48] = 0.8
+            poses[ind, 49] = 1e-8
+            poses[ind, 50] = -1.0
+            poses[ind, 55] = 1e-8
+            forward_arm = "right"
+        print(forward_arm)
         print("The refine %d iteration" % ind)
         param_shape = tf.Variable(betas[ind, :].reshape([1, -1]), dtype=tf.float32)
         param_rot = tf.Variable(poses[ind, 0:3].reshape([1, -1]), dtype=tf.float32)
@@ -116,7 +148,7 @@ def refine_optimization(poses, betas, trans, data_dict, hmr_dict, LR_cameras, te
 
         param_complete_pose = tf.concat([param_rot, param_pose], axis=1)
         ### 6000.0
-        objs['Prior_Loss'] = 1000.0 * tf.reduce_sum(tf.square(param_complete_pose[0, :] - poses[ind, :]))
+        objs['Prior_Loss'] = 6000.0 * tf.reduce_sum(tf.square(param_complete_pose[0, :] - poses[ind, :]))
         objs['Prior_Shape'] = 5.0 * tf.reduce_sum(tf.square(param_shape))
         w1 = np.array([1.04 * 2.0, 1.04 * 2.0, 57.4 * 50, 57.4 * 50])
         w1 = tf.constant(w1, dtype=tf.float32)
@@ -126,9 +158,9 @@ def refine_optimization(poses, betas, trans, data_dict, hmr_dict, LR_cameras, te
         w_temporal = [0.5, 0.5, 1.0, 1.5, 2.5, 2.5, 1.5, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 7.0, 7.0]
 
         param_pose_full = tf.concat([param_rot, param_pose], axis=1)
-        objs['hmr_constraint'] = 0.0 * tf.reduce_sum(tf.square(tf.squeeze(param_pose_full) - hmr_theta))
+        objs['hmr_constraint'] = 6000.0 * tf.reduce_sum(tf.square(tf.squeeze(param_pose_full) - hmr_theta))
         ### 8000.0
-        objs['hmr_hands_constraint'] = 100000.0 * tf.reduce_sum(
+        objs['hmr_hands_constraint'] = 0.0 * tf.reduce_sum(
             tf.square(tf.squeeze(param_pose_full)[21] - hmr_theta[21])
             + tf.square(tf.squeeze(param_pose_full)[23] - hmr_theta[23])
             + tf.square(tf.squeeze(param_pose_full)[20] - hmr_theta[20])
@@ -170,17 +202,17 @@ def refine_optimization(poses, betas, trans, data_dict, hmr_dict, LR_cameras, te
             smpl.set_template(template)
             v = smpl.get_verts(pose_final, betas_final, trans_final)
 
-            #img_result_texture = camera.render_texture(v, texture_img, texture_vt)
-            #img_result_texture = tex.correct_render_small(img_result_texture)
+            img_result_texture = camera.render_texture(v, texture_img, texture_vt)
+            img_result_texture = tex.correct_render_small(img_result_texture, 3)
             if not os.path.exists(util.hmr_path + "output_after_refine"):
                 os.makedirs(util.hmr_path + "output_after_refine")
-            #cv2.imwrite(util.hmr_path + "output_after_refine/hmr_optimization_texture_%04d.png" % ind, img_result_texture)
-            #bg_new = cv2.resize(LR_imgs[ind], (2442, 1832))
-            #img_result_texture_bg = camera.render_texture_imgbg(img_result_texture, LR_imgs[ind])
-            #cv2.imwrite(util.hmr_path + "output_after_refine/texture_bg_%04d.png" % ind,
-                        #img_result_texture_bg)
-            #if util.video is True:
-                #videowriter.write(img_result_texture)
+            cv2.imwrite(util.hmr_path + "output_after_refine/hmr_optimization_texture_%04d.png" % ind, img_result_texture)
+            img_bg = cv2.resize(LR_imgs[ind], (util.img_width, util.img_height))
+            img_result_texture_bg = camera.render_texture_imgbg(img_result_texture, img_bg)
+            cv2.imwrite(util.hmr_path + "output_after_refine/texture_bg_%04d.png" % ind,
+                        img_result_texture_bg)
+            if util.video is True:
+                videowriter.write(img_result_texture)
             img_result_naked = camera.render_naked(v, LR_imgs[ind])
             cv2.imwrite(util.hmr_path + "output_after_refine/hmr_optimization_%04d.png" % ind, img_result_naked)
             img_result_naked_rotation = camera.render_naked_rotation(v, 90, LR_imgs[ind])

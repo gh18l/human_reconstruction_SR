@@ -471,14 +471,14 @@ def main(flength=2500.):
         objs['J2D_face_Loss'] = tf.reduce_sum(
             weights_face * tf.reduce_sum(tf.square(j2dsplus_est[14:19, :] - LR_j2ds_face[ind]), 1))
 
-        base_weights_head = 0.0 * np.array(
+        base_weights_head = 1.0 * np.array(
             [1.0, 1.0])
         weights_head = LR_confs_head[ind] * base_weights_head
         weights_head = tf.constant(weights_head, dtype=tf.float32)
         objs['J2D_head_Loss'] = tf.reduce_sum(
             weights_head * tf.reduce_sum(tf.square(LR_j2ds_head[ind] - j2ds_est[14:16, :]), 1))
 
-        base_weights_foot = 0.0 * np.array(
+        base_weights_foot = 0.5 * np.array(
             [1.0, 1.0])
         _LR_confs_foot = np.zeros(2)
         if LR_confs_foot[ind][0] != 0 and LR_confs_foot[ind][1] != 0:
@@ -540,7 +540,7 @@ def main(flength=2500.):
         pose_index = pose_index.reshape([-1, 1]).astype(np.int64)
         hmr_theta_refine = hmr_theta[pose_index]
         param_pose_refine = tf.gather_nd(tf.squeeze(param_pose_full), pose_index)
-        objs['hmr_constraint'] = 800.0 * tf.reduce_sum(tf.square(tf.squeeze(param_pose_refine) - hmr_theta_refine.squeeze()))
+        objs['hmr_constraint'] = 6000.0 * tf.reduce_sum(tf.square(tf.squeeze(param_pose_refine) - hmr_theta_refine.squeeze()))
         ### 8000.0
         objs['hmr_hands_constraint'] = 100000.0 * tf.reduce_sum(
             tf.square(tf.squeeze(param_pose_full)[21] - hmr_theta[21])
@@ -551,7 +551,7 @@ def main(flength=2500.):
         #w_temporal = [0.5, 0.5, 1.0, 1.5, 2.5, 2.5, 1.5, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 7.0, 7.0]
         w_temporal = [0.5, 0.5, 1.0, 1.5, 2.5, 2.5, 1.5, 1.0, 1.0, 1.5, 2.5, 2.5, 1.5, 1.0, 7.0, 7.0]
         if ind != 0:
-            objs['temporal'] = 800.0 * tf.reduce_sum(
+            objs['temporal'] = 6000.0 * tf.reduce_sum(
                 w_temporal * tf.reduce_sum(tf.square(j3ds - j3ds_old), 1))
             objs['temporal_pose'] = 0.0 * tf.reduce_sum(
                 tf.square(pose_final_old[0, 3:72] - param_pose[0,:]))
@@ -584,7 +584,7 @@ def main(flength=2500.):
             ### set nonrigid template
             smpl = smpl_np.SMPLModel('./smpl/models/basicmodel_m_lbs_10_207_0_v1.0.0.pkl')
             template = np.load(util.texture_path + "template.npy")
-            #smpl.set_template(template)
+            smpl.set_template(template)
             v = smpl.get_verts(pose_final, betas_final, trans_final)
 
 

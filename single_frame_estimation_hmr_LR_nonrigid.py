@@ -442,21 +442,21 @@ def main(flength=2500.):
         weights = tf.constant(weights, dtype=tf.float32)
         objs['J2D_Loss'] = tf.reduce_sum(weights * tf.reduce_sum(tf.square(j2ds_est[2:, :] - LR_j2d), 1))
 
-        base_weights_face = 1.5 * np.array(
+        base_weights_face = 2.5 * np.array(
             [1.0, 1.0, 1.0, 1.0, 1.0])
         weights_face = LR_confs_face[ind] * base_weights_face
         weights_face = tf.constant(weights_face, dtype=tf.float32)
         objs['J2D_face_Loss'] = tf.reduce_sum(
             weights_face * tf.reduce_sum(tf.square(j2dsplus_est[14:19, :] - LR_j2ds_face[ind]), 1))
 
-        base_weights_head = 1.0 * np.array(
+        base_weights_head = 0.5 * np.array(
             [1.0, 1.0])
         weights_head = LR_confs_head[ind] * base_weights_head
         weights_head = tf.constant(weights_head, dtype=tf.float32)
         objs['J2D_head_Loss'] = tf.reduce_sum(
             weights_head * tf.reduce_sum(tf.square(LR_j2ds_head[ind] - j2ds_est[14:16, :]), 1))
 
-        base_weights_foot = 0.5 * np.array(
+        base_weights_foot = 1.0 * np.array(
             [1.0, 1.0])
         _LR_confs_foot = np.zeros(2)
         if LR_confs_foot[ind][0] != 0 and LR_confs_foot[ind][1] != 0:
@@ -509,7 +509,7 @@ def main(flength=2500.):
                                           + tf.square(param_pose[0, 42:45] - hmr_theta[45:48]))
 
         param_pose_full = tf.concat([param_rot, param_pose], axis=1)
-        objs['hmr_constraint'] = 500.0 * tf.reduce_sum(tf.square(tf.squeeze(param_pose_full) - hmr_theta))
+        objs['hmr_constraint'] = 6000.0 * tf.reduce_sum(tf.square(tf.squeeze(param_pose_full) - hmr_theta))
         ### 8000.0
         objs['hmr_hands_constraint'] = 100000.0 * tf.reduce_sum(
             tf.square(tf.squeeze(param_pose_full)[21] - hmr_theta[21])
@@ -556,15 +556,21 @@ def main(flength=2500.):
             v = smpl.get_verts(pose_final, betas_final, trans_final)
 
             img_result_texture = camera.render_texture(v, texture_img, texture_vt)
+            #img_result_texture = tex.correct_render_small(img_result_texture)
             if not os.path.exists(util.hmr_path + "output"):
                 os.makedirs(util.hmr_path + "output")
             cv2.imwrite(util.hmr_path + "output/hmr_optimization_texture_%04d.png" % ind, img_result_texture)
+            img_bg = cv2.resize(LR_imgs[ind], (util.img_width, util.img_height))
+            img_result_texture_bg = camera.render_texture_imgbg(img_result_texture, img_bg)
+            cv2.imwrite(util.hmr_path + "output/texture_bg_%04d.png" % ind,
+                        img_result_texture_bg)
             if util.video is True:
                 videowriter.write(img_result_texture)
             img_result_naked = camera.render_naked(v, LR_imgs[ind])
             cv2.imwrite(util.hmr_path + "output/hmr_optimization_%04d.png" % ind, img_result_naked)
             img_result_naked_rotation = camera.render_naked_rotation(v, 90, LR_imgs[ind])
             cv2.imwrite(util.hmr_path + "output/hmr_optimization_rotation_%04d.png" % ind, img_result_naked_rotation)
+
             #model_f = sess.run(smpl_model.f)
             _objs = sess.run(objs)
             for name in _objs:
@@ -594,7 +600,7 @@ def main(flength=2500.):
         # out_ply_path = os.path.join(out_ply_path, "%04d.ply" % ind)
         # m.write_ply(out_ply_path)
         #
-        res = {'pose': pose_final, 'betas': betas_final, 'trans': trans_final}
+        res = {'pose': pose_final, 'betas': betas_final, 'trans': trans_final, 'j3ds': v_final[2]}
         # out_pkl_path = out_ply_path.replace('.ply', '.pkl')
         with open(util.hmr_path + "output/hmr_optimization_pose_%04d.pkl" % ind, 'wb') as fout:
             pkl.dump(res, fout)
@@ -639,6 +645,7 @@ def main(flength=2500.):
 
     period_new.save_prerefine_data(LR_cameras, texture_img, texture_vt, data_dict)
     period_new.save_pkl_to_csv(util.hmr_path + "output")
+    period_new.save_pkl_to_npy(util.hmr_path + "output")
 
 
 if __name__ == '__main__':

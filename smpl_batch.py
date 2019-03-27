@@ -14,8 +14,8 @@ class SMPL:
 		data = pkl.load(open(smpl_model_path))
 		data1 = pkl.load(open(normal_smpl_model_path))
 		template = data1['v_template']
-		v_template = smpl_np.remove_template_handfoot(template, data1['weights'])
-		self.v_template = tf.constant(v_template, dtype=tf.float32)
+		#v_template = smpl_np.remove_template_handfoot(template, data1['weights'])
+		self.v_template = tf.constant(template, dtype=tf.float32)
 		self.v_template_RT = tf.constant(data1['v_template'], dtype=tf.float32)
 		self.f = tf.constant(data1['f'], dtype=tf.float32)
 		self.shapedirs = tf.constant(data1['shapedirs'].r, dtype=tf.float32)

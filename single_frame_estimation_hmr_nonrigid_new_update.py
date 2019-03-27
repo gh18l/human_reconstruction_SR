@@ -11,7 +11,7 @@ import optimization_prepare as opt_pre
 import pickle
 import smpl_np
 import scipy.io as sio
-ind = 0
+ind = util.graphcut_index
 
 def write_file(contours, verts2d, smpl_contours_index):
     contours = contours.squeeze()
@@ -438,13 +438,13 @@ def smpl_to_boundary(camera, pose, beta, tran, verts2d):
 def smpl_to_boundary1(camera, pose, beta, tran, verts2d):
     smpl = smpl_np.SMPLModel('./smpl/models/basicmodel_m_lbs_10_207_0_v1.0.0.pkl')
     verts = smpl.get_verts(pose, beta, tran)
-    bg = np.zeros([util.img_width, util.img_height, 3], dtype=np.uint8)
+    bg = np.zeros([util.img_height, util.img_width, 3], dtype=np.uint8)
     img_result_naked = camera.render_naked(verts, bg)
     mask = img_result_naked[:, :, 0]
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     cntsSorted = sorted(contours[0], key=lambda x: cv2.contourArea(x))
 
-    ## view
+    # view
     # for i in range(len(contours[0])):
     #     x = np.rint(contours[0][i, :, 0]).astype("int")
     #     y = np.rint(contours[0][i, :, 1]).astype("int")

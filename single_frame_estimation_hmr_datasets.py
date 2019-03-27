@@ -281,7 +281,8 @@ def main(flength=2500.):
     pose_mean = tf.constant(pose_mean, dtype=tf.float32)
     pose_covariance = tf.constant(pose_covariance, dtype=tf.float32)
     smpl_model = SMPL(util.SMPL_PATH, util.NORMAL_SMPL_PATH)
-    j3ds_old = []
+    j3ds_old = np.array([])
+    j3ds_old_old = np.array([])
     pose_final_old = []
     pose_final = []
     LR_cameras = []
@@ -468,7 +469,7 @@ def main(flength=2500.):
         objs['J2D_head_Loss'] = tf.reduce_sum(
             weights_head * tf.reduce_sum(tf.square(LR_j2ds_head[ind] - j2ds_est[14:16, :]), 1))
 
-        base_weights_foot = 0.5 * np.array(
+        base_weights_foot = 1.0 * np.array(
             [1.0, 1.0])
         _LR_confs_foot = np.zeros(2)
         if LR_confs_foot[ind][0] != 0 and LR_confs_foot[ind][1] != 0:
@@ -490,7 +491,7 @@ def main(flength=2500.):
             weights_foot * tf.reduce_sum(tf.square(_LR_j2ds_foot - j2ds_est[0:2, :]), 1))
 
         pose_diff = tf.reshape(param_pose - pose_mean, [1, -1])
-        objs['Prior_Loss'] = 10.0 * tf.squeeze(tf.matmul(tf.matmul(pose_diff, pose_covariance), tf.transpose(pose_diff)))
+        objs['Prior_Loss'] = 1.0 * tf.squeeze(tf.matmul(tf.matmul(pose_diff, pose_covariance), tf.transpose(pose_diff)))
         objs['Prior_Shape'] = 5.0 * tf.reduce_sum(tf.square(param_shape))
         ##############################################################
         ##########control the angle of the elbow and knee#############
@@ -518,7 +519,7 @@ def main(flength=2500.):
         objs['face'] = 0.0 * tf.reduce_sum(tf.square(hmr_joint3d[14:19] - jointsplus[14:19]))
 
         objs['face_pose'] = 0.0 * tf.reduce_sum(tf.square(param_pose[0, 33:36] - hmr_theta[36:39])
-                                          + tf.square(param_pose[0, 42:45] - hmr_theta[45:48]))
+                                          + tf .square(param_pose[0, 42:45] - hmr_theta[45:48]))
 
         param_pose_full = tf.concat([param_rot, param_pose], axis=1)
         #objs['hmr_constraint'] = 5000.0 * tf.reduce_sum(tf.square(tf.squeeze(param_pose_full) - hmr_theta))
@@ -531,9 +532,9 @@ def main(flength=2500.):
         pose_index = pose_index.reshape([-1, 1]).astype(np.int64)
         hmr_theta_refine = hmr_theta[pose_index]
         param_pose_refine = tf.gather_nd(tf.squeeze(param_pose_full), pose_index)
-        objs['hmr_constraint'] = 0.0 * tf.reduce_sum(tf.square(tf.squeeze(param_pose_refine) - hmr_theta_refine.squeeze()))
+        objs['hmr_constraint'] = 6000.0 * tf.reduce_sum(tf.square(tf.squeeze(param_pose_refine) - hmr_theta_refine.squeeze()))
         ### 8000.0
-        objs['hmr_hands_constraint'] = 100000.0 * tf.reduce_sum(
+        objs['hmr_hands_constraint'] = 0.0 * tf.reduce_sum(
             tf.square(tf.squeeze(param_pose_full)[21] - hmr_theta[21])
             + tf.square(tf.squeeze(param_pose_full)[23] - hmr_theta[23])
             + tf.square(tf.squeeze(param_pose_full)[20] - hmr_theta[20])
@@ -542,16 +543,22 @@ def main(flength=2500.):
         #w_temporal = [0.5, 0.5, 1.0, 1.5, 2.5, 2.5, 1.5, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 7.0, 7.0]
         w_temporal = [0.5, 0.5, 1.0, 1.5, 2.5, 2.5, 1.5, 1.0, 1.0, 1.5, 2.5, 2.5, 1.5, 1.0, 7.0, 7.0]
         if ind != 0:
-            objs['temporal'] = 2500.0 * tf.reduce_sum(
+            objs['temporal'] = 1000.0 * tf.reduce_sum(
                 w_temporal * tf.reduce_sum(tf.square(j3ds - j3ds_old), 1))
             objs['temporal_pose'] = 0.0 * tf.reduce_sum(
                 tf.square(pose_final_old[0, 3:72] - param_pose[0,:]))
+        if ind > 1 and ind < 20:
             ##optical flow constraint
             body_idx = np.array(body_parsing_idx[0]).squeeze()
             body_idx = body_idx.reshape([-1, 1]).astype(np.int64)
             verts_est_body = tf.gather_nd(verts_est, body_idx)
-            objs['dense_optflow'] = 0.0* tf.reduce_sum(tf.square(
+            objs['dense_optflow'] = 0.08 * tf.reduce_sum(tf.square(
                 verts_est_body - verts_body_old))
+        if ind > 1:
+            objs['temporal_2'] = 0.0 * tf.reduce_sum(
+                w_temporal * tf.reduce_sum(tf.square(tf.square(j3ds - j3ds_old) - tf.square(j3ds_old - j3ds_old_old)),
+                                           1))
+
         # pose1 = param_pose[0, 52]
         # pose2 = param_pose[0, 55]
         # pose3 = param_pose[0, 9]
@@ -575,13 +582,13 @@ def main(flength=2500.):
             ### set nonrigid template
             smpl = smpl_np.SMPLModel('./smpl/models/basicmodel_m_lbs_10_207_0_v1.0.0.pkl')
             template = np.load(util.texture_path + "template.npy")
-            #smpl.set_template(template)
+            smpl.set_template(template)
             v = smpl.get_verts(pose_final, betas_final, trans_final)
 
 
             texture_img = cv2.resize(texture_img, (util.img_width, util.img_height))
             img_result_texture = camera.render_texture(v, texture_img, texture_vt)
-            #img_result_texture = tex.correct_render_small(img_result_texture)
+            img_result_texture = tex.correct_render_small(img_result_texture)
             if not os.path.exists(util.hmr_path + "output"):
                 os.makedirs(util.hmr_path + "output")
             cv2.imwrite(util.hmr_path + "output/hmr_optimization_texture_%04d.png" % ind, img_result_texture)
@@ -647,6 +654,8 @@ def main(flength=2500.):
         # HR_init_param_pose = (pose_final.squeeze()[3:]).reshape([1, -1])
         # HR_init_param_trans = trans_final.reshape([1, -1])
         # cam_HR_init_trans = camera_t_final_HR
+        if j3ds_old != []:
+            j3ds_old_old = j3ds_old
         j3ds_old = v_final[2]
         pose_final_old = pose_final
 

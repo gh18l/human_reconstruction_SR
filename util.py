@@ -54,16 +54,24 @@ LR_img_dctsmooth_base_path = base_path + "/LRdctsmooth"
 # hmr_path = "/home/lgh/code/SMPLify_TF/test/test_hmr_init/jianing2/"
 # texture_path = "/home/lgh/code/SMPLify_TF/test/test_hmr_init/HR_multi_crop_small3/output/texture_file/"
 # HR_pose_path = "/home/lgh/code/SMPLify_TF/test/test_hmr_init/HR_multi_crop_small3/output/"
-hmr_path = "/home/lgh/MOTdatasets/MOT17-11-SDP/texture1/"
-texture_path = "/home/lgh/code/SMPLify_TF/test/test_phone_HR/output/texture_file/"
-HR_pose_path = "/home/lgh/MOTdatasets/MOT17-11-SDP/texture1/output/"
+hmr_path = "/home/lgh/real_system_data/data1/people2/LR/"
+texture_path = "/home/lgh/real_system_data/data1/people2/HR/output/texture_file/"
+HR_pose_path = "/home/lgh/real_system_data/data1/people2/HR/output/"
 crop_texture = True  ###only use in small texture
 index_data = 0
 video = True
 pedestrian_constraint = True
-img_widthheight = 02500600
-img_width = 250
-img_height = 600
+
+img_widthheight = 110000750
+img_width = 1000
+img_height = 750
+graphcut_index = 8
+correct_render_up_mid = 110
+correct_render_hand_up_mid = 120
+correct_render_down_mid = 350
+render_fingers = False
+render_toes = False
+render_hands = True
 ###dingjianLR100
 #lr_points = [0, 16, 31, 47, 64, 80, 96]    ###[0, 18, 36, 54, 72]
 #hr_points = [4, 20, 36]
@@ -98,8 +106,16 @@ img_height = 600
 #lr_points = [0, 17, 34, 52, 68, 85, 102, 119, 136, 153, 171]
 # lr_points = [0, 17, 34, 52, 69, 86, 104]#    ###[0, 18, 36, 54, 72]
 # hr_points = [6, 23]
-lr_points = [0, 36, 72]#    ###[0, 18, 36, 54, 72]
-hr_points = [0, 36]
+lr_points = [0, 16, 32, 47, 61, 76, 92, 106, 120, 135, 149, 164, 180, 194]#    ###[0, 18, 36, 54, 72]
+hr_points = [1, 16, 30]
+
+##jianing
+# lr_points = [0, 17, 32, 47, 62, 76, 92, 108, 123, 137, 152, 166, 182, 197, 211, 226, 241, 258, 273, 287, 303, 320, 336, 353, 370, 387, ]#    ###[0, 18, 36, 54, 72]
+# hr_points = [0, 17]
+
+##yinheng
+# lr_points = [0, 10, 26, 43, 60, 77, 94, 111, 128, 145]#    ###[0, 18, 36, 54, 72]
+# hr_points = [0, 16]
 
 which_people = "tianyi_LR"
 code_params = {"tianyi_LR": {"Prior_Loss":10.0, "Prior_Shape":5.0, "angle_elbow_knee":0.1, "angle_head":100.0,
@@ -217,7 +233,7 @@ def load_hmr_data(path):
     MPI_j2d_files = sorted([filename for filename in MPI_j2d_files if filename.endswith(".json")],
                             key=lambda d: int((d.split('_')[0])))
     img_files = os.listdir(path)
-    img_files = sorted([filename for filename in img_files if (filename.endswith(".png") or filename.endswith(".jpg")) and "mask" not in filename])
+    img_files = sorted([filename for filename in img_files if (filename.endswith(".png") or filename.endswith(".jpg")) and "mask" not in filename and "label" not in filename])
                        # key=lambda d: int((d.split('_')[0])))
 
     mask_files = os.listdir(path)

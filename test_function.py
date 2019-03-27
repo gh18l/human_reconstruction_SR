@@ -5,6 +5,7 @@ import pickle as pkl
 import csv
 from scipy import sparse as sp
 import tensorflow as tf
+from skimage import morphology
 def polyfit3D():
     import matplotlib.pyplot as plt
     path = "/home/lgh/code/SMPLify_TF/test/temp0_tianyi/1/LR/output"
@@ -398,8 +399,132 @@ def crop_img():
 #     img = cv2.imread("/home/lgh/code/SMPLify_TF/test/test_suzhuo/optimization_data/%04d.png" % (i+51))
 #     img = cv2.resize(img, (1000, 750))
 #     cv2.imwrite("/home/lgh/code/SMPLify_TF/test/test_suzhuo/optimization_data/%04d.png" % i, img)
-crop_img()
+#crop_img()
 
+def render_texture_imgbg():
+    path = "/home/lgh/MPIIdatasets/img16"
+    LR = cv2.imread(path + "_resize/optimization_data/0000.png")
+    fps = 10
+    size = (LR.shape[1] * 2, LR.shape[0] * 2)
+    video_path = path + "/result.mp4"
+    videowriter = cv2.VideoWriter(video_path, cv2.VideoWriter_fourcc('D', 'I', 'V', 'X'), fps, size)
+    for ind in range(40):
+        HR = cv2.imread(path + "/optimization_data/%08d.jpg" % (ind+34))
+        LR = cv2.imread(path + "_resize/optimization_data/%04d.png" % ind)
+        render = cv2.imread(path + "_resize/output/hmr_optimization_texture_%04d.png" % ind)
+        SR = cv2.imread("/home/lgh/MPIIdatasets/sr_result/pack6/%04d.png" % ind)
+        SR = LR
+        bg_img = np.copy(SR)
+        for i in range(render.shape[0]):
+            for j in range(render.shape[1]):
+                if render[i, j, 0] == 0 and render[i, j, 1] == 0 and render[i, j, 2] == 0:
+                    continue
+                bg_img[i, j, :] = render[i, j, :]
+        cv2.imwrite(path + "/all/HR_%04d.png" % ind, HR)
+        cv2.imwrite(path + "/all/LR_%04d.png" % ind, LR)
+        cv2.imwrite(path + "/all/render_%04d.png" % ind, bg_img)
+        cv2.imwrite(path + "/all/SR_%04d.png" % ind, SR)
+        result = np.zeros([LR.shape[0] * 2, LR.shape[1] * 2, 3],dtype=np.uint8)
+        result[:LR.shape[0], :LR.shape[1], :] = LR
+        result[:LR.shape[0], LR.shape[1]:, :] = SR
+        result[LR.shape[0]:, :LR.shape[1], :] = bg_img
+        result[LR.shape[0]:, LR.shape[1]:, :] = HR
+        videowriter.write(result)
+
+import matplotlib.pyplot as plt
+
+def get_texture(solution = 32):
+    #
+    #inputs:
+    #   solution is the size of generated texture, in notebook provided by facebookresearch the solution is 200
+    #   If use lager solution, the texture will be sparser and smaller solution result in denser texture.
+    #   im is original image
+    #   IUV is densepose result of im
+    #output:
+    #   TextureIm, the 24 part texture of im according to IUV
+    solution_float = float(solution) - 1
+
+    IUV = cv2.imread("/home/lgh/Downloads/DensePose-master/DensePoseData/output_data/0028_IUV.png")
+    im = cv2.imread("/home/lgh/Downloads/DensePose-master/DensePoseData/input_data/0028.png")
+    index = IUV[:, :, 0]
+    U = IUV[:,:,1]
+    V = IUV[:,:,2]
+    parts = list()
+    for PartInd in range(1,25):    ## Set to xrange(1,23) to ignore the face part.
+        actual_part = np.zeros((solution, solution, 3))
+        x,y = np.where(IUV[:,:,0]==PartInd)
+        if len(x) == 0:
+            parts.append(actual_part)
+            continue
+
+
+        u_current_points = U[x,y]   #  Pixels that belong to this specific part.
+        v_current_points = V[x,y]
+        ##
+        tex_map_coords = ((255-v_current_points)*solution_float/255.).astype(int),(u_current_points*solution_float/255.).astype(int)
+        for c in range(3):
+            actual_part[tex_map_coords[0],tex_map_coords[1], c] = im[x,y,c]
+        parts.append(actual_part)
+
+
+    TextureIm  = np.zeros([solution*6,solution*4,3])
+
+    for i in range(4):
+        for j in range(6):
+            TextureIm[ (solution*j):(solution*j+solution)  , (solution*i):(solution*i+solution) ,: ] = parts[i*6+j]
+
+
+
+    cv2.imshow("1", TextureIm.transpose([1,0,2])[:,:,::-1]/255)
+    cv2.waitKey()
+    #plt.figure(figsize = (25,25))
+
+    #plt.imshow(TextureIm.transpose([1,0,2])[:,:,::-1]/255)
+
+def dilate_mask():
+    img = cv2.imread("/media/lgh/6626-63BC/neet_to_mask/0030.png")
+    mask = cv2.imread("/media/lgh/000324E9000CDBD5/mask_refine/yinheng_output_0015_49.ppm")
+    mask = mask[:, :, 0]
+    for i in range(mask.shape[0]):
+        for j in range(mask.shape[1]):
+            if mask[i, j] != 0:
+                mask[i, j] = 1
+    mask = mask.astype(np.bool)
+    dst = morphology.remove_small_objects(mask, min_size=300, connectivity=1)
+    mask = (dst.astype(np.uint8)) * 255
+
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (4, 4))
+    mask = cv2.dilate(mask, kernel)
+    # contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    # contour = contours[-1]
+    # demo = np.zeros_like(mask)
+    # for i in range(len(contour)):
+    #     contour = contour.squeeze()
+    #     x = contour[i, 0]
+    #     y = contour[i, 1]
+    #     demo[y, x] = 127
+    result = cv2.add(img, np.zeros(np.shape(img), dtype=np.uint8), mask=mask)
+    result_weights = cv2.addWeighted(result, 0.5, img, 0.5, 0)
+    cv2.imshow("1", result)
+    cv2.waitKey()
+   # cv2.imwrite("/home/lgh/real_system_data/data1/real_system_maskrcnn_for_mask_3.26/3/mask_dilated_0008.png", result_weights)
+   # cv2.imwrite("/home/lgh/real_system_data/data1/real_system_maskrcnn_for_mask_3.26/3/maskdilatedresult_0008.png",
+               # mask)
+
+# img = cv2.imread("/home/lgh/Downloads/Mask_RCNN-master/images/00000078.jpg")
+# mask = cv2.imread("/home/lgh/Downloads/Mask_RCNN-master/results/mask_0000.png")
+# #cv2.imwrite("/home/lgh/Downloads/Mask_RCNN-master/images/00000078.jpg", img)
+# result = cv2.add(img, np.zeros(np.shape(img), dtype=np.uint8), mask=mask[:, :, 0])
+# #result_weights = cv2.addWeighted(result, 0.5, img, 0.5, 0)
+# cv2.imshow("1", result)
+# cv2.waitKey()
+dilate_mask()
+#get_texture()
+#render_texture_imgbg()
+# img = cv2.imread("/home/lgh/MPIIdatasets/img13/output_nonrigid/hmr_optimization_texture_nonrigid0032.png")
+# img = img[:, img.shape[1] / 3:, :]
+# cv2.imshow("1", img)
+# cv2.waitKey()
 
 # for i in range(900):
 #     img = cv2.imread("/home/lgh/MOTdatasets/MOT17-11-SDP/img1/optimization_data/%06d.jpg" % (i+1))

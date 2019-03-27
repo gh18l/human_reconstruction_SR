@@ -160,7 +160,21 @@ def save_prerefine_data(LR_cameras, texture_img, texture_vt, data_dict):
     np.save(util.hmr_path + "refine_data/texture_vt.npy", texture_vt)
     np.save(util.hmr_path + "refine_data/data_dict.npy", data_dict)
 
-
+def save_pkl_to_npy(pose_path):
+    #####save csv before refine, extra output
+    pkl_files = os.listdir(pose_path)
+    pkl_files = sorted([filename for filename in pkl_files if filename.endswith(".pkl")],
+                          key=lambda d: int((d.split('_')[3]).split('.')[0]))
+    length = len(pkl_files)
+    array = np.zeros((length, 24 * 3))
+    for ind, pkl_file in enumerate(pkl_files):
+        pkl_path = os.path.join(pose_path, pkl_file)
+        with open(pkl_path) as f:
+            param = pickle.load(f)
+        pose = param['pose']
+        for i in range(24 * 3):
+            array[ind, i] = pose[0, i]
+    np.save(os.path.join(pose_path, "optimization_pose.npy"), array)
 
 
 def save_pkl_to_csv(pose_path):
