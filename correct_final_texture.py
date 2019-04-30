@@ -4,6 +4,7 @@ from sklearn import neighbors
 import time
 import copy
 import util
+from skmultilearn.adapt import MLkNN
 def closest_node(node, nodes):
     nodes = np.asarray(nodes)
     deltas = nodes - node
@@ -96,9 +97,9 @@ def correct_render_mix(img):
     img3 = img_temp[hand_up_mid:down_mid, :, :]  ## hands
     img4 = img_temp[down_mid:, :, :] ##leg
     #img_corrected1 = correct_render_small(img1, 0)
-    img_corrected1 = img1
-    img_corrected2 = correct_render_small(img2, 5)
-    img_corrected3 = correct_render_small(img3, 5)
+    img_corrected1 = correct_render_small(img1, 10)
+    img_corrected2 = correct_render_small(img2, 25)
+    img_corrected3 = correct_render_small(img3, 20)
     img_corrected4 = correct_render_small(img4, 10)
     img_final = np.zeros_like(img)
     img_final[0:up_mid, :, :] = img_corrected1
@@ -269,6 +270,103 @@ def correct_rendertest(img):
     end = time.time()
     print('Running time: %s Seconds' % (end - start))
     return img_corrected
+
+def dilute_texture(img, mask, rect_size = 4, erodesize = 5):
+
+    for i in range(mask.shape[0]):
+        for j in range(mask.shape[1]):
+            if mask[i, j, 0] == 0 and mask[i, j, 1] == 0 and mask[i, j, 2] == 0:
+                continue
+            mask[i, j, :] = 255
+    mask = mask[:, :, 0]
+
+    img_corrected = np.copy(img)
+
+    ## erode
+    if erodesize > 0:
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (erodesize, erodesize))
+        eroded = cv2.erode(mask, kernel)
+    else:
+        eroded = mask
+
+    print(">>>>>>>>>>erode finish<<<<<<<<<<<<")
+
+    full_mask = np.ones_like(mask) * 255
+
+    ## extract eroded part
+    rest_region = full_mask - eroded
+    #borders_region = mask - eroded
+
+    nodes = []
+    borders = []
+    for i in range(eroded.shape[0]):
+        for j in range(eroded.shape[1]):
+            if eroded[i, j] == 255:
+                nodes.append([j, i])
+            if rest_region[i, j] == 255:
+                borders.append([j, i])
+    nodes = np.array(nodes)
+    borders = np.array(borders)
+    labels = np.array(range(nodes.shape[0]))
+    knn = neighbors.KNeighborsClassifier(n_neighbors=1)
+    knn.fit(nodes, labels)
+    predictedLabel = knn.predict(borders)
+    print(">>>>>>>>>>knn predict finish<<<<<<<<<<<<")
+    # img_corrected[borders[:, 0], borders[:, 1], :] = img[nodes[predictedLabel, 0], nodes[predictedLabel, 1], :]
+    for i in range(borders.shape[0]):
+        x = borders[i, 0]
+        y = borders[i, 1]
+        index = predictedLabel[i]
+        x_nearest = nodes[index, 0]
+        y_nearest = nodes[index, 1]
+
+        ### convolution
+        if rect_size != 0:
+            for c in range(3):
+                rect = img[y_nearest-rect_size:y_nearest+rect_size, x_nearest-rect_size:x_nearest+rect_size, c]
+                rect_mean = np.mean(rect)
+                img_corrected[y, x, c] = rect_mean
+        else:
+            img_corrected[y, x, :] = img[y_nearest, x_nearest, :]
+    print(">>>>>>>>>>img_corrected finish<<<<<<<<<<<<")
+    return img_corrected
+
+def dilute_texture_multi_label(img, mask, erodesize = 5):
+    img_corrected = np.copy(img)
+
+    ## erode
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (erodesize, erodesize))
+    eroded = cv2.erode(mask, kernel)
+
+    full_mask = np.ones_like(mask) * 255
+
+    ## extract eroded part
+    rest_region = full_mask - eroded
+
+    nodes = []
+    borders = []
+    for i in range(eroded.shape[0]):
+        for j in range(eroded.shape[1]):
+            if eroded[i, j] == 255:
+                nodes.append([j, i])
+            if rest_region[i, j] == 255:
+                borders.append([j, i])
+    nodes = np.array(nodes)
+    borders = np.array(borders)
+    labels = np.array(range(nodes.shape[0]))
+    classifier = MLkNN(k=5)
+    classifier.fit(nodes, labels)
+    predictedLabel = classifier.predict(borders)
+    # img_corrected[borders[:, 0], borders[:, 1], :] = img[nodes[predictedLabel, 0], nodes[predictedLabel, 1], :]
+    for i in range(borders.shape[0]):
+        x = borders[i, 0]
+        y = borders[i, 1]
+        index = predictedLabel[i]
+        x_nearest = nodes[index, 0]
+        y_nearest = nodes[index, 1]
+        img_corrected[y, x, :] = img[y_nearest, x_nearest, :]
+    return img_corrected, eroded
+
 # img = cv2.imread("/home/lgh/code/SMPLify_TF/test/test_hmr_init/jianing2/output_after_refine_big/hmr_optimization_texture_0012.png")
 # img_corrected = correct_rendertest(img)
 # cv2.imshow("1", img_corrected)

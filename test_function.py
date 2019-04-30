@@ -4,8 +4,8 @@ import os
 import pickle as pkl
 import csv
 from scipy import sparse as sp
-import tensorflow as tf
 from skimage import morphology
+import correct_final_texture as tex
 def polyfit3D():
     import matplotlib.pyplot as plt
     path = "/home/lgh/code/SMPLify_TF/test/temp0_tianyi/1/LR/output"
@@ -511,6 +511,82 @@ def dilate_mask():
    # cv2.imwrite("/home/lgh/real_system_data/data1/real_system_maskrcnn_for_mask_3.26/3/maskdilatedresult_0008.png",
                # mask)
 
+def delete_redundant_frame():
+    path = "/home/lgh/real_system_data2/data1/people9/LR"
+    index = 0
+    f2 = open(path + "1/coordination.txt", 'w')
+    with open("/home/lgh/real_system_data2/data1/people9/LR/coordination.txt", 'r') as f:
+        for i in range(481):
+            img_path = os.path.join(path, "%04d.png"%i)
+            img = cv2.imread(img_path)
+            line = f.readline()
+            if i == 0 or i %2 == 1:
+                cv2.imwrite("/home/lgh/real_system_data2/data1/people9/LR1/%04d.png" % index, img)
+                a = []
+                for j in line.split():
+                    a.append(int(j))
+                f2.write(str(a[0]) + " " + str(a[1]) + " " + str(a[2]) + "\n")
+                index = index + 1
+
+def view_mask():
+    img_path = "/home/lgh/Downloads/DensePose-master/DensePoseData/demo_data4/"
+    for i in range(32):
+        img = cv2.imread(img_path + "img_%04d.jpg")
+        mask = cv2.imread("/home/lgh/Downloads/DensePose-master/DensePoseData/infer_out1/img_0001_IUV.png")
+
+def convert_mask(img, mask):
+    for i in range(mask.shape[0]):
+        for j in range(mask.shape[1]):
+            if mask[i, j, 0] == 0 and mask[i, j, 1] == 0 and mask[i, j, 2] == 0:
+                continue
+            mask[i, j, :] = 255
+    mask = mask[:, :, 0]
+    return mask
+
+def reverse_mask(mask):
+    for i in range(mask.shape[0]):
+        for j in range(mask.shape[1]):
+            if mask[i, j] == 0:
+                mask[i, j] = 255
+            else:
+                mask[i, j] = 0
+    return mask
+def mask_img(img, mask):
+    for i in range(mask.shape[0]):
+        for j in range(mask.shape[1]):
+            if mask[i, j] == 255:
+                img[i, j, :] = 255
+    return img
+
+for i in range(41):
+    img = cv2.imread("/home/lgh/MPIIdatasets/img9/optimization_data/%04d.png" % i)
+    img_resize = cv2.resize(img, (480/4, 720/4))
+    img_resize = cv2.resize(img, (480, 720))
+    cv2.imwrite("/home/lgh/MPIIdatasets/img9_resize/optimization_data/%04d.png" % i, img_resize)
+
+img = cv2.imread("/home/lgh/MPIIdatasets/img16/optimization_data/00000055.jpg")
+mask = cv2.imread("/home/lgh/MPIIdatasets/img16/optimization_data/label.png")
+mask = convert_mask(img, mask)
+# result = cv2.add(img, np.zeros(np.shape(img), dtype=np.uint8),
+#                  mask=mask)
+result = tex.dilute_texture(img, mask, rect_size = 5)
+#borders_region = reverse_mask(borders_region)
+# img = mask_img(img, borders_region)
+# img = cv2.resize(img, (256, 256))
+# borders_region = cv2.resize(borders_region, (256, 256))
+# cv2.imwrite("/home/lgh/mask.png", borders_region)
+# cv2.imwrite("/home/lgh/img.png", img)
+
+# result_weights = cv2.add(result, np.zeros(np.shape(result), dtype=np.uint8),
+#                  mask=eroded)
+# result_weights = cv2.addWeighted(result_weights, 0.5, result, 0.5, 0)
+cv2.imwrite("/home/lgh/MPIIdatasets/img16/output_nonrigid/texture.png", result)
+cv2.imshow("1", result)
+cv2.waitKey()
+# img = cv2.imread("/home/lgh/real_system_data5/data1/people9/HR/optimization_data/0040.jpg")
+# cv2.imshow("1", img)
+# cv2.waitKey()
+#delete_redundant_frame()
 # img = cv2.imread("/home/lgh/Downloads/Mask_RCNN-master/images/00000078.jpg")
 # mask = cv2.imread("/home/lgh/Downloads/Mask_RCNN-master/results/mask_0000.png")
 # #cv2.imwrite("/home/lgh/Downloads/Mask_RCNN-master/images/00000078.jpg", img)
@@ -518,7 +594,7 @@ def dilate_mask():
 # #result_weights = cv2.addWeighted(result, 0.5, img, 0.5, 0)
 # cv2.imshow("1", result)
 # cv2.waitKey()
-dilate_mask()
+#dilate_mask()
 #get_texture()
 #render_texture_imgbg()
 # img = cv2.imread("/home/lgh/MPIIdatasets/img13/output_nonrigid/hmr_optimization_texture_nonrigid0032.png")

@@ -56,6 +56,10 @@ def periodicDecomp(lr, hr, lr_points, hr_points):
     for i in range(hr_num):
         if hr_points[i+1] - hr_points[i] < hr_len:
             hr_len = hr_points[i+1] - hr_points[i]
+    if hr_len <= lr_len:
+        lr_len = hr_len
+    else:
+        hr_len = lr_len
     lr_mean = np.mean(lr[lr_points[0]:lr_points[-1]+1], axis=0)
     hr_mean = np.mean(hr[hr_points[0]:hr_points[-1]+1], axis=0)
 

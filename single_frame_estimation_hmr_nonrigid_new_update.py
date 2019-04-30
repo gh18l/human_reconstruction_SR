@@ -449,8 +449,8 @@ def smpl_to_boundary1(camera, pose, beta, tran, verts2d):
     #     x = np.rint(contours[0][i, :, 0]).astype("int")
     #     y = np.rint(contours[0][i, :, 1]).astype("int")
     #     mask[y, x] = 255
-    #     cv2.imshow("1", mask)
-    #     cv2.waitKey()
+    # cv2.imshow("1", mask)
+    # cv2.waitKey()
 
     ### find nearest 2d smpl point of each contour point to get boundary
     '''
@@ -624,105 +624,4 @@ def nonrigid_estimation():
     contours_smpl_index1 = smpl_to_boundary1(camera, poses[ind], betas[ind], trans[ind], verts2d)
 
     write_file(contours1, verts2d, contours_smpl_index1)
-
-    smpl_parsing_index = get_parsing_smpl_contours(contours_smpl_index, body_parsing_idx)
-    smpl_parsing_index1 = get_parsing_smpl_contours(contours_smpl_index1, body_parsing_idx1)
-    smplcontours_mask_index, smpl_weights = get_smplcontours_mask_index(mask_parsing_index, contours, smpl_parsing_index, verts2d, contours_smpl_index, hands_feet_index)
-    maskcontours_smpl_index, mask_weights = get_maskcontours_smpl_index(mask_parsing_index1, contours, smpl_parsing_index1, verts2d, contours_smpl_index1, hands_feet_index)
-
-    ##### generate smpl shape template
-    param_shape = tf.Variable(betas[ind].reshape([1, -1]), dtype=tf.float32)
-    param_rot = tf.constant(poses[ind][0:3].reshape([1, -1]), dtype=tf.float32)
-    param_pose = tf.constant(poses[ind][3:72].reshape([1, -1]), dtype=tf.float32)
-    param_trans = tf.constant(trans[ind].reshape([1, -1]), dtype=tf.float32)
-
-    ####tensorflow array initial_param_tf
-    smpl_model = SMPL(util.SMPL_PATH, util.NORMAL_SMPL_PATH)
-    initial_param_tf = tf.concat([param_shape, param_rot, param_pose, param_trans], axis=1)
-    j3ds, v, jointsplus = smpl_model.get_3d_joints(initial_param_tf, util.SMPL_JOINT_IDS)
-    v_shaped_tf = tf.reshape(v, [-1, 3])
-
-    smpl = smpl_np.SMPLModel('./smpl/models/basicmodel_m_lbs_10_207_0_v1.0.0.pkl')
-    v = smpl.get_verts(poses[ind], betas[ind], trans[ind])
-    v_tf = tf.Variable(v, dtype=tf.float32)
-
-    ### convert v_tf to laplace coordination
-    faces = camera.renderer.faces.astype(np.int64)
-    L = opt_pre.get_laplace_operator(v_shaped_tf, faces)
-    delta = tf.matmul(L, v_shaped_tf)
-    weights_laplace = opt_pre.get_laplace_weights()
-    weights_laplace = 4.0 * weights_laplace.reshape(-1, 1)
-
-
-    cam_nonrigid = Perspective_Camera(cams[ind][0], cams[ind][0], cams[ind][1],
-                                      cams[ind][2], cams[ind][3], np.zeros(3))
-    verts_est = cam_nonrigid.project(tf.squeeze(v_tf))
-    objs_nonrigid = {}
-    contours_tf = tf.convert_to_tensor(contours.squeeze(), dtype=tf.float32)
-
-    contours_smpl_index = contours_smpl_index.reshape([-1, 1]).astype(np.int64)
-    smplcontours_mask_index = smplcontours_mask_index.reshape([-1, 1]).astype(np.int64)
-
-    verts_est1 = tf.gather_nd(verts_est, contours_smpl_index)
-    contours1_tf = tf.gather_nd(contours_tf, smplcontours_mask_index)
-    objs_nonrigid['verts_loss'] = 0.0 * tf.reduce_sum(smpl_weights * tf.reduce_sum(tf.square(verts_est1 - contours1_tf), 1))
-
-    #### verts_loss1
-    maskcontours_smpl_index = maskcontours_smpl_index.reshape([-1, 1]).astype(np.int64)
-    verts_est_contours = tf.gather_nd(verts_est, maskcontours_smpl_index)
-    objs_nonrigid['verts_loss1'] = 0.08 * tf.reduce_sum(tf.reduce_sum(tf.square(verts_est_contours - contours.squeeze()), 1))
-
-
-    #### norm choose   weights_laplace
-    objs_nonrigid['laplace'] = 0.05 * tf.reduce_sum(weights_laplace * tf.reduce_sum(tf.square(tf.matmul(L, v_tf) - delta), 1))
-    objs_nonrigid['smooth_loss'] = 1.0 * tf.reduce_sum(tf.square(v_tf - v_shaped_tf))
-
-    loss = tf.reduce_mean(objs_nonrigid.values())
-    with tf.Session() as sess:
-        sess.run(tf.global_variables_initializer())
-        # L-BFGS-B
-        optimizer = scipy_pt(loss=loss, var_list=[v_tf, param_shape],
-                             options={'eps': 1e-12, 'ftol': 1e-12, 'maxiter': 1000, 'disp': False}, method='L-BFGS-B')
-        optimizer.minimize(sess)
-        v_nonrigid_final = sess.run(v_tf)
-        verts2d = sess.run(verts_est)
-        _objs_nonrigid = sess.run(objs_nonrigid)
-        pose_final, betas_final, trans_final = sess.run(
-            [tf.concat([param_rot, param_pose], axis=1), param_shape, param_trans])
-        for name in _objs_nonrigid:
-            print("the %s loss is %f" % (name, _objs_nonrigid[name]))
-
-    ### view data
-    ## dont render fingers
-    # with open("/home/lgh/code/SMPLify_TF/smpl/models/bodyparts.pkl", 'rb') as f:
-    #     v_ids = pickle.load(f)
-    # fingers = np.concatenate((v_ids['fingers_r'], v_ids['fingers_l']))
-    # faces = camera.renderer.faces
-    # camera.renderer.faces = np.array(filter(lambda face: np.intersect1d(face, fingers).size == 0, faces))
-
-    _, vt = camera.generate_uv(v_nonrigid_final, HR_imgs[ind])
-    if not os.path.exists(util.hmr_path + "output_nonrigid"):
-        os.makedirs(util.hmr_path + "output_nonrigid")
-    img_result_texture = camera.render_texture(v_nonrigid_final, HR_imgs[ind], vt)
-    cv2.imwrite(util.hmr_path + "output_nonrigid/hmr_optimization_texture_nonrigid%04d.png" % ind, img_result_texture)
-    img_result_naked = camera.render_naked(v_nonrigid_final, HR_imgs[ind])
-    cv2.imwrite(util.hmr_path + "output_nonrigid/hmr_optimization_nonrigid_%04d.png" % ind, img_result_naked)
-    img_result_naked_rotation = camera.render_naked_rotation(v_nonrigid_final, 90, HR_imgs[ind])
-    cv2.imwrite(util.hmr_path + "output_nonrigid/hmr_optimization_rotation_nonrigid_%04d.png" % ind, img_result_naked_rotation)
-    camera.write_obj(util.hmr_path + "output_nonrigid/hmr_optimization_rotation_nonrigid_%04d.obj" % ind, v_nonrigid_final, vt)
-    camera.write_texture_data(util.texture_path, HR_imgs[ind], vt)
-    template = smpl.get_nonrigid_smpl_template(v_nonrigid_final, pose_final, betas_final, trans_final)
-    render.save_nonrigid_template(util.texture_path, template)
-
-    for z in range(len(verts2d)):
-        if int(verts2d[z][0]) > HR_masks[ind].shape[1] - 1:
-            print(int(verts2d[z][0]))
-            verts2d[z][0] = HR_masks[ind].shape[1] - 1
-        if int(verts2d[z][1]) > HR_masks[ind].shape[0] - 1:
-            print(int(verts2d[z][1]))
-            verts2d[z][1] = HR_masks[ind].shape[0] - 1
-        (HR_masks[ind])[int(verts2d[z][1]), int(verts2d[z][0])] = 127
-    if not os.path.exists(util.hmr_path + "output_mask"):
-        os.makedirs(util.hmr_path + "output_mask")
-    cv2.imwrite(util.hmr_path + "output_mask/%04d_nonrigid.png" % ind, HR_masks[ind])
 nonrigid_estimation()

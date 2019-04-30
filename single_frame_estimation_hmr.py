@@ -550,7 +550,7 @@ def main(flength=2500.):
         #objs['J2D_face_Loss'] = 10000000.0 * tf.reduce_sum(
               #tf.square(j2dsplus_est[14, :] - HR_j2ds_face[ind][0, :]))
 
-        base_weights_head = 0.5 * np.array(
+        base_weights_head = 1.0 * np.array(
             [1.0, 1.0])
         weights_head = HR_confs_head[ind] * base_weights_head
         weights_head = tf.constant(weights_head, dtype=tf.float32)
@@ -612,7 +612,7 @@ def main(flength=2500.):
                                                             + tf.square(tf.squeeze(param_pose_full)[22] - hmr_theta[22]))
         w_temporal = [0.5, 0.5, 1.0, 1.5, 2.5, 2.5, 1.5, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 5.0, 5.0]
         if ind != 0:
-            objs['temporal'] = 1000.0 * tf.reduce_sum(
+            objs['temporal'] = 800.0 * tf.reduce_sum(
                 w_temporal * tf.reduce_sum(tf.square(j3ds - j3ds_old), 1))
             objs['temporal_pose'] = 0.0 * tf.reduce_sum(
                 tf.square(pose_final_old[0, 3:72] - param_pose[0, :]))
@@ -624,7 +624,7 @@ def main(flength=2500.):
                                            body_parsing_idx[2]])).squeeze()
             body_idx = body_idx.reshape([-1, 1]).astype(np.int64)
             verts_est_body = tf.gather_nd(verts_est, body_idx)
-            ### 0.05
+            ### 0.08
             objs['dense_optflow'] = 0.08 * tf.reduce_sum(tf.square(
                 verts_est_body - verts_body_old))
 
@@ -642,8 +642,7 @@ def main(flength=2500.):
             cam_HR1 = sess.run([cam_HR.fl_x, cam_HR.cx, cam_HR.cy, cam_HR.trans])
             if not os.path.exists(util.hmr_path + "output"):
                 os.makedirs(util.hmr_path + "output")
-            if not os.path.exists(util.hmr_path + "output/camera_after_optimization.npy"):
-                np.save(util.hmr_path + "output/camera_after_optimization.npy", cam_HR1)
+            np.save(util.hmr_path + "output/camera_after_optimization_%04d.npy" % ind, cam_HR1)
             duration = time.time() - start_time
             print("cam_HR1 is %f" % duration)
             start_time = time.time()
@@ -653,33 +652,23 @@ def main(flength=2500.):
             print("v_final is %f" % duration)
             camera = render.camera(cam_HR1[0], cam_HR1[1], cam_HR1[2], cam_HR1[3])
             _, vt = camera.generate_uv(v_final[0], HR_imgs[ind])
-            if ind == 4:
-                vt_HRview = vt
             if not os.path.exists(util.hmr_path + "output"):
                 os.makedirs(util.hmr_path + "output")
-            if util.crop_texture is True:
-                if ind >= 4:
-                    img_result_texture = camera.render_texture(v_final[0], HR_imgs[4], vt_HRview)
-                    cv2.imwrite(util.hmr_path + "output/hmr_optimization_texture_%04d.png" % ind, img_result_texture)
-                    if util.video is True:
-                        videowriter.write(img_result_texture)
-                if ind == 4:
-                    if not os.path.exists(util.texture_path):
-                        os.makedirs(util.texture_path)
-                    HR_mask_img = camera.save_texture_img(HR_imgs[ind], HR_masks[ind])
-                    camera.write_texture_data(util.texture_path, HR_mask_img, vt)
-            else:
-                if ind >= 4:
-                    img_result_texture = camera.render_texture(v_final[0], HR_imgs[4], vt_HRview)
-                    cv2.imwrite(util.hmr_path + "output/hmr_optimization_texture_%04d.png" % ind, img_result_texture)
-                    if util.video is True:
-                        videowriter.write(img_result_texture)
-                if ind == 4:
-                    if not os.path.exists(util.texture_path):
-                        os.makedirs(util.texture_path)
-                    camera.write_texture_data(util.texture_path, HR_imgs[ind], vt)
+            img_result_texture = camera.render_texture(v_final[0], HR_imgs[ind], vt)
+            cv2.imwrite(util.hmr_path + "output/hmr_optimization_texture_%04d.png" % ind, img_result_texture)
+            if util.video is True:
+                videowriter.write(img_result_texture)
+            if ind == 4:
+                if not os.path.exists(util.texture_path):
+                    os.makedirs(util.texture_path)
+            HR_mask_img = camera.save_texture_img(HR_imgs[ind], HR_masks[ind])
+            #camera.write_texture_data(util.texture_path, HR_mask_img, vt)
+
             img_result_naked = camera.render_naked(v_final[0], HR_imgs[ind])
             cv2.imwrite(util.hmr_path + "output/hmr_optimization_%04d.png" % ind, img_result_naked)
+            bg = np.ones_like(HR_imgs[ind]).astype(np.uint8) * 255
+            img_result_naked1 = camera.render_naked(v_final[0], bg)
+            cv2.imwrite(util.hmr_path + "output/hmr_optimization_naked_%04d.png" % ind, img_result_naked1)
             img_result_naked_rotation = camera.render_naked_rotation(v_final[0], 90, HR_imgs[ind])
             cv2.imwrite(util.hmr_path + "output/hmr_optimization_rotation_%04d.png" % ind, img_result_naked_rotation)
 
@@ -716,10 +705,8 @@ def main(flength=2500.):
         verts2d = v_final[1]
         for z in range(len(verts2d)):
             if int(verts2d[z][0]) > HR_masks[ind].shape[0] - 1:
-                print(int(verts2d[z][0]))
                 verts2d[z][0] = HR_masks[ind].shape[0] - 1
             if int(verts2d[z][1]) > HR_masks[ind].shape[1] - 1:
-                print(int(verts2d[z][1]))
                 verts2d[z][1] = HR_masks[ind].shape[1] - 1
             (HR_masks[ind])[int(verts2d[z][0]), int(verts2d[z][1])] = 127
         if not os.path.exists(util.hmr_path + "output_mask"):

@@ -532,7 +532,7 @@ def main(flength=2500.):
         pose_index = pose_index.reshape([-1, 1]).astype(np.int64)
         hmr_theta_refine = hmr_theta[pose_index]
         param_pose_refine = tf.gather_nd(tf.squeeze(param_pose_full), pose_index)
-        objs['hmr_constraint'] = 6000.0 * tf.reduce_sum(tf.square(tf.squeeze(param_pose_refine) - hmr_theta_refine.squeeze()))
+        objs['hmr_constraint'] = 3000.0 * tf.reduce_sum(tf.square(tf.squeeze(param_pose_refine) - hmr_theta_refine.squeeze()))
         ### 8000.0
         objs['hmr_hands_constraint'] = 0.0 * tf.reduce_sum(
             tf.square(tf.squeeze(param_pose_full)[21] - hmr_theta[21])
@@ -552,7 +552,7 @@ def main(flength=2500.):
             body_idx = np.array(body_parsing_idx[0]).squeeze()
             body_idx = body_idx.reshape([-1, 1]).astype(np.int64)
             verts_est_body = tf.gather_nd(verts_est, body_idx)
-            objs['dense_optflow'] = 0.08 * tf.reduce_sum(tf.square(
+            objs['dense_optflow'] = 0.0 * tf.reduce_sum(tf.square(
                 verts_est_body - verts_body_old))
         if ind > 1:
             objs['temporal_2'] = 0.0 * tf.reduce_sum(
@@ -568,7 +568,7 @@ def main(flength=2500.):
             sess.run(tf.global_variables_initializer())
             #L-BFGS-B
             optimizer = scipy_pt(loss=loss,
-                        var_list=[param_rot, param_trans, param_pose, cam_LR.cx, cam_LR.cy],
+                        var_list=[param_shape, param_rot, param_trans, param_pose, cam_LR.cx, cam_LR.cy],
                     options={'eps': 1e-12, 'ftol': 1e-12, 'maxiter': 500, 'disp': False})
             optimizer.minimize(sess)
             pose_final, betas_final, trans_final = sess.run(
@@ -588,10 +588,10 @@ def main(flength=2500.):
 
             texture_img = cv2.resize(texture_img, (util.img_width, util.img_height))
             img_result_texture = camera.render_texture(v, texture_img, texture_vt)
-            img_result_texture = tex.correct_render_small(img_result_texture)
+            #img_result_texture = tex.correct_render_small(img_result_texture)
             if not os.path.exists(util.hmr_path + "output"):
                 os.makedirs(util.hmr_path + "output")
-            cv2.imwrite(util.hmr_path + "output/hmr_optimization_texture_%04d.png" % ind, img_result_texture)
+            cv2.imwrite(util.hmr_path + "output/  %04d.png" % ind, img_result_texture)
             img_bg = cv2.resize(LR_imgs[ind], (util.img_width, util.img_height))
             img_result_texture_bg = camera.render_texture_imgbg(img_result_texture, img_bg)
             cv2.imwrite(util.hmr_path + "output/texture_bg_%04d.png" % ind,

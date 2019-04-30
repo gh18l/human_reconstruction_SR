@@ -590,6 +590,9 @@ def nonrigid_estimation():
     hmr_dict, data_dict = util.load_hmr_data(util.hmr_path)
     HR_imgs = data_dict["imgs"]
     HR_masks = data_dict["masks"]
+    refined_mask = cv2.imread(util.hmr_path + "optimization_data/label.png")
+    texture = tex.dilute_texture(HR_imgs[ind], refined_mask, rect_size = 3, erodesize = 0)
+    cv2.imwrite(util.hmr_path + "output_nonrigid/texture.png", texture)
     hands_feet_index = opt_pre.get_hands_feet_index()
     poses, betas, trans, cams = load_nonrigid_data()
     body_parsing_idx = load_body_parsing()
@@ -688,25 +691,25 @@ def nonrigid_estimation():
 
     ### view data
     ## dont render fingers
-    #with open("/home/lgh/code/SMPLify_TF/smpl/models/bodyparts.pkl", 'rb') as f:
-        #v_ids = pickle.load(f)
-    #fingers = np.concatenate((v_ids['fingers_r'], v_ids['fingers_l']))
-    #faces = camera.renderer.faces
-    #camera.renderer.faces = np.array(filter(lambda face: np.intersect1d(face, fingers).size == 0, faces))
-    HR_imgs[ind] = cv2.resize(HR_imgs[ind], (util.img_width, util.img_height))
-    _, vt = camera.generate_uv(v_nonrigid_final, HR_imgs[ind])
+    # with open("/home/lgh/code/SMPLify_TF/smpl/models/bodyparts.pkl", 'rb') as f:
+    #     v_ids = pickle.load(f)
+    # fingers = np.concatenate((v_ids['fingers_r'], v_ids['fingers_l']))
+    # faces = camera.renderer.faces
+    # camera.renderer.faces = np.array(filter(lambda face: np.intersect1d(face, fingers).size == 0, faces))
+    texture = cv2.resize(texture, (util.img_width, util.img_height))
+    _, vt = camera.generate_uv(v_nonrigid_final, texture)
     if not os.path.exists(util.hmr_path + "output_nonrigid"):
         os.makedirs(util.hmr_path + "output_nonrigid")
-    img_result_texture = camera.render_texture(v_nonrigid_final, HR_imgs[ind], vt)
-    img_result_texture = tex.correct_render_mix(img_result_texture)
-    texture_as_save = tex.stitch_in_picture(img_result_texture, HR_imgs[ind])
+    img_result_texture = camera.render_texture(v_nonrigid_final, texture, vt)
+    #img_result_texture = tex.correct_render_small(img_result_texture, 5)
+    #texture_as_save = tex.stitch_in_picture(img_result_texture, HR_imgs[ind])
     cv2.imwrite(util.hmr_path + "output_nonrigid/hmr_optimization_texture_nonrigid_%04d.png" % ind, img_result_texture)
-    img_result_naked = camera.render_naked(v_nonrigid_final, HR_imgs[ind])
+    img_result_naked = camera.render_naked(v_nonrigid_final, texture)
     cv2.imwrite(util.hmr_path + "output_nonrigid/hmr_optimization_nonrigid_%04d.png" % ind, img_result_naked)
-    img_result_naked_rotation = camera.render_naked_rotation(v_nonrigid_final, 90, HR_imgs[ind])
+    img_result_naked_rotation = camera.render_naked_rotation(v_nonrigid_final, 90, texture)
     cv2.imwrite(util.hmr_path + "output_nonrigid/hmr_optimization_rotation_nonrigid_%04d.png" % ind, img_result_naked_rotation)
     camera.write_obj(util.hmr_path + "output_nonrigid/hmr_optimization_rotation_nonrigid_%04d.obj" % ind, v_nonrigid_final, vt)
-    camera.write_texture_data(util.texture_path, texture_as_save, vt)
+    camera.write_texture_data(util.texture_path, vt)
     template = smpl.get_nonrigid_smpl_template(v_nonrigid_final, pose_final, betas_final, trans_final)
     template = np.array(template)
     render.save_nonrigid_template(util.texture_path, template)
@@ -716,7 +719,7 @@ def nonrigid_estimation():
     T_pose[0, 1] = np.pi
     template_for_demo = smpl.get_verts(T_pose, betas_final, trans_final)
     template_for_demo = np.array(template_for_demo)
-    bg_white = (np.ones_like(HR_imgs[ind]) * 255).astype(np.uint8)
+    bg_white = (np.ones_like(texture) * 255).astype(np.uint8)
     template_naked = camera.render_naked(template_for_demo, bg_white)
     cv2.imwrite(util.hmr_path + "output_nonrigid/template_nonrigid_%04d.png" % ind, template_naked)
 
@@ -733,15 +736,15 @@ def nonrigid_estimation():
     cv2.imwrite(util.hmr_path + "output_nonrigid/hmr_optimization_rotation180_nonrigid_%04d.png" % ind,
                 img_result_naked_rotation)
 
-    ####rotate texture
+    ###rotate texture
     pose_rotation = pose_final.copy()
     flipped_rot = cv2.Rodrigues(pose_rotation.squeeze()[0:3])[0].dot(
         cv2.Rodrigues(np.array([0., -np.pi / 9.0, 0]))[0])
     flipped_rot = cv2.Rodrigues(flipped_rot)[0].ravel()
     pose_rotation[0, 0:3] = flipped_rot
     v_rotation = smpl.get_verts(pose_rotation, betas_final, trans_final)
-    img_result_texture_rotation = camera.render_texture(v_rotation, texture_as_save, vt)
-    img_result_texture_rotation = tex.correct_render_small(img_result_texture_rotation)
+    img_result_texture_rotation = camera.render_texture(v_rotation, texture, vt)
+    #img_result_texture_rotation = tex.correct_render_mix(img_result_texture_rotation)
     cv2.imwrite(util.hmr_path + "output_nonrigid/hmr_optimization_texture_nonrigid_rotation1_%04d.png" % ind, img_result_texture_rotation)
     ####rotate texture
     pose_rotation = pose_final.copy()
@@ -750,8 +753,8 @@ def nonrigid_estimation():
     flipped_rot = cv2.Rodrigues(flipped_rot)[0].ravel()
     pose_rotation[0, 0:3] = flipped_rot
     v_rotation = smpl.get_verts(pose_rotation, betas_final, trans_final)
-    img_result_texture_rotation = camera.render_texture(v_rotation, texture_as_save, vt)
-    img_result_texture_rotation = tex.correct_render_small(img_result_texture_rotation)
+    img_result_texture_rotation = camera.render_texture(v_rotation, texture, vt)
+    #img_result_texture_rotation = tex.correct_render_mix(img_result_texture_rotation)
     cv2.imwrite(util.hmr_path + "output_nonrigid/hmr_optimization_texture_nonrigid_rotation2_%04d.png" % ind,
                 img_result_texture_rotation)
     ####rotate texture
@@ -761,8 +764,8 @@ def nonrigid_estimation():
     flipped_rot = cv2.Rodrigues(flipped_rot)[0].ravel()
     pose_rotation[0, 0:3] = flipped_rot
     v_rotation = smpl.get_verts(pose_rotation, betas_final, trans_final)
-    img_result_texture_rotation = camera.render_texture(v_rotation, texture_as_save, vt)
-    img_result_texture_rotation = tex.correct_render_small(img_result_texture_rotation)
+    img_result_texture_rotation = camera.render_texture(v_rotation, texture, vt)
+    #img_result_texture_rotation = tex.correct_render_mix(img_result_texture_rotation)
     cv2.imwrite(util.hmr_path + "output_nonrigid/hmr_optimization_texture_nonrigid_rotation3_%04d.png" % ind,
                 img_result_texture_rotation)
     ####rotate texture
@@ -772,8 +775,8 @@ def nonrigid_estimation():
     flipped_rot = cv2.Rodrigues(flipped_rot)[0].ravel()
     pose_rotation[0, 0:3] = flipped_rot
     v_rotation = smpl.get_verts(pose_rotation, betas_final, trans_final)
-    img_result_texture_rotation = camera.render_texture(v_rotation, texture_as_save, vt)
-    img_result_texture_rotation = tex.correct_render_small(img_result_texture_rotation)
+    img_result_texture_rotation = camera.render_texture(v_rotation, texture, vt)
+    #img_result_texture_rotation = tex.correct_render_mix(img_result_texture_rotation)
     cv2.imwrite(util.hmr_path + "output_nonrigid/hmr_optimization_texture_nonrigid_rotation4_%04d.png" % ind,
                 img_result_texture_rotation)
     ####rotate texture
@@ -783,8 +786,8 @@ def nonrigid_estimation():
     flipped_rot = cv2.Rodrigues(flipped_rot)[0].ravel()
     pose_rotation[0, 0:3] = flipped_rot
     v_rotation = smpl.get_verts(pose_rotation, betas_final, trans_final)
-    img_result_texture_rotation = camera.render_texture(v_rotation, texture_as_save, vt)
-    img_result_texture_rotation = tex.correct_render_small(img_result_texture_rotation)
+    img_result_texture_rotation = camera.render_texture(v_rotation, texture, vt)
+    #img_result_texture_rotation = tex.correct_render_small(img_result_texture_rotation)
     cv2.imwrite(util.hmr_path + "output_nonrigid/hmr_optimization_texture_nonrigid_rotation5_%04d.png" % ind,
                 img_result_texture_rotation)
     ####rotate texture
@@ -794,8 +797,8 @@ def nonrigid_estimation():
     flipped_rot = cv2.Rodrigues(flipped_rot)[0].ravel()
     pose_rotation[0, 0:3] = flipped_rot
     v_rotation = smpl.get_verts(pose_rotation, betas_final, trans_final)
-    img_result_texture_rotation = camera.render_texture(v_rotation, texture_as_save, vt)
-    img_result_texture_rotation = tex.correct_render_small(img_result_texture_rotation)
+    img_result_texture_rotation = camera.render_texture(v_rotation, texture, vt)
+    #img_result_texture_rotation = tex.correct_render_small(img_result_texture_rotation)
     cv2.imwrite(util.hmr_path + "output_nonrigid/hmr_optimization_texture_nonrigid_rotation6_%04d.png" % ind,
                 img_result_texture_rotation)
 

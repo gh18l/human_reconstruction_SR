@@ -61,26 +61,26 @@ def refine_optimization(poses, betas, trans, data_dict, hmr_dict, LR_cameras, te
         hmr_shape = hmr_betas[ind, :].squeeze()
         hmr_tran = hmr_trans[ind, :].squeeze()
         hmr_cam = hmr_cams[ind, :].squeeze()
-
-        posepre_joint3d = j3dss[ind]
-        if posepre_joint3d[2, 2] < posepre_joint3d[7, 2]:
-            poses[ind, 51] = 0.8
-            poses[ind, 52] = 1e-8
-            poses[ind, 53] = 1.0
-            poses[ind, 58] = 1e-8
-            forward_arm = "left"
-        else:
-            poses[ind, 48] = 0.8
-            poses[ind, 49] = 1e-8
-            poses[ind, 50] = -1.0
-            poses[ind, 55] = 1e-8
-            forward_arm = "right"
-        print(forward_arm)
+        if util.pedestrian_constraint == True:
+            posepre_joint3d = j3dss[ind]
+            if posepre_joint3d[2, 2] < posepre_joint3d[7, 2]:
+                poses[ind, 51] = 0.8
+                poses[ind, 52] = 1e-8
+                poses[ind, 53] = 1.0
+                poses[ind, 58] = 1e-8
+                forward_arm = "left"
+            else:
+                poses[ind, 48] = 0.8
+                poses[ind, 49] = 1e-8
+                poses[ind, 50] = -1.0
+                poses[ind, 55] = 1e-8
+                forward_arm = "right"
+            print(forward_arm)
         print("The refine %d iteration" % ind)
-        param_shape = tf.Variable(betas[ind, :].reshape([1, -1]), dtype=tf.float32)
-        param_rot = tf.Variable(poses[ind, 0:3].reshape([1, -1]), dtype=tf.float32)
-        param_pose = tf.Variable(poses[ind, 3:72].reshape([1, -1]), dtype=tf.float32)
-        param_trans = tf.Variable(trans[ind, :].reshape([1, -1]), dtype=tf.float32)
+        param_shape = tf.Variable(hmr_shape.reshape([1, -1]), dtype=tf.float32)
+        param_rot = tf.Variable(hmr_theta[0:3].reshape([1, -1]), dtype=tf.float32)
+        param_pose = tf.Variable(hmr_theta[3:72].reshape([1, -1]), dtype=tf.float32)
+        param_trans = tf.Variable(hmr_tran.reshape([1, -1]), dtype=tf.float32)
 
         ###to get hmr 2d verts
         param_shape_fixed = tf.constant(hmr_shape.reshape([1, -1]), dtype=tf.float32)
@@ -148,6 +148,14 @@ def refine_optimization(poses, betas, trans, data_dict, hmr_dict, LR_cameras, te
 
         param_complete_pose = tf.concat([param_rot, param_pose], axis=1)
         ### 6000.0
+        #weights = np.ones([1, 72])
+        #weights[0,54] = 0
+        #weights[0,55] = 0
+        #weights[0,56] = 0
+        #weights[0, 48] = 0
+        #weights[0, 49] = 0
+        #weights[0, 50] = 0
+        #weights = tf.constant(weights, dtype=tf.float32)
         objs['Prior_Loss'] = 6000.0 * tf.reduce_sum(tf.square(param_complete_pose[0, :] - poses[ind, :]))
         objs['Prior_Shape'] = 5.0 * tf.reduce_sum(tf.square(param_shape))
         w1 = np.array([1.04 * 2.0, 1.04 * 2.0, 57.4 * 50, 57.4 * 50])
@@ -158,7 +166,7 @@ def refine_optimization(poses, betas, trans, data_dict, hmr_dict, LR_cameras, te
         w_temporal = [0.5, 0.5, 1.0, 1.5, 2.5, 2.5, 1.5, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 7.0, 7.0]
 
         param_pose_full = tf.concat([param_rot, param_pose], axis=1)
-        objs['hmr_constraint'] = 6000.0 * tf.reduce_sum(tf.square(tf.squeeze(param_pose_full) - hmr_theta))
+        objs['hmr_constraint'] = 0.0 * tf.reduce_sum(tf.square(tf.squeeze(param_pose_full) - hmr_theta))
         ### 8000.0
         objs['hmr_hands_constraint'] = 0.0 * tf.reduce_sum(
             tf.square(tf.squeeze(param_pose_full)[21] - hmr_theta[21])
@@ -169,9 +177,15 @@ def refine_optimization(poses, betas, trans, data_dict, hmr_dict, LR_cameras, te
         #param_pose_full = tf.concat([param_rot, param_pose], axis=1)
         #objs['hmr_constraint'] = 30.0 * tf.reduce_sum(tf.square(tf.squeeze(param_pose_full) - hmr_theta))
         if ind != 0:
-            objs['temporal'] = 800.0 * tf.reduce_sum(
+            w_temporal = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 10000.0, 0.0, 0.0, 0.0]
+            objs['temporal'] = 0.0 * tf.reduce_sum(
                 w_temporal * tf.reduce_sum(tf.square(j3ds - j3ds_old), 1))
-            objs['temporal_pose'] = 0.0 * tf.reduce_sum(
+            p_weights = np.ones([1, 69])
+            # p_weights[0, 51] = 10000
+            # p_weights[0, 52] = 10000
+            # p_weights[0, 53] = 10000
+            p_weights = tf.constant(p_weights, dtype=tf.float32)
+            objs['temporal_pose'] = 30000.0 * tf.reduce_sum(p_weights *
                 tf.square(pose_final_old[0, 3:72] - param_pose[0, :]))
             ##optical flow constraint
             body_idx = np.array(np.hstack([body_parsing_idx[0],
@@ -203,7 +217,7 @@ def refine_optimization(poses, betas, trans, data_dict, hmr_dict, LR_cameras, te
             v = smpl.get_verts(pose_final, betas_final, trans_final)
 
             img_result_texture = camera.render_texture(v, texture_img, texture_vt)
-            img_result_texture = tex.correct_render_small(img_result_texture, 3)
+            #img_result_texture = tex.correct_render_small(img_result_texture, 3)
             if not os.path.exists(util.hmr_path + "output_after_refine"):
                 os.makedirs(util.hmr_path + "output_after_refine")
             cv2.imwrite(util.hmr_path + "output_after_refine/hmr_optimization_texture_%04d.png" % ind, img_result_texture)
@@ -222,6 +236,11 @@ def refine_optimization(poses, betas, trans, data_dict, hmr_dict, LR_cameras, te
                 print("the %s loss is %f" % (name, _objs[name]))
             j3ds_old = v_final[2]
             pose_final_old = pose_final
+
+            res = {'pose': pose_final, 'betas': betas_final, 'trans': trans_final, 'j3ds': v_final[2], 'cam': cam_LR1}
+            # out_pkl_path = out_ply_path.replace('.ply', '.pkl')
+            with open(util.hmr_path + "output_after_refine/hmr_optimization_pose_%04d.pkl" % ind, 'wb') as fout:
+                pickle.dump(res, fout)
 
             #### get body vertex corresponding 2d index
             if ind != len(LR_j2ds) - 1:
