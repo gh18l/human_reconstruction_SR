@@ -64,8 +64,8 @@ index_data = 4
 video = True
 pedestrian_constraint = True
 
-img_widthheight = 102000600
-img_width = 200
+img_widthheight = 103000600
+img_width = 300
 img_height = 600
 graphcut_index = 30
 correct_render_up_mid = 450
