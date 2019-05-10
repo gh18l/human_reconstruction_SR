@@ -185,7 +185,7 @@ def refine_optimization(poses, betas, trans, data_dict, hmr_dict, LR_cameras, te
             # p_weights[0, 52] = 10000
             # p_weights[0, 53] = 10000
             p_weights = tf.constant(p_weights, dtype=tf.float32)
-            objs['temporal_pose'] = 30000.0 * tf.reduce_sum(p_weights *
+            objs['temporal_pose'] = 0.0 * tf.reduce_sum(p_weights *
                 tf.square(pose_final_old[0, 3:72] - param_pose[0, :]))
             ##optical flow constraint
             body_idx = np.array(np.hstack([body_parsing_idx[0],

@@ -336,58 +336,59 @@ def delete_bg():
 
 
 def generate_new_data():
-    path = "/home/lgh/real_system_data5/data1/people10/"
-    HR_path = path + "HR/"
-    LR_path = path + "LR1/"
-    LR_output_path = LR_path + "output/"
-    #LR_output_path = LR_path + "output_after_refine/"
-    #hmr_dict, data_dict = util.load_hmr_data(path)
-    img_files = os.listdir(LR_path + "optimization_data")
-    img_files = sorted([filename for filename in img_files if (filename.endswith(".png") or filename.endswith(
-        ".jpg")) and "mask" not in filename and "label" not in filename])
+    for i in range(8):
+        path = "/home/lgh/real_system_data7_people1_people2_refine/data1/people2/"
+        HR_path = path + "HR/"
+        LR_path = path + "LR%d/" % (i+1)
+        #LR_output_path = LR_path + "output/"
+        LR_output_path = LR_path + "output_after_refine/"
+        #hmr_dict, data_dict = util.load_hmr_data(path)
+        img_files = os.listdir(LR_path + "optimization_data")
+        img_files = sorted([filename for filename in img_files if (filename.endswith(".png") or filename.endswith(
+            ".jpg")) and "mask" not in filename and "label" not in filename])
 
-    imgs = []
-    for ind in range(len(img_files)):
-        img_file_path = os.path.join(LR_path + "optimization_data", img_files[ind])
-        img = cv2.imread(img_file_path)
-        imgs.append(img)
+        imgs = []
+        for ind in range(len(img_files)):
+            img_file_path = os.path.join(LR_path + "optimization_data", img_files[ind])
+            img = cv2.imread(img_file_path)
+            imgs.append(img)
 
-    pkl_files = os.listdir(LR_output_path)
-    pkl_files = sorted([filename for filename in pkl_files if filename.endswith(".pkl")],
-                          key=lambda d: int((d.split('_')[3]).split('.')[0]))
-    for ind, pkl_file in enumerate(pkl_files):
-        LR_pkl_path = os.path.join(LR_output_path, pkl_file)
-        with open(LR_pkl_path) as f:
-            param = pickle.load(f)
-        pose = param['pose']
-        beta = param['betas']
-        tran = param['trans']
-        cam = param['cam']
+        pkl_files = os.listdir(LR_output_path)
+        pkl_files = sorted([filename for filename in pkl_files if filename.endswith(".pkl")],
+                              key=lambda d: int((d.split('_')[3]).split('.')[0]))
+        for ind, pkl_file in enumerate(pkl_files):
+            LR_pkl_path = os.path.join(LR_output_path, pkl_file)
+            with open(LR_pkl_path) as f:
+                param = pickle.load(f)
+            pose = param['pose']
+            beta = param['betas']
+            tran = param['trans']
+            cam = param['cam']
 
-        smpl = smpl_np.SMPLModel('./smpl/models/basicmodel_m_lbs_10_207_0_v1.0.0.pkl')
-        template = np.load(HR_path + "output/texture_file/template.npy")
-        smpl.set_template(template)
-        v = smpl.get_verts(pose, beta, tran)
+            smpl = smpl_np.SMPLModel('./smpl/models/basicmodel_m_lbs_10_207_0_v1.0.0.pkl')
+            template = np.load(HR_path + "output/texture_file/template.npy")
+            smpl.set_template(template)
+            v = smpl.get_verts(pose, beta, tran)
 
-        camera = render.camera(cam[0], cam[1], cam[2], cam[3])
+            camera = render.camera(cam[0], cam[1], cam[2], cam[3])
 
-        ##render
-        #texture_img = cv2.imread(HR_path + "output/texture_file/HR1.png")
-        texture_img = cv2.imread(HR_path + "output/texture_file/HR.png")
-        texture_vt = np.load(HR_path + "output/texture_file/vt.npy")
-        img_result_texture = camera.render_texture(v, texture_img, texture_vt)
-        # img_result_texture = tex.correct_render_small(img_result_texture, 3)
-        if not os.path.exists(LR_path + "new_output"):
-            os.makedirs(LR_path + "new_output")
-        cv2.imwrite(LR_path + "new_output/hmr_optimization_texture_%04d.png" % ind, img_result_texture)
-        img_bg = cv2.resize(imgs[ind], (util.img_width, util.img_height))
-        img_result_texture_bg = camera.render_texture_imgbg(img_result_texture, imgs[ind])
-        cv2.imwrite(LR_path + "new_output/texture_bg_%04d.png" % ind,
-                    img_result_texture_bg)
-        img_result_naked = camera.render_naked(v, imgs[ind])
-        cv2.imwrite(LR_path + "new_output/hmr_optimization_%04d.png" % ind, img_result_naked)
-        img_result_naked_rotation = camera.render_naked_rotation(v, 90, imgs[ind])
-        cv2.imwrite(LR_path + "new_output/hmr_optimization_rotation_%04d.png" % ind, img_result_naked_rotation)
+            ##render
+            #texture_img = cv2.imread(HR_path + "output/texture_file/HR1.png")
+            texture_img = cv2.imread(HR_path + "output_nonrigid/texture.png")
+            texture_vt = np.load(HR_path + "output/texture_file/vt.npy")
+            img_result_texture = camera.render_texture(v, texture_img, texture_vt)
+            # img_result_texture = tex.correct_render_small(img_result_texture, 3)
+            if not os.path.exists(LR_path + "new_output"):
+                os.makedirs(LR_path + "new_output")
+            cv2.imwrite(LR_path + "new_output/hmr_optimization_texture_%04d.png" % ind, img_result_texture)
+            img_bg = cv2.resize(imgs[ind], (util.img_width, util.img_height))
+            img_result_texture_bg = camera.render_texture_imgbg(img_result_texture, imgs[ind])
+            cv2.imwrite(LR_path + "new_output/texture_bg_%04d.png" % ind,
+                        img_result_texture_bg)
+            img_result_naked = camera.render_naked(v, imgs[ind])
+            cv2.imwrite(LR_path + "new_output/hmr_optimization_%04d.png" % ind, img_result_naked)
+            img_result_naked_rotation = camera.render_naked_rotation(v, 90, imgs[ind])
+            cv2.imwrite(LR_path + "new_output/hmr_optimization_rotation_%04d.png" % ind, img_result_naked_rotation)
 
 def generate_new_data1():
     path = "/home/lgh/real_system_data/data1/people3/"
@@ -753,13 +754,13 @@ def to_render():
     bg = cv2.imread("/home/lgh/octopus/data/sample/frames/0000.png")
     img_result_naked = camera.render_naked(mesh, bg)
     cv2.imwrite("/home/lgh/octopus/out/img_result.png", img_result_naked)
-to_render()
+#to_render()
 #crop_img_for_nonrigid()
 # forpipeline()
 #generate_zhengfangxingSR()
 #make_teaser()
 #generate_realsystem_SR()
-#generate_new_data()
+generate_new_data()
 #crop_single_img()
 #img16transformresize8()
 #crop_img()

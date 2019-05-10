@@ -1,3 +1,4 @@
+import sys
 import numpy as np
 from smpl_batch import SMPL
 import util
@@ -264,6 +265,7 @@ def main(flength=2500.):
     smooth : j3ds
     '''
     videowriter = []
+    util.hmr_path = sys.argv[1]
     model = _load_model(util.SMPL_PATH)
     body_parsing_idx = opt_pre.load_body_parsing()
 
@@ -319,39 +321,40 @@ def main(flength=2500.):
         # print(hmr_joint3d[7, 2])
         # print(hmr_joint3d[10, 2])
         # print(hmr_joint3d[11, 2])
-        arm_error = np.fabs((hmr_joint3d[6, 2] + hmr_joint3d[7, 2]) - (hmr_joint3d[10, 2] + hmr_joint3d[11, 2]))
-        leg_error = np.fabs((hmr_joint3d[0, 2] + hmr_joint3d[1, 2]) - (hmr_joint3d[5, 2] + hmr_joint3d[4, 2]))
-        # v("the %d leg error is %f" % (ind, leg_error))
-        # continue
-        ####leg
-        if leg_error > 0.1:
-            if hmr_joint3d[0, 2] + hmr_joint3d[1, 2] < hmr_joint3d[5, 2] + hmr_joint3d[4, 2]:
-                hmr_theta[51] = 0.8
-                hmr_theta[52] = 1e-8
-                hmr_theta[53] = 1.0
-                hmr_theta[58] = 1e-8
-                forward_arm = "left"
+        if util.pedestrian_constraint == True:
+            arm_error = np.fabs((hmr_joint3d[6, 2] + hmr_joint3d[7, 2]) - (hmr_joint3d[10, 2] + hmr_joint3d[11, 2]))
+            leg_error = np.fabs((hmr_joint3d[0, 2] + hmr_joint3d[1, 2]) - (hmr_joint3d[5, 2] + hmr_joint3d[4, 2]))
+            # v("the %d leg error is %f" % (ind, leg_error))
+            # continue
+            ####leg
+            if leg_error > 0.1:
+                if hmr_joint3d[0, 2] + hmr_joint3d[1, 2] < hmr_joint3d[5, 2] + hmr_joint3d[4, 2]:
+                    hmr_theta[51] = 0.8
+                    hmr_theta[52] = 1e-8
+                    hmr_theta[53] = 1.0
+                    hmr_theta[58] = 1e-8
+                    forward_arm = "left"
+                else:
+                    hmr_theta[48] = 0.8
+                    hmr_theta[49] = 1e-8
+                    hmr_theta[50] = -1.0
+                    hmr_theta[55] = 1e-8
+                    forward_arm = "right"
+            #####arm
             else:
-                hmr_theta[48] = 0.8
-                hmr_theta[49] = 1e-8
-                hmr_theta[50] = -1.0
-                hmr_theta[55] = 1e-8
-                forward_arm = "right"
-        #####arm
-        else:
-            if hmr_joint3d[6, 2] + hmr_joint3d[7, 2] < hmr_joint3d[10, 2] + hmr_joint3d[11, 2]:
-                hmr_theta[48] = 0.8
-                hmr_theta[49] = 1e-8
-                hmr_theta[50] = -1.0
-                hmr_theta[55] = 1e-8
-                forward_arm = "right"
-            else:
-                hmr_theta[51] = 0.8
-                hmr_theta[52] = 1e-8
-                hmr_theta[53] = 1.0
-                hmr_theta[58] = 1e-8
-                forward_arm = "left"
-        print(forward_arm)
+                if hmr_joint3d[6, 2] + hmr_joint3d[7, 2] < hmr_joint3d[10, 2] + hmr_joint3d[11, 2]:
+                    hmr_theta[48] = 0.8
+                    hmr_theta[49] = 1e-8
+                    hmr_theta[50] = -1.0
+                    hmr_theta[55] = 1e-8
+                    forward_arm = "right"
+                else:
+                    hmr_theta[51] = 0.8
+                    hmr_theta[52] = 1e-8
+                    hmr_theta[53] = 1.0
+                    hmr_theta[58] = 1e-8
+                    forward_arm = "left"
+            print(forward_arm)
         ####numpy array initial_param
         initial_param_np = np.concatenate([hmr_shape.reshape([1, -1]), hmr_theta.reshape([1, -1]), hmr_tran.reshape([1, -1])], axis=1)
 
@@ -524,9 +527,9 @@ def main(flength=2500.):
                                           + tf.square(param_pose[0, 42:45] - hmr_theta[45:48]))
 
         param_pose_full = tf.concat([param_rot, param_pose], axis=1)
-        objs['hmr_constraint'] = 3000.0 * tf.reduce_sum(tf.square(tf.squeeze(param_pose_full) - hmr_theta))
+        objs['hmr_constraint'] = 0.0 * tf.reduce_sum(tf.square(tf.squeeze(param_pose_full) - hmr_theta))
         ### 8000.0
-        objs['hmr_hands_constraint'] = 100000.0 * tf.reduce_sum(
+        objs['hmr_hands_constraint'] = 0.0 * tf.reduce_sum(
             tf.square(tf.squeeze(param_pose_full)[21] - hmr_theta[21])
             + tf.square(tf.squeeze(param_pose_full)[23] - hmr_theta[23])
             + tf.square(tf.squeeze(param_pose_full)[20] - hmr_theta[20])
@@ -536,7 +539,7 @@ def main(flength=2500.):
         if ind != 0:
             objs['temporal'] = 0.0 * tf.reduce_sum(
                 w_temporal * tf.reduce_sum(tf.square(j3ds - j3ds_old), 1))
-            objs['temporal_pose'] = 3000.0 * tf.reduce_sum(
+            objs['temporal_pose'] = 0.0 * tf.reduce_sum(
                 tf.square(pose_final_old[0, 3:72] - param_pose[0,:]))
             ##optical flow constraint
             body_idx = np.array(body_parsing_idx[0]).squeeze()
@@ -568,7 +571,7 @@ def main(flength=2500.):
             ### set nonrigid template
             smpl = smpl_np.SMPLModel('./smpl/models/basicmodel_m_lbs_10_207_0_v1.0.0.pkl')
             template = np.load(util.texture_path + "template.npy")
-            #smpl.set_template(template)
+            smpl.set_template(template)
             v = smpl.get_verts(pose_final, betas_final, trans_final)
 
             img_result_texture = camera.render_texture(v, texture_img, texture_vt)

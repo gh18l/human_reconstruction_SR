@@ -243,6 +243,20 @@ def output_hmr():
         img_result = camera.render_naked(v1, HR_imgs[ind])
         cv2.imwrite("/home/lgh/code/SMPLify_TF/test/test_hmr_init/dingjianLR/output/hmr_%04d.png" % ind, img_result)
 
+def load_pose_pkl():
+    HR_path = util.hmr_path + "output"
+    HR_pkl_files = os.listdir(HR_path)
+    HR_pkl_files = sorted([filename for filename in HR_pkl_files if filename.endswith(".pkl")],
+                          key=lambda d: int((d.split('_')[3]).split('.')[0]))
+    j3dss = []
+    for ind, HR_pkl_file in enumerate(HR_pkl_files):
+        HR_pkl_path = os.path.join(HR_path, HR_pkl_file)
+        with open(HR_pkl_path) as f:
+            param = pickle.load(f)
+        j3ds = param['j3ds']
+        j3dss.append(j3ds)
+    return j3dss
+
 def main(flength=2500.):
     '''
     hmr : initial value
@@ -336,14 +350,17 @@ def main(flength=2500.):
         hmr_cam = hmr_cams[0, :].squeeze()
 
         hmr_joint3d = hmr_joint3ds[ind, :, :]
-        print(hmr_joint3d[0, 2])
-        print(hmr_joint3d[1, 2])
-        print(hmr_joint3d[4, 2])
-        print(hmr_joint3d[5, 2])
-        print(hmr_joint3d[6, 2])
-        print(hmr_joint3d[7, 2])
-        print(hmr_joint3d[10, 2])
-        print(hmr_joint3d[11, 2])
+        # import matplotlib.pyplot as plt
+        # from mpl_toolkits.mplot3d import Axes3D
+        # fig = plt.figure(1)
+        # #ax = plt.subplot(111)
+        # ax = fig.add_subplot(111, projection='3d')
+        # ax.scatter(posepre_joint3d[:, 0], posepre_joint3d[:, 1], posepre_joint3d[:, 2], c='b')
+        # ax.scatter(posepre_joint3d[0, 0], posepre_joint3d[0, 1], posepre_joint3d[0, 2], c='r')
+        # ax.scatter(posepre_joint3d[1, 0], posepre_joint3d[1, 1], posepre_joint3d[1, 2], c='r')
+        # #ax.scatter(HR_j2d[:, 0], HR_j2d[:, 1], c='r')
+        # #plt.savefig("/home/lgh/code/SMPLify_TF/test/temp0/1/LR/test_temp/dot.png")
+        # plt.show()
         # if util.pedestrian_constraint is True:
         #     arm_error = np.fabs((hmr_joint3d[6, 2] + hmr_joint3d[7, 2]) - (hmr_joint3d[10, 2] + hmr_joint3d[11, 2]))
         #     leg_error = np.fabs((hmr_joint3d[0, 2] + hmr_joint3d[1, 2]) - (hmr_joint3d[5, 2] + hmr_joint3d[4, 2]))
@@ -380,13 +397,17 @@ def main(flength=2500.):
         #             forward_arm = "left"
         #     print(forward_arm)
         if util.pedestrian_constraint is True:
+            j3dss = load_pose_pkl()
+            posepre_joint3d = j3dss[ind]
             arm_error = np.fabs((hmr_joint3d[6, 2] + hmr_joint3d[7, 2]) - (hmr_joint3d[10, 2] + hmr_joint3d[11, 2]))
             leg_error = np.fabs((hmr_joint3d[0, 2] + hmr_joint3d[1, 2]) - (hmr_joint3d[5, 2] + hmr_joint3d[4, 2]))
             ####arm
             ####leg
+            print(posepre_joint3d[2, :])
+            print(posepre_joint3d[7, :])
             if leg_error > 0.0:
                 print("leg_error>0.1")
-                if hmr_joint3d[0, 2] < hmr_joint3d[5, 2]:
+                if posepre_joint3d[2, 2] < posepre_joint3d[7, 2]:
                     hmr_theta[51] = 0.8
                     hmr_theta[52] = 1e-8
                     hmr_theta[53] = 1.0
@@ -596,7 +617,7 @@ def main(flength=2500.):
         ###################mask obj###################################
         ##############################################################
         ##0.05
-        objs['mask'] = 0.05 * tf.reduce_sum(verts2dsilhouette / 255.0 * (255.0 - HR_mask) / 255.0
+        objs['mask'] = 0.01 * tf.reduce_sum(verts2dsilhouette / 255.0 * (255.0 - HR_mask) / 255.0
                                             + (255.0 - verts2dsilhouette) / 255.0 * HR_mask / 255.0)
 
         objs['face'] = 0.0 * tf.reduce_sum(tf.square(hmr_joint3d[14:19] - jointsplus[14:19]))
@@ -604,17 +625,28 @@ def main(flength=2500.):
         #objs['face_pose'] = 0.0 * tf.reduce_sum(tf.square(param_pose[0, 0:69] - hmr_theta[3:72])
                                           #+ tf.square(param_rot[0, 0:3] - hmr_theta[0:3]))
         param_pose_full = tf.concat([param_rot, param_pose], axis=1)
-        objs['hmr_constraint'] = 6000.0 * tf.reduce_sum(tf.square(tf.squeeze(param_pose_full) - hmr_theta))
+        objs['hmr_constraint'] = 8000.0 * tf.reduce_sum(tf.square(tf.squeeze(param_pose_full) - hmr_theta))
         ### 8000.0
-        objs['hmr_hands_constraint'] = 0.0 * tf.reduce_sum(tf.square(tf.squeeze(param_pose_full)[21] - hmr_theta[21])
-                                                    + tf.square(tf.squeeze(param_pose_full)[23] - hmr_theta[23])
-                                                        + tf.square(tf.squeeze(param_pose_full)[20] - hmr_theta[20])
-                                                            + tf.square(tf.squeeze(param_pose_full)[22] - hmr_theta[22]))
+        # objs['hmr_hands_constraint'] = 1000000.0 * tf.reduce_sum(tf.square(tf.squeeze(param_pose_full)[63] - hmr_theta[63])
+        #                                             + tf.square(tf.squeeze(param_pose_full)[64] - hmr_theta[64])
+        #                                                 + tf.square(tf.squeeze(param_pose_full)[65] - hmr_theta[65])
+        #                                                     + tf.square(tf.squeeze(param_pose_full)[60] - hmr_theta[60])
+        #                                                          + tf.square(tf.squeeze(param_pose_full)[61] - hmr_theta[61])
+        #                                                          + tf.square(tf.squeeze(param_pose_full)[62] - hmr_theta[62])
+        #                                                          + tf.square(tf.squeeze(param_pose_full)[66] - hmr_theta[66])
+        #                                                          +tf.square(tf.squeeze(param_pose_full)[67] - hmr_theta[67])
+        #                                                          +tf.square(tf.squeeze(param_pose_full)[68] - hmr_theta[68])
+        #                                                          +tf.square(tf.squeeze(param_pose_full)[69] - hmr_theta[69])
+        #                                                          +tf.square(tf.squeeze(param_pose_full)[70] - hmr_theta[70])
+        #                                                          +tf.square(tf.squeeze(param_pose_full)[71] - hmr_theta[71]))
+        objs['hmr_hands_constraint'] = 0.0 * tf.reduce_sum(tf.square(param_pose_full[0, 48:72] - hmr_theta[48:72]))
+        #objs['hmr_hands_constraint1'] = 99999999.0 * tf.reduce_sum(
+            #tf.square(param_pose_full[0, 39:45] - hmr_theta[39:45]))
         w_temporal = [0.5, 0.5, 1.0, 1.5, 2.5, 2.5, 1.5, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 5.0, 5.0]
         if ind != 0:
-            objs['temporal'] = 800.0 * tf.reduce_sum(
+            objs['temporal'] = 8000.0 * tf.reduce_sum(
                 w_temporal * tf.reduce_sum(tf.square(j3ds - j3ds_old), 1))
-            objs['temporal_pose'] = 0.0 * tf.reduce_sum(
+            objs['temporal_pose'] = 8000.0 * tf.reduce_sum(
                 tf.square(pose_final_old[0, 3:72] - param_pose[0, :]))
             objs['temporal_pose_rot'] = 0.0 * tf.reduce_sum(
                 tf.square(pose_final_old[0, 0:3] - param_rot[0, :]))
@@ -625,7 +657,7 @@ def main(flength=2500.):
             body_idx = body_idx.reshape([-1, 1]).astype(np.int64)
             verts_est_body = tf.gather_nd(verts_est, body_idx)
             ### 0.08
-            objs['dense_optflow'] = 0.08 * tf.reduce_sum(tf.square(
+            objs['dense_optflow'] = util.optflow * tf.reduce_sum(tf.square(
                 verts_est_body - verts_body_old))
 
         loss = tf.reduce_mean(objs.values())
@@ -656,8 +688,6 @@ def main(flength=2500.):
                 os.makedirs(util.hmr_path + "output")
             img_result_texture = camera.render_texture(v_final[0], HR_imgs[ind], vt)
             cv2.imwrite(util.hmr_path + "output/hmr_optimization_texture_%04d.png" % ind, img_result_texture)
-            if util.video is True:
-                videowriter.write(img_result_texture)
             if ind == 4:
                 if not os.path.exists(util.texture_path):
                     os.makedirs(util.texture_path)
@@ -665,7 +695,10 @@ def main(flength=2500.):
             #camera.write_texture_data(util.texture_path, HR_mask_img, vt)
 
             img_result_naked = camera.render_naked(v_final[0], HR_imgs[ind])
+            img_result_naked = img_result_naked[:,:,:3]
             cv2.imwrite(util.hmr_path + "output/hmr_optimization_%04d.png" % ind, img_result_naked)
+            if util.video is True:
+                videowriter.write(img_result_naked)
             bg = np.ones_like(HR_imgs[ind]).astype(np.uint8) * 255
             img_result_naked1 = camera.render_naked(v_final[0], bg)
             cv2.imwrite(util.hmr_path + "output/hmr_optimization_naked_%04d.png" % ind, img_result_naked1)
@@ -731,13 +764,14 @@ def main(flength=2500.):
                 verts_body_old = opt_pre.get_dense_correspondence(verts_body,
                                     HR_imgs[ind], HR_imgs[ind + 1])
             else:
-                body_idx = np.array(body_parsing_idx[0]).squeeze()  ##body part
-                head_idx = np.array(body_parsing_idx[1]).squeeze()
-                leg_idx = np.array(body_parsing_idx[2]).squeeze()
-                verts_body = np.vstack([v_final[1][body_idx],
-                                        v_final[1][leg_idx]])
-                verts_body_old = opt_pre.get_dense_correspondence(verts_body,
-                                        HR_imgs[ind], HR_imgs[ind + 1])
+                if util.optflow != 0:
+                    body_idx = np.array(body_parsing_idx[0]).squeeze()  ##body part
+                    head_idx = np.array(body_parsing_idx[1]).squeeze()
+                    leg_idx = np.array(body_parsing_idx[2]).squeeze()
+                    verts_body = np.vstack([v_final[1][body_idx],
+                                            v_final[1][leg_idx]])
+                    verts_body_old = opt_pre.get_dense_correspondence(verts_body,
+                                            HR_imgs[ind], HR_imgs[ind + 1])
 
 
 

@@ -19,7 +19,6 @@ def write_file(contours, verts2d, smpl_contours_index):
 
     sio.savemat(util.hmr_path + "output_nonrigid/contours.mat",
                 {"contours": contours, "smpl_contours": smpl_contours})
-    a = 1
 
 
 def get_n_min_index(values, n):

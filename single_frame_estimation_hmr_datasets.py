@@ -272,7 +272,7 @@ def main(flength=2500.):
     LR_imgs = data_dict["imgs"]
     LR_masks = data_dict["masks"]
     if util.video == True:
-        fps = 15
+        fps = 10
         size = (LR_imgs[0].shape[1], LR_imgs[0].shape[0])
         video_path = util.hmr_path + "output/texture.mp4"
         videowriter = cv2.VideoWriter(video_path, cv2.VideoWriter_fourcc('D', 'I', 'V', 'X'), fps, size)
@@ -532,7 +532,7 @@ def main(flength=2500.):
         pose_index = pose_index.reshape([-1, 1]).astype(np.int64)
         hmr_theta_refine = hmr_theta[pose_index]
         param_pose_refine = tf.gather_nd(tf.squeeze(param_pose_full), pose_index)
-        objs['hmr_constraint'] = 3000.0 * tf.reduce_sum(tf.square(tf.squeeze(param_pose_refine) - hmr_theta_refine.squeeze()))
+        objs['hmr_constraint'] = 6000.0 * tf.reduce_sum(tf.square(tf.squeeze(param_pose_refine) - hmr_theta_refine.squeeze()))
         ### 8000.0
         objs['hmr_hands_constraint'] = 0.0 * tf.reduce_sum(
             tf.square(tf.squeeze(param_pose_full)[21] - hmr_theta[21])
@@ -552,7 +552,7 @@ def main(flength=2500.):
             body_idx = np.array(body_parsing_idx[0]).squeeze()
             body_idx = body_idx.reshape([-1, 1]).astype(np.int64)
             verts_est_body = tf.gather_nd(verts_est, body_idx)
-            objs['dense_optflow'] = 0.0 * tf.reduce_sum(tf.square(
+            objs['dense_optflow'] = 0.08 * tf.reduce_sum(tf.square(
                 verts_est_body - verts_body_old))
         if ind > 1:
             objs['temporal_2'] = 0.0 * tf.reduce_sum(
@@ -597,7 +597,7 @@ def main(flength=2500.):
             cv2.imwrite(util.hmr_path + "output/texture_bg_%04d.png" % ind,
                         img_result_texture_bg)
             if util.video is True:
-                videowriter.write(img_result_texture)
+                videowriter.write(img_result_texture_bg)
             img_result_naked = camera.render_naked(v, LR_imgs[ind])
             cv2.imwrite(util.hmr_path + "output/hmr_optimization_%04d.png" % ind, img_result_naked)
             img_result_naked_rotation = camera.render_naked_rotation(v, 90, LR_imgs[ind])

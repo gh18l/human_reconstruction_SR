@@ -106,7 +106,7 @@ def load_body_parsing():
     #leg_index = [1, 4, 7, 10, 2, 5, 8, 11]
     leg_index = []
     arm_index = [17, 19, 21, 23, 16, 18, 20, 22, 14, 13]
-    body_index = [3, 6, 9, 2, 5, 1, 4]
+    body_index = [6]
     #body_index = [3, 6, 9, 14, 17, 19, 13, 16, 18, 1, 2, 4, 5, 12, 15]
     #body_index = [14, 17, 19, 13, 16, 18]
     #body_index = []

@@ -356,19 +356,19 @@ def mask_texture():
             #"/home/lgh/code/SMPLify_TF/test/test_hmr_init/HR_multi_crop_small3/optimization_data/mask_%04d.png" % i,
             #mask)
 
-def generate_video():
-    fps = 15
-    size = (1920, 1080)
-    path = "/home/lgh/MOTdatasets/MOT17-08/img1/optimization_data"
-    video_path = "/home/lgh/MOTdatasets/MOT17-08/img1/optimization_data/1.mp4"
-    videowriter = cv2.VideoWriter(video_path, cv2.VideoWriter_fourcc('D', 'I', 'V', 'X'), fps, size)
-    imgs_files = os.listdir(path)
-    imgs_files = sorted([filename for filename in imgs_files if filename.endswith(".jpg")],
-                        key=lambda d: int((d.split('.')[0])))
-    for ind, imgs_file in enumerate(imgs_files):
-        img_file_path = os.path.join(path, imgs_file)
-        HR_img = cv2.imread(img_file_path)
-        videowriter.write(HR_img)
+# def generate_video():
+#     fps = 15
+#     size = (1920, 1080)
+#     path = "/home/lgh/MOTdatasets/MOT17-08/img1/optimization_data"
+#     video_path = "/home/lgh/MOTdatasets/MOT17-08/img1/optimization_data/1.mp4"
+#     videowriter = cv2.VideoWriter(video_path, cv2.VideoWriter_fourcc('D', 'I', 'V', 'X'), fps, size)
+#     imgs_files = os.listdir(path)
+#     imgs_files = sorted([filename for filename in imgs_files if filename.endswith(".jpg")],
+#                         key=lambda d: int((d.split('.')[0])))
+#     for ind, imgs_file in enumerate(imgs_files):
+#         img_file_path = os.path.join(path, imgs_file)
+#         HR_img = cv2.imread(img_file_path)
+#         videowriter.write(HR_img)
 
 def generate_coordination():
     path = "/home/lgh/code/SMPLify_TF/test/temp0/4/LR/img_data"
@@ -558,18 +558,60 @@ def mask_img(img, mask):
                 img[i, j, :] = 255
     return img
 
-for i in range(41):
-    img = cv2.imread("/home/lgh/MPIIdatasets/img9/optimization_data/%04d.png" % i)
-    img_resize = cv2.resize(img, (480/4, 720/4))
-    img_resize = cv2.resize(img, (480, 720))
-    cv2.imwrite("/home/lgh/MPIIdatasets/img9_resize/optimization_data/%04d.png" % i, img_resize)
+def generate_video():
+    path = "/home/lgh/MPIIdatasets/img5_resize8/output"
+    for i in range(41):
+        img = cv2.imread(path + "/texture_bg_%04d.png" % i)
+        if i == 0:
+            fps = 10
+            size = (img.shape[1], img.shape[0])
+            video_path = path + "/texture.mp4"
+            videowriter = cv2.VideoWriter(video_path, cv2.VideoWriter_fourcc('D', 'I', 'V', 'X'), fps, size)
+        videowriter.write(img)
 
-img = cv2.imread("/home/lgh/MPIIdatasets/img16/optimization_data/00000055.jpg")
-mask = cv2.imread("/home/lgh/MPIIdatasets/img16/optimization_data/label.png")
-mask = convert_mask(img, mask)
+def video_to_imgs():
+    frame_count = 0
+    cap = cv2.VideoCapture("/home/lgh/real_system_data/data1/human_render/rendercase1.mp4")
+    success = True
+    while(success):
+        success, frame = cap.read()
+        cv2.imwrite("/home/lgh/real_system_data/data1/human_render/rendercase1/%d.png" % frame_count, frame)
+        frame_count = frame_count + 1
+
+def resize_img():
+    for i in range(28):
+        img = cv2.imread("/home/lgh/real_system_data7/data1/people1/HR/optimization_data/%04d.jpg" % i)
+        img_re = cv2.resize(img, (750, 1100))
+        cv2.imwrite("/home/lgh/real_system_data7/data1/people1/HR1/%04d.jpg" % i, img_re)
+
+def split_video():
+    frame_count = 0
+    cap = cv2.VideoCapture("/home/lgh/real_system_data7/data1/local1.avi")
+    success = True
+    while (success):
+        success, frame = cap.read()
+        frame1 = frame[:, :2100, :]
+        frame2 = frame[:, 1500:, :]
+        cv2.imwrite("/home/lgh/real_system_data7/data1/HR1/%d.png" % frame_count, frame1)
+        cv2.imwrite("/home/lgh/real_system_data7/data1/HR2/%d.png" % frame_count, frame2)
+        frame_count = frame_count + 1
+split_video()
+#resize_img()
+#video_to_imgs()
+#generate_video()
+#generate_video()
+# for i in range(27):
+#     img = cv2.imread("/home/lgh/MPIIdatasets/img10/optimization_data/%08d.jpg" % (i+31))
+#     img_resize = cv2.resize(img, (1280/4, 720/4))
+#     img_resize = cv2.resize(img_resize, (1280, 720))
+#     cv2.imwrite("/home/lgh/MPIIdatasets/img10_resize/optimization_data/%04d.png" % i, img_resize)
+#
+# img = cv2.imread("/home/lgh/MPIIdatasets/img16/optimization_data/00000055.jpg")
+# mask = cv2.imread("/home/lgh/MPIIdatasets/img16/optimization_data/label.png")
+# mask = convert_mask(img, mask)
 # result = cv2.add(img, np.zeros(np.shape(img), dtype=np.uint8),
 #                  mask=mask)
-result = tex.dilute_texture(img, mask, rect_size = 5)
+#result = tex.dilute_texture(img, mask, rect_size = 5)
 #borders_region = reverse_mask(borders_region)
 # img = mask_img(img, borders_region)
 # img = cv2.resize(img, (256, 256))
@@ -580,9 +622,9 @@ result = tex.dilute_texture(img, mask, rect_size = 5)
 # result_weights = cv2.add(result, np.zeros(np.shape(result), dtype=np.uint8),
 #                  mask=eroded)
 # result_weights = cv2.addWeighted(result_weights, 0.5, result, 0.5, 0)
-cv2.imwrite("/home/lgh/MPIIdatasets/img16/output_nonrigid/texture.png", result)
-cv2.imshow("1", result)
-cv2.waitKey()
+# cv2.imwrite("/home/lgh/MPIIdatasets/img16/output_nonrigid/texture.png", result)
+# cv2.imshow("1", result)
+# cv2.waitKey()
 # img = cv2.imread("/home/lgh/real_system_data5/data1/people9/HR/optimization_data/0040.jpg")
 # cv2.imshow("1", img)
 # cv2.waitKey()

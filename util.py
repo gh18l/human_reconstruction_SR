@@ -8,6 +8,7 @@ import cv2
 import tensorflow as tf
 import hmr
 import json
+import sys
 
 GENDER = 'm'
 HEVA_PATH = 'Data/HEVA_Validate'
@@ -54,24 +55,26 @@ LR_img_dctsmooth_base_path = base_path + "/LRdctsmooth"
 # hmr_path = "/home/lgh/code/SMPLify_TF/test/test_hmr_init/jianing2/"
 # texture_path = "/home/lgh/code/SMPLify_TF/test/test_hmr_init/HR_multi_crop_small3/output/texture_file/"
 # HR_pose_path = "/home/lgh/code/SMPLify_TF/test/test_hmr_init/HR_multi_crop_small3/output/"
-hmr_path = "/home/lgh/MPIIdatasets/img9_resize/"
-texture_path = "/home/lgh/MPIIdatasets/img9/output/texture_file/"
-HR_pose_path = "/home/lgh/MPIIdatasets/img9/output/"
+hmr_path = "/home/lgh/real_system_data7/data1/people1/HR/"
+#hmr_path = sys.argv[4]
+texture_path = "/home/lgh/real_system_data7/data1/people1/HR/output/texture_file/"
+HR_pose_path = "/home/lgh/real_system_data7/data1/people1/HR/output/"
 crop_texture = True  ###only use in small texture
 index_data = 4
 video = True
-pedestrian_constraint = False
+pedestrian_constraint = True
 
-img_widthheight = 104600720
-img_width = 460
-img_height = 720
-graphcut_index = 13
+img_widthheight = 102000600
+img_width = 200
+img_height = 600
+graphcut_index = 30
 correct_render_up_mid = 450
 correct_render_hand_up_mid = 570
 correct_render_down_mid = 610
 render_fingers = True
 render_toes = True
 render_hands = True
+optflow = 0.08
 ###dingjianLR100
 #lr_points = [0, 16, 31, 47, 64, 80, 96]    ###[0, 18, 36, 54, 72]
 #hr_points = [4, 20, 36]
@@ -136,8 +139,8 @@ render_hands = True
 # hr_points = [33, 75]
 
 #data3people4
-lr_points = [0, 32, 63, 94]#    ###[0, 18, 36, 54, 72]
-hr_points = [4, 35, 66]
+# lr_points = [0, 32, 63, 94]#    ###[0, 18, 36, 54, 72]
+# hr_points = [4, 35, 66]
 
 #data3people5
 # lr_points = [0, 25, 56, 79]#    ###[0, 18, 36, 54, 72]
@@ -196,6 +199,8 @@ hr_points = [4, 35, 66]
 #data4people4LR1
 # lr_points = [0, 18, 37, 54, 72, 88]#    ###[0, 18, 36, 54, 72]
 # hr_points = [8, 26, 43, 61]
+#hr_points = np.array((sys.argv[2]).strip().strip('[]').split(",")).astype(int)
+#lr_points = np.array((sys.argv[3]).strip().strip('[]').split(",")).astype(int)
 which_people = "tianyi_LR"
 code_params = {"tianyi_LR": {"Prior_Loss":10.0, "Prior_Shape":5.0, "angle_elbow_knee":0.1, "angle_head":100.0,
                         "rot_direction":0.0, "arm_direction":0.0, "mask":0.06, "temporal": 800.0},

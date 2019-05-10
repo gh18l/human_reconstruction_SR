@@ -202,7 +202,7 @@ def save_pkl_to_csv(pose_path):
 
 def refine_LR_pose(HR_pose_path, hr_points, lr_points):
     LR_cameras = np.load(util.hmr_path + "refine_data/LR_cameras.npy")
-    texture_img = cv2.imread(util.texture_path + "HR.png")
+    texture_img = cv2.imread(util.texture_path + "../../output_nonrigid/texture.png")
     texture_vt = np.load(util.texture_path + "vt.npy")
     data_dict = np.load(util.hmr_path + "refine_data/data_dict.npy").item()
     hmr_dict, _ = util.load_hmr_data(util.hmr_path)
