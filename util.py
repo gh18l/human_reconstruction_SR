@@ -10,11 +10,14 @@ import hmr
 import json
 import sys
 
+with open("./run_all.json", "r") as f:
+    params = json.loads(f.read())
+
 GENDER = 'm'
 HEVA_PATH = 'Data/HEVA_Validate'
 #SMPL_PATH = 'Data/Smpl_Model/basicModel_%s_lbs_10_207_0_v1.0.0.pkl' % GENDER
-SMPL_PATH = 'Data/Smpl_Model/neutral_smpl_with_cocoplus_reg.pkl'
-NORMAL_SMPL_PATH = '/home/lgh/code/SMPLify_TF/Data/Smpl_Model/basicModel_m_lbs_10_207_0_v1.0.0.pkl'
+SMPL_PATH = str(params["path"]["SMPL_PATH"])
+NORMAL_SMPL_PATH = str(params["path"]["NORMAL_SMPL_PATH"])
 N_BETAS = 10
 SMPL_JOINT_IDS = [11, 10, 8, 5, 2, 1, 4, 7, 21, 19, 17, 16, 18, 20, 12]
 SMPL_JOINT_ALL = range(0, 24)
@@ -55,26 +58,25 @@ LR_img_dctsmooth_base_path = base_path + "/LRdctsmooth"
 # hmr_path = "/home/lgh/code/SMPLify_TF/test/test_hmr_init/jianing2/"
 # texture_path = "/home/lgh/code/SMPLify_TF/test/test_hmr_init/HR_multi_crop_small3/output/texture_file/"
 # HR_pose_path = "/home/lgh/code/SMPLify_TF/test/test_hmr_init/HR_multi_crop_small3/output/"
-hmr_path = "/home/lgh/real_system_data7/data1/people1/HR/"
-#hmr_path = sys.argv[4]
-texture_path = "/home/lgh/real_system_data7/data1/people1/HR/output/texture_file/"
-HR_pose_path = "/home/lgh/real_system_data7/data1/people1/HR/output/"
+hmr_path = sys.argv[3]
+texture_path = str(params["path"]["texture_path"])
+HR_pose_path = str(params["path"]["HR_pose_path"])
+
 crop_texture = True  ###only use in small texture
 index_data = 4
 video = True
-pedestrian_constraint = True
+pedestrian_constraint = params["setting"]["pedestrian_constraint"]
 
-img_widthheight = 102000600
-img_width = 200
-img_height = 600
+img_widthheight = 121003000
+img_width = 2100
+img_height = 3000
 graphcut_index = 30
 correct_render_up_mid = 450
 correct_render_hand_up_mid = 570
 correct_render_down_mid = 610
-render_fingers = True
-render_toes = True
-render_hands = True
-optflow = 0.08
+render_fingers = params["setting"]["render_fingers"]
+render_toes = params["setting"]["render_toes"]
+render_hands = params["setting"]["render_hands"]
 ###dingjianLR100
 #lr_points = [0, 16, 31, 47, 64, 80, 96]    ###[0, 18, 36, 54, 72]
 #hr_points = [4, 20, 36]
@@ -199,8 +201,8 @@ optflow = 0.08
 #data4people4LR1
 # lr_points = [0, 18, 37, 54, 72, 88]#    ###[0, 18, 36, 54, 72]
 # hr_points = [8, 26, 43, 61]
-#hr_points = np.array((sys.argv[2]).strip().strip('[]').split(",")).astype(int)
-#lr_points = np.array((sys.argv[3]).strip().strip('[]').split(",")).astype(int)
+hr_points = np.array((sys.argv[1]).strip().strip('[]').split(",")).astype(int)
+lr_points = np.array((sys.argv[2]).strip().strip('[]').split(",")).astype(int)
 which_people = "tianyi_LR"
 code_params = {"tianyi_LR": {"Prior_Loss":10.0, "Prior_Shape":5.0, "angle_elbow_knee":0.1, "angle_head":100.0,
                         "rot_direction":0.0, "arm_direction":0.0, "mask":0.06, "temporal": 800.0},

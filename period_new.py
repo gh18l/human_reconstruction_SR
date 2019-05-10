@@ -208,7 +208,7 @@ def refine_LR_pose(HR_pose_path, hr_points, lr_points):
     hmr_dict, _ = util.load_hmr_data(util.hmr_path)
 
 
-    LR_path = util.hmr_path + "output"
+    LR_path = util.hmr_path + util.params["path"]["refine_reference_path"]
     LR_pkl_files = os.listdir(LR_path)
     LR_pkl_files = sorted([filename for filename in LR_pkl_files if filename.endswith(".pkl")],
                           key=lambda d: int((d.split('_')[3]).split('.')[0]))

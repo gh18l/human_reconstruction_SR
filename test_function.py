@@ -1,11 +1,9 @@
 import cv2
 import numpy as np
 import os
-import pickle as pkl
 import csv
 from scipy import sparse as sp
 from skimage import morphology
-import correct_final_texture as tex
 def polyfit3D():
     import matplotlib.pyplot as plt
     path = "/home/lgh/code/SMPLify_TF/test/temp0_tianyi/1/LR/output"
@@ -595,7 +593,7 @@ def split_video():
         cv2.imwrite("/home/lgh/real_system_data7/data1/HR1/%d.png" % frame_count, frame1)
         cv2.imwrite("/home/lgh/real_system_data7/data1/HR2/%d.png" % frame_count, frame2)
         frame_count = frame_count + 1
-split_video()
+#split_video()
 #resize_img()
 #video_to_imgs()
 #generate_video()
