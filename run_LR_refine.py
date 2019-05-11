@@ -25,5 +25,5 @@ with open("./run_all.json", "r") as f:
 
 for i in range(1):                   #####################
     print(">>>>>>>>>>>index %d <<<<<<<<< <<<" % (i+1))
-    os.system("python LR_refine_model.py %s %s %s/LR%d/" % (str_hr[i], str_lr[i], hmr_path, (i+1)))
-    #os.system("cp ./run_all.json %s/LR%d/%s/run_all.json" % (hmr_path, (i + 1), params["path"]["refine_output_path"]))
+    os.system("python LR_refine_model.py %s %s %s/LR%d/ " % (str_hr[i], str_lr[i], hmr_path, (i+1)))
+    os.system("cp ./run_all.json %s/LR%d/%s/run_all.json" % (hmr_path, (i + 1), params["path"]["refine_output_path"]))
